@@ -33,30 +33,10 @@
             "text_color": ""
           },
           "blocks": {}
-        },
-        "announcement_BxgCk9": {
-          "type": "_announcement",
-          "settings": {
-            "text": "Free shipping on all orders $75+",
-            "link": "",
-            "font": "var(--font-subheading--family)",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "custom_line_height": 1.5,
-            "weight": "",
-            "letter_spacing": "normal",
-            "case": "uppercase",
-            "type_preset_mobile": "custom",
-            "mobile_font_size": "0.875rem",
-            "mobile_custom_line_height": 1,
-            "text_color": ""
-          },
-          "blocks": {}
         }
       },
       "block_order": [
-        "announcement_qAbYWq",
-        "announcement_BxgCk9"
+        "announcement_qAbYWq"
       ],
       "name": "t:names.announcement_bar",
       "settings": {
