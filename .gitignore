@@ -1,0 +1,12 @@
+# Local dev dependencies
+node_modules/
+
+# Figma asset drop zone + generated conversions (local only, never committed)
+figma/
+
+# Dev logs
+shopify_dev.log
+shopify_errors.log
+
+# Editor / OS cruft
+.DS_Store

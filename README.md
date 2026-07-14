@@ -1,6 +1,7 @@
 # Horizon
 
 [Getting started](#getting-started) |
+[LanternSol dev tooling](#lanternsol-dev-tooling) |
 [Staying up to date with Horizon changes](#staying-up-to-date-with-horizon-changes) |
 [Developer tools](#developer-tools) |
 [Contributing](#contributing) |
@@ -30,6 +31,63 @@ Please note that the `main` branch may include code for features not yet release
 ### Shopify Theme Store development
 
 If you're building a theme for the Shopify Theme Store, then do not use Horizon as a starting point. Themes based on, derived from, or incorporating Horizon are not eligible for submission to to the Shopify Theme Store. Use the [Skeleton Theme](https://github.com/Shopify/skeleton-theme) instead.
+
+## LanternSol dev tooling
+
+This fork ships a small `lanternsol` CLI that runs the Shopify dev server **and** an automatic asset optimizer together.
+
+Drop raw design exports (from Figma, screen recordings, etc.) into a local `figma/` folder and they are converted to web-optimized formats on the fly:
+
+| You drop | You get in `figma/converted/` |
+| --- | --- |
+| An image (`.png`, `.jpg`, `.gif`, `.heic`, …) | An optimized `.webp` |
+| A video (`.mov`, `.mp4`, `.mkv`, …) | An optimized `.webm` (VP9 + Opus) |
+
+Originals are never modified, and the whole `figma/` folder is ignored by both git (`.gitignore`) and the theme uploader (`.shopifyignore`), so nothing here is ever committed or pushed to the store.
+
+### One-time setup (per machine)
+
+```sh
+# 1. Conversion engines (ffmpeg → video/webm, webp/cwebp → image/webp)
+brew install ffmpeg webp
+
+# 2. Local dependencies
+npm install
+
+# 3. Make `lanternsol` available globally (symlinks to this repo)
+npm link
+```
+
+Because `npm link` uses a symlink, edits to the tooling take effect immediately with no reinstall.
+
+### Daily use
+
+```sh
+lanternsol theme dev
+```
+
+This does two things in one process:
+
+1. Starts `shopify theme dev` (same output you're used to).
+2. Watches `figma/`, creating it (and `figma/converted/`) if needed, and converts every file that lands in it.
+
+Conversion progress is printed inline alongside the Shopify output, e.g.:
+
+```
+[figma] detected  hero.png
+[figma] converting hero.png → converted/hero.webp  (image)…
+[figma] ✓ done  converted/hero.webp  (2.4 MB → 480 KB, -80%)
+```
+
+Press `Ctrl+C` to stop — both the watcher and the Shopify dev server shut down together. If `shopify theme dev` exits on its own, the watcher stops too.
+
+Any other command is passed straight through to the Shopify CLI, so `lanternsol theme push`, `lanternsol theme pull`, etc. all work as expected.
+
+> **Note:** `lanternsol` uses [`ffmpeg`](https://ffmpeg.org/) for video and [`cwebp`/`gif2webp`](https://developers.google.com/speed/webp/docs/using) (the `webp` package) for images — Homebrew's `ffmpeg` bottle ships without a WebP encoder, so both are required. If either is missing, the watcher still runs but the affected conversions are skipped with a warning. VP9 video encoding is CPU-intensive, so large videos can take a while to convert.
+>
+> **Troubleshooting:** if image conversions fail and `cwebp -version` aborts with a `libtiff.6.dylib` (dyld) error, run `brew install libtiff` to repair the dependency.
+
+To run only the watcher (without the Shopify dev server): `npm run figma:watch`.
 
 ## Staying up to date with Horizon changes
 

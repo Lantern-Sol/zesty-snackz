@@ -11,7 +11,13 @@
 
 # Local tooling / scratch (not part of the theme)
 
-.claude/* 
+.claude/*
 .tmp-figma/*
+figma/*
+node_modules/*
+bin/*
+scripts/*
+package.json
+package-lock.json
 shopify_dev.log
 shopify_errors.log

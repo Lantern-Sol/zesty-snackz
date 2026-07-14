@@ -1,0 +1,19 @@
+{
+  "name": "lanternsol-horizon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LanternSol fork of Shopify Horizon, with local dev tooling.",
+  "bin": {
+    "lanternsol": "bin/lanternsol.js"
+  },
+  "scripts": {
+    "dev": "node bin/lanternsol.js theme dev",
+    "figma:watch": "node scripts/figma-watch.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
