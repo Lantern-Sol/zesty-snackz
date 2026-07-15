@@ -118,6 +118,13 @@ function buildCommand(kind, src, out) {
 let queue = Promise.resolve();
 const inFlight = new Set();
 
+// Watcher lifecycle. chokidar fires every existing-file 'add' during the
+// initial scan (before 'ready'); we process those quietly so a re-launch
+// doesn't bury the Shopify output under a wall of skip lines.
+let ready = false;
+let scanSkipped = 0;
+let scanPending = 0;
+
 function humanSize(bytes) {
   if (!Number.isFinite(bytes)) return '?';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -134,9 +141,20 @@ function enqueue(src) {
   const target = targetFor(src);
   if (!target) return; // unsupported type — ignore silently
   if (inFlight.has(src)) return;
-  inFlight.add(src);
 
-  log(`detected  ${path.relative(FIGMA_DIR, src)}`);
+  if (!ready) {
+    // Initial scan of files already on disk: stay quiet. Skip anything that's
+    // already converted; only queue (and later log) the ones needing work.
+    if (isUpToDate(src, target.out)) {
+      scanSkipped += 1;
+      return;
+    }
+    scanPending += 1;
+  } else {
+    log(`detected  ${path.relative(FIGMA_DIR, src)}`);
+  }
+
+  inFlight.add(src);
   queue = queue.then(() => convert(src, target)).finally(() => inFlight.delete(src));
 }
 
@@ -146,7 +164,9 @@ function convert(src, target) {
     const outRel = path.relative(FIGMA_DIR, target.out);
 
     if (isUpToDate(src, target.out)) {
-      log(`skip (already converted): ${rel}`);
+      // Live re-adds of an already-converted file are rare; the initial scan
+      // handles existing files silently, so only report skips once live.
+      if (ready) log(`skip (already converted): ${rel}`);
       return resolve();
     }
 
@@ -208,6 +228,10 @@ function startWatcher() {
     log('Watcher will still run, but affected conversions will be skipped.');
   }
 
+  ready = false;
+  scanSkipped = 0;
+  scanPending = 0;
+
   ensureDirs();
   log(`watching ${path.relative(REPO_ROOT, FIGMA_DIR) || 'figma'}/ (drop files here)`);
 
@@ -225,6 +249,14 @@ function startWatcher() {
   watcher
     .on('add', (filePath) => enqueue(filePath))
     .on('change', (filePath) => enqueue(filePath))
+    .on('ready', () => {
+      ready = true;
+      const parts = [];
+      if (scanSkipped) parts.push(`${scanSkipped} already converted`);
+      if (scanPending) parts.push(`${scanPending} to convert`);
+      const summary = parts.length ? parts.join(', ') : 'no existing assets';
+      log(`ready — ${summary}. Watching for new files…`);
+    })
     .on('error', (err) => log(`watcher error: ${err.message}`));
 
   return watcher;
