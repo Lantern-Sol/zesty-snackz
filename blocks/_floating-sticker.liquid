@@ -164,6 +164,12 @@
     --sticker-peel: 0.62;
   }
 
+  /* While dragging, the component writes --sticker-peel inline every frame;
+     the transition would lag the pointer, so suspend it */
+  .floating-sticker__peel.is-dragging {
+    transition: none;
+  }
+
   /* The front of the sticker, clipped away below the fold line. clip-path
      also clips the button's hit area, so once peeled the code underneath
      becomes clickable through the opened region. */
@@ -176,8 +182,21 @@
     border: 0;
     background: none;
     appearance: none;
-    cursor: pointer;
+    cursor: grab;
+
+    /* The drag drives the peel, so keep touch drags for ourselves instead of
+       scrolling the page, and suppress native image dragging/selection */
+    touch-action: none;
     clip-path: inset(0 0 calc(var(--sticker-peel) * 100%) 0);
+  }
+
+  .floating-sticker__peel.is-dragging .floating-sticker__front {
+    cursor: grabbing;
+  }
+
+  .floating-sticker__front .floating-sticker__media {
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   /* The underside: a mirrored copy of the image, flipped about its bottom
@@ -214,9 +233,8 @@
     inset: 0;
     z-index: 0;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding-bottom: 6%;
     visibility: hidden;
     clip-path: inset(calc(100% - var(--sticker-peel) * 100%) 0 0 0);
 
@@ -224,7 +242,9 @@
     transition: visibility 0s 0.45s;
   }
 
+  /* is-dragging included because touch drags never set :hover */
   .floating-sticker__peel:hover .floating-sticker__reveal,
+  .floating-sticker__peel.is-dragging .floating-sticker__reveal,
   .floating-sticker__peel.is-peeled .floating-sticker__reveal {
     visibility: visible;
     transition: visibility 0s;
@@ -235,12 +255,18 @@
     font-size: calc(var(--sticker-size, 7.5rem) / 9);
     letter-spacing: 0.06em;
     white-space: nowrap;
-    color: var(--color-foreground);
-    background: var(--color-background);
-    border: 2px dashed currentcolor;
+    color: var(--color-secondary-button-text, var(--color-foreground));
+    background: var(--color-secondary-button-background, var(--color-background));
+    border: 2px dashed var(--color-secondary-button-border, currentcolor);
     border-radius: 0.5em;
     padding: 0.3em 0.65em;
     cursor: pointer;
+  }
+
+  .floating-sticker__code:hover {
+    color: var(--color-secondary-button-hover-text, var(--color-foreground));
+    background: var(--color-secondary-button-hover-background, var(--color-background));
+    border-color: var(--color-secondary-button-hover-border, currentcolor);
   }
 
   .floating-sticker__code-copied {
@@ -392,7 +418,7 @@
       "id": "peel_enabled",
       "label": "Peel to reveal",
       "default": false,
-      "info": "Hovering teases the sticker's corner; clicking peels it open."
+      "info": "Hovering teases the sticker's edge; dragging or clicking peels it open."
     },
     {
       "type": "text",
