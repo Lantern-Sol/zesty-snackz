@@ -1,0 +1,83 @@
+<div class="floating-stickers" {{ block.shopify_attributes }}>
+  {% content_for 'blocks' %}
+</div>
+
+{% stylesheet %}
+  .floating-stickers {
+    /* Distance from the viewport edge to the page-width central column */
+    --floating-edge-offset: calc(var(--page-margin) + max((100vw - var(--page-width)) / 2, 0px));
+
+    position: absolute;
+    inset: 0;
+    z-index: var(--layer-flat);
+
+    /* The group is a pure positioning layer; the stickers inside re-enable
+       pointer events in the theme editor for on-canvas selection */
+    pointer-events: none;
+  }
+
+  /* When the section constrains its content to page width, stretch the group
+     to the full section width so the stickers inside position against it */
+  @media screen and (min-width: 750px) {
+    .section-content-wrapper.page-width > .floating-stickers {
+      left: calc(-1 * var(--floating-edge-offset));
+      right: calc(-1 * var(--floating-edge-offset));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .section-content-wrapper.page-width-mobile > .floating-stickers {
+      left: calc(-1 * var(--floating-edge-offset));
+      right: calc(-1 * var(--floating-edge-offset));
+    }
+  }
+
+  /* Sections apply their spacing on a container above the content wrapper, so
+     the wrapper starts below the section's top padding — and, for the first
+     section under a transparent header, below the header-height offset too.
+     The spacing-style variables inherit, so pull the group back over them to
+     span the true section bounds. Skipped when the wrapper carries
+     spacing-style itself (e.g. the Custom Section), where inset: 0 already
+     covers the padding area. */
+  .section-content-wrapper:not(.spacing-style) > .floating-stickers {
+    top: calc(-1 * var(--padding-block-start, 0px) - var(--section-top-offset, 0px));
+    bottom: calc(-1 * var(--padding-block-end, 0px));
+  }
+
+  @media screen and (max-width: 749px) {
+    .section-content-wrapper:not(.spacing-style) > .floating-stickers {
+      top: calc(-1 * var(--padding-block-start-mobile, var(--padding-block-start, 0px)) - var(--section-top-offset, 0px));
+      bottom: calc(-1 * var(--padding-block-end-mobile, var(--padding-block-end, 0px)));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Floating stickers",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_floating-sticker"
+    }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Overlay layer that holds floating stickers. It spans the full section, and the stickers inside position relative to it."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating stickers",
+      "category": "t:categories.basic",
+      "blocks": {
+        "floating-sticker-1": {
+          "type": "_floating-sticker"
+        }
+      },
+      "block_order": ["floating-sticker-1"]
+    }
+  ]
+}
+{% endschema %}

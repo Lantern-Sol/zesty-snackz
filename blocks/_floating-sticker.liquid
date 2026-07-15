@@ -1,0 +1,215 @@
+{% liquid
+  assign block_settings = block.settings
+  assign size_px = block_settings.size | default: 120
+  assign size_rem = size_px | divided_by: 16.0
+  assign image_width = size_px | times: 3 | at_most: 1400
+  assign sizes_attribute = size_px | append: 'px'
+%}
+
+<div
+  class="floating-sticker{% if request.design_mode %} floating-sticker--design-mode{% endif %}{% if block_settings.shadow %} floating-sticker--shadow{% endif %}"
+  style="
+    --sticker-x: {{ block_settings.x_position }};
+    --sticker-y: {{ block_settings.y_position }}%;
+    --sticker-size: {{ size_rem }}rem;
+    --sticker-rotation: {{ block_settings.rotation | default: 0 }}deg;
+    --sticker-offset: {{ block_settings.motion_offset | default: 0 }}s;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="floating-sticker__floater">
+    {% if block_settings.image != blank %}
+      {{
+        block_settings.image
+        | image_url: width: image_width
+        | image_tag: loading: 'lazy', class: 'floating-sticker__media', sizes: sizes_attribute
+      }}
+    {% else %}
+      {{ 'image' | placeholder_svg_tag: 'floating-sticker__media floating-sticker__media--placeholder' }}
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .floating-sticker {
+    position: absolute;
+    top: var(--sticker-y, 50%);
+
+    /* Percentages resolve against the sticker group, which spans the full section */
+    left: calc(var(--sticker-x, 50) * 1%);
+
+    /* Anchor the sticker at its center: X/Y position its middle. At the
+       extremes the sticker may hang past the section edges; the section's
+       overflow clipping handles it. */
+    translate: -50% -50%;
+    width: var(--sticker-size, 7.5rem);
+    z-index: var(--layer-flat);
+    pointer-events: none;
+  }
+
+  /* Keep the block clickable in the theme editor so it can be selected on canvas */
+  .floating-sticker--design-mode {
+    pointer-events: auto;
+  }
+
+  /* The bob animates `translate` on an unrotated wrapper so the sticker always
+     drifts straight up and down; the wobble is purely visual on the media
+     inside. Separate elements, separate properties — the two loops compose. */
+  .floating-sticker__floater {
+    animation: floating-sticker-bob 2.9s ease-in-out calc(-1 * var(--sticker-offset, 0s)) infinite;
+  }
+
+  /* drop-shadow instead of box-shadow so the shadow follows the sticker's alpha
+     silhouette (not its rectangle). On the floater, not the rotated media, so
+     the shadow always drops downward in screen space */
+  .floating-sticker--shadow .floating-sticker__floater {
+    filter: drop-shadow(0 18px 24px rgb(11 27 43 / 0.18));
+  }
+
+  .floating-sticker__media {
+    display: block;
+    width: 100%;
+    height: auto;
+
+    /* Base rotation from the setting plus an animated wobble offset */
+    rotate: calc(var(--sticker-rotation, 0deg) + var(--floating-sticker-wobble, 0deg));
+    animation: floating-sticker-wobble 3.2s ease-in-out calc(-1 * var(--sticker-offset, 0s)) infinite;
+  }
+
+  .floating-sticker__media--placeholder {
+    aspect-ratio: 1;
+  }
+
+  /* Registered so the wobble offset interpolates smoothly instead of stepping */
+  @property --floating-sticker-wobble {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  /* Gentle pendulum around the resting angle, traced from the source export
+     (±0.043rad ≈ ±2.5deg). 3.2s against the 2.9s bob so the combined motion
+     drifts out of phase instead of ticking like a metronome */
+  @keyframes floating-sticker-wobble {
+    0%,
+    50%,
+    100% {
+      --floating-sticker-wobble: 0deg;
+    }
+
+    25% {
+      --floating-sticker-wobble: 2.5deg;
+    }
+
+    75% {
+      --floating-sticker-wobble: -2.5deg;
+    }
+  }
+
+  /* Vertical drift traced from the source export: rise first, sink past the
+     resting point, return — ±11px per cycle */
+  @keyframes floating-sticker-bob {
+    0%,
+    50%,
+    100% {
+      translate: 0 0;
+    }
+
+    25% {
+      translate: 0 -11px;
+    }
+
+    75% {
+      translate: 0 11px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-sticker__floater,
+    .floating-sticker__media {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Floating sticker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "number",
+      "id": "size",
+      "label": "t:settings.width",
+      "default": 120,
+      "info": "Width in pixels."
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Rotation",
+      "min": -180,
+      "max": 180,
+      "step": 5,
+      "unit": "deg",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "shadow",
+      "label": "Shadow",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:settings.position"
+    },
+    {
+      "type": "range",
+      "id": "x_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y_position",
+      "label": "Vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "t:settings.animation"
+    },
+    {
+      "type": "range",
+      "id": "motion_offset",
+      "label": "Motion offset",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "unit": "s",
+      "default": 0,
+      "info": "Staggers the float loop so neighboring stickers don't move in sync."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating sticker",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}
