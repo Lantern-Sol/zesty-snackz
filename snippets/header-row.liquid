@@ -78,6 +78,9 @@
               {{ logo }}
             {% when 'menu' %}
               {{ menu }}
+              {% unless forloop.last %}
+                <span class="header__menu-separator" aria-hidden="true"></span>
+              {% endunless %}
             {% when 'localization' %}
               {{ localization }}
             {% when 'search' %}

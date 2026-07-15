@@ -1015,6 +1015,48 @@
     }
   }
 
+  /* Floating header: 0.5rem between the action icons (search / account / cart) */
+  @media screen and (min-width: 750px) {
+    .header--floating .header__column--right {
+      gap: 0.5rem;
+    }
+
+    .header--floating header-actions {
+      gap: 0.5rem;
+    }
+
+    /* Cancel the stock negative pull of the actions toward search */
+    .header--floating .header__column--right header-actions {
+      margin-inline-start: 0;
+    }
+
+    /* Same for the search action's negative margins — with the 0.5rem gap
+       they would crush the icon and separator spacing */
+    .header--floating .header__column--right .search-action {
+      margin-inline: 0;
+    }
+  }
+
+  /* Separator between the menu and the action icons (desktop menu only) */
+  .header__menu-separator {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .header--floating:not([data-menu-style='drawer']) .header__menu-separator {
+      display: block;
+      flex: none;
+      align-self: center;
+      width: 2px;
+      height: 26px;
+      border-radius: 1px;
+      background: rgba(11, 27, 43, 0.1);
+
+      /* 18px / 16px total inline spacing once the 0.5rem column gap is included */
+      margin-inline: calc(18px - 0.5rem) calc(16px - 0.5rem);
+    }
+  }
+
   /* Single column layout if there are no columns within */
   .header__columns:not(:has(.header__column)) {
     grid-template-columns: 1fr;
