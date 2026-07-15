@@ -5,11 +5,13 @@
   @param {product} product_resource - The product to render
   @param {boolean} [show_unit_price] - Whether to show the unit price
   @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+  @param {boolean} [allow_from_prefix] - Whether a varying price may show the "From" prefix on cards (default true)
 {%- enddoc -%}
 
 {%- liquid
   assign show_unit_price = show_unit_price | default: false
   assign show_sale_price_first = show_sale_price_first | default: false
+  assign allow_from_prefix = allow_from_prefix | default: true, allow_false: true
   assign selected_variant = product_resource.selected_or_first_available_variant
   assign price = selected_variant.price
   assign compare_at_price = selected_variant.compare_at_price
@@ -41,7 +43,7 @@
     assign price_max = product_resource.price_max
     assign has_volume_pricing = product_resource.quantity_price_breaks_configured? | default: false
 
-    if product_resource.price_varies and has_volume_pricing == false
+    if product_resource.price_varies and has_volume_pricing == false and allow_from_prefix
       assign show_from_prefix = true
     endif
   else

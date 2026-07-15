@@ -52,7 +52,8 @@
   {% render 'price',
     show_unit_price: true,
     product_resource: product_resource,
-    show_sale_price_first: block_settings.show_sale_price_first
+    show_sale_price_first: block_settings.show_sale_price_first,
+    allow_from_prefix: block_settings.show_from_prefix
   %}
 
   {% if block_settings.show_tax_info %}
@@ -103,6 +104,12 @@
       "type": "checkbox",
       "id": "show_sale_price_first",
       "label": "t:settings.show_sale_price_first",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_from_prefix",
+      "label": "Show \"From\" prefix when price varies",
       "default": true
     },
     {

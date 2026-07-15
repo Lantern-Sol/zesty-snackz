@@ -97,7 +97,7 @@
       # Hover label (category metafield) replaces the second-image-on-hover
       # behaviour, so arrows are suppressed when it's enabled to avoid
       # competing nav UI on top of the panel.
-      if product.media.size > 2 and generic_media_size > 0 and block_settings.show_hover_label != true
+      if product.media.size > 2 and generic_media_size > 0 and block_settings.show_hover_label != true and block_settings.show_hover_arrows != false
         assign show_arrows = true
       endif
 

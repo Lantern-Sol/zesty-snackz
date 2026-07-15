@@ -2371,7 +2371,8 @@
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "padding-inline-end": 0,
+                "show_hover_arrows": false
               },
               "blocks": {}
             },
@@ -2550,7 +2551,8 @@
                         "padding-block-start-mobile": 0,
                         "padding-block-end-mobile": 0,
                         "padding-inline-start-mobile": 0,
-                        "padding-inline-end-mobile": 0
+                        "padding-inline-end-mobile": 0,
+                        "show_from_prefix": false
                       },
                       "blocks": {}
                     },
