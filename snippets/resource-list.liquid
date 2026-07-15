@@ -11,6 +11,7 @@
   @param {number} slide_count - Number of slides for carousel layouts
   @param {string} content_type - Type of content: 'products' | 'collections' | 'articles'
   @param {string} [test_id] - Data test ID for the main resource list
+  @param {boolean} [wrap_columns] - Grid only. Cards wrap to fewer columns when the container narrows (e.g. cart drawer open) instead of squeezing. The configured column count fits at a 1240px container and is never exceeded on wider screens.
 
   @example
   {% render 'resource-list',
@@ -63,7 +64,13 @@
       capture resource_list_styles
         echo '--resource-list-column-gap-desktop: ' | append: columns_gap | append: 'px;'
         echo '--resource-list-row-gap-desktop: ' | append: rows_gap | append: 'px;'
-        echo '--resource-list-columns: repeat(' | append: columns | append: ', 1fr);'
+        if wrap_columns
+          assign wrap_gaps_total = columns | minus: 1 | times: columns_gap
+          assign wrap_min_card_width = 1240 | minus: wrap_gaps_total | divided_by: columns
+          echo '--resource-list-columns: repeat(auto-fill, minmax(max(' | append: wrap_min_card_width | append: 'px, calc((100% - ' | append: wrap_gaps_total | append: 'px) / ' | append: columns | append: ')), 1fr));'
+        else
+          echo '--resource-list-columns: repeat(' | append: columns | append: ', 1fr);'
+        endif
         echo '--resource-list-columns-mobile: repeat(' | append: mobile_columns | append: ', 1fr);'
         echo '--column-count-mobile: ' | append: mobile_columns | append: ';'
       endcapture
