@@ -18,8 +18,7 @@
     --sht-line-height: {{ block.settings.line_height }};
     text-align: {{ block.settings.alignment }};
     text-transform: {{ block.settings.case }};
-    padding-block-start: {{ block.settings.padding-block-start }}px;
-    padding-block-end: {{ block.settings.padding-block-end }}px;
+    {% render 'spacing-padding', settings: block.settings %}
   "
   data-split="{{ block.settings.split }}"
   data-start="{{ block.settings.start_position }}"
@@ -38,6 +37,15 @@
   .scroll-highlight-text {
     display: block;
     width: 100%;
+    padding-block: var(--padding-block-start, 0rem) var(--padding-block-end, 0rem);
+    padding-inline: var(--padding-inline-start, 0rem) var(--padding-inline-end, 0rem);
+  }
+
+  @media screen and (max-width: 749px) {
+    .scroll-highlight-text {
+      padding-block: var(--padding-block-start-mobile, 0rem) var(--padding-block-end-mobile, 0rem);
+      padding-inline: var(--padding-inline-start-mobile, 0rem) var(--padding-inline-end-mobile, 0rem);
+    }
   }
 
   .scroll-highlight-text__content {
@@ -306,7 +314,7 @@
       "id": "text",
       "label": "t:settings.text",
       "default": "<p>Sour candy, sliced paper-thin. It crunches. It melts. It never takes a molar hostage.</p>",
-      "info": "Add a sticker block, give it a key, and place the key in square brackets — e.g. [gummy] — where the sticker should appear."
+      "info": "Add a Sticker block and give it a key. Type the key as a plain word (e.g. gummy) to show the sticker before that word, or in square brackets (e.g. [gummy]) to show the sticker on its own."
     },
     {
       "type": "header",
@@ -549,6 +557,80 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Mobile padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start-mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end-mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start-mobile",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end-mobile",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
     }
   ],
   "presets": [

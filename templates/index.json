@@ -1773,103 +1773,167 @@
           },
           "blocks": {}
         },
-        "scroll_highlight_text_ahUdFa": {
-          "type": "scroll-highlight-text",
-          "name": "Scroll highlight text",
+        "group_HKjR7z": {
+          "type": "group",
+          "name": "t:names.group",
           "settings": {
-            "text": "<p>Sour [sticker1] candy, sliced paper-<br/>thin. It [sticker2] crunches. It melts. <br/>It never takes a molar hostage. [sticker3] <br/>AND FOR THE [sticker4] HEALTH-CONSCIOUS: <br/>WE DRIED YOU SOME [sticker5] FRUIT</p>",
-            "split": "characters",
-            "start_position": 85,
-            "end_position": 45,
-            "font": "var(--font-heading--family)",
-            "font_size": "5rem",
-            "mobile_font_size": "2rem",
-            "line_height": "1.2",
-            "alignment": "center",
-            "case": "uppercase",
-            "dim_color": "#5c718f",
-            "highlight_color": "#ffffff",
-            "enable_glow": true,
-            "glow_color": "#ffffff8c",
-            "glow_size": 18,
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "use_mobile_alignment": false,
+            "mobile_horizontal_alignment": "flex-start",
+            "mobile_vertical_alignment": "center",
+            "mobile_horizontal_alignment_flex_direction_column": "flex-start",
+            "mobile_vertical_alignment_flex_direction_column": "center",
+            "gap": 0,
+            "use_mobile_gap": false,
+            "mobile_gap": 12,
+            "width": "custom",
+            "custom_width": 79,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "background_media": "none",
+            "background_color": "",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
             "padding-block-start": 0,
-            "padding-block-end": 0
+            "padding-block-end": 0,
+            "padding-inline-start": 4,
+            "padding-inline-end": 4,
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
           },
           "blocks": {
-            "text_sticker_KMdkbP": {
-              "type": "_text-sticker",
-              "name": "Sticker",
+            "scroll_highlight_text_LHzrXp": {
+              "type": "scroll-highlight-text",
+              "name": "Scroll highlight text",
               "settings": {
-                "key": "[sticker1]",
-                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_02_05_PM_1.webp",
-                "size": 100,
-                "mobile_size": 40,
-                "vertical_offset": 0
+                "text": "<p>Sour [sticker1] candy, sliced paper- thin. It [sticker2] crunches. It melts. It never takes a molar hostage. [sticker3]  AND FOR THE [sticker4] HEALTH-CONSCIOUS: WE DRIED YOU SOME [sticker5] FRUIT</p>",
+                "split": "characters",
+                "start_position": 85,
+                "end_position": 45,
+                "font": "var(--font-heading--family)",
+                "font_size": "5rem",
+                "mobile_font_size": "2rem",
+                "line_height": "1.2",
+                "alignment": "center",
+                "case": "uppercase",
+                "dim_color": "#5c718f",
+                "highlight_color": "#ffffff",
+                "enable_glow": true,
+                "glow_color": "#ffffff8c",
+                "glow_size": 18,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
               },
-              "blocks": {}
-            },
-            "text_sticker_KXiTyK": {
-              "type": "_text-sticker",
-              "name": "Sticker",
-              "settings": {
-                "key": "[sticker2]",
-                "image": "shopify://shop_images/Frame_127_66bb84ee-473a-4cc6-af87-4bad61454f81.webp",
-                "size": 76,
-                "mobile_size": 40,
-                "vertical_offset": 0
+              "blocks": {
+                "text_sticker_KMdkbP": {
+                  "type": "_text-sticker",
+                  "name": "Sticker",
+                  "settings": {
+                    "key": "[sticker1]",
+                    "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_02_05_PM_1.webp",
+                    "size": 100,
+                    "mobile_size": 40,
+                    "vertical_offset": 0
+                  },
+                  "blocks": {}
+                },
+                "text_sticker_KXiTyK": {
+                  "type": "_text-sticker",
+                  "name": "Sticker",
+                  "settings": {
+                    "key": "[sticker2]",
+                    "image": "shopify://shop_images/Frame_127_66bb84ee-473a-4cc6-af87-4bad61454f81.webp",
+                    "size": 76,
+                    "mobile_size": 40,
+                    "vertical_offset": 0
+                  },
+                  "blocks": {}
+                },
+                "text_sticker_BEhxdd": {
+                  "type": "_text-sticker",
+                  "name": "Sticker",
+                  "settings": {
+                    "key": "[sticker3]",
+                    "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_03_51_45_PM_1.webp",
+                    "size": 60,
+                    "mobile_size": 40,
+                    "vertical_offset": 0
+                  },
+                  "blocks": {}
+                },
+                "text_sticker_Wafw7y": {
+                  "type": "_text-sticker",
+                  "name": "Sticker",
+                  "settings": {
+                    "key": "[sticker4]",
+                    "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_13_11_PM_1.webp",
+                    "size": 120,
+                    "mobile_size": 40,
+                    "vertical_offset": 0
+                  },
+                  "blocks": {}
+                },
+                "text_sticker_hqkH3P": {
+                  "type": "_text-sticker",
+                  "name": "Sticker",
+                  "settings": {
+                    "key": "[sticker5]",
+                    "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_04_19_37_PM_1.webp",
+                    "size": 124,
+                    "mobile_size": 40,
+                    "vertical_offset": 0
+                  },
+                  "blocks": {}
+                }
               },
-              "blocks": {}
-            },
-            "text_sticker_BEhxdd": {
-              "type": "_text-sticker",
-              "name": "Sticker",
-              "settings": {
-                "key": "[sticker3]",
-                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_03_51_45_PM_1.webp",
-                "size": 60,
-                "mobile_size": 40,
-                "vertical_offset": 0
-              },
-              "blocks": {}
-            },
-            "text_sticker_Wafw7y": {
-              "type": "_text-sticker",
-              "name": "Sticker",
-              "settings": {
-                "key": "[sticker4]",
-                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_13_11_PM_1.webp",
-                "size": 120,
-                "mobile_size": 40,
-                "vertical_offset": 0
-              },
-              "blocks": {}
-            },
-            "text_sticker_hqkH3P": {
-              "type": "_text-sticker",
-              "name": "Sticker",
-              "settings": {
-                "key": "[sticker5]",
-                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_04_19_37_PM_1.webp",
-                "size": 124,
-                "mobile_size": 40,
-                "vertical_offset": 0
-              },
-              "blocks": {}
+              "block_order": [
+                "text_sticker_KMdkbP",
+                "text_sticker_KXiTyK",
+                "text_sticker_BEhxdd",
+                "text_sticker_Wafw7y",
+                "text_sticker_hqkH3P"
+              ]
             }
           },
           "block_order": [
-            "text_sticker_KMdkbP",
-            "text_sticker_KXiTyK",
-            "text_sticker_BEhxdd",
-            "text_sticker_Wafw7y",
-            "text_sticker_hqkH3P"
+            "scroll_highlight_text_LHzrXp"
           ]
         },
         "button_ehNTR4": {
           "type": "button",
           "name": "t:names.button",
           "settings": {
-            "label": "Shop now",
+            "label": "Build Your Bundle",
             "link": "shopify://collections/all",
             "open_in_new_tab": false,
             "style_class": "button-secondary",
@@ -1903,7 +1967,7 @@
       },
       "block_order": [
         "text_NEKD3L",
-        "scroll_highlight_text_ahUdFa",
+        "group_HKjR7z",
         "button_ehNTR4"
       ],
       "name": "Reveal on scroll",
@@ -1972,14 +2036,14 @@
           "name": "t:names.header",
           "static": true,
           "settings": {
-            "content_direction": "row",
+            "content_direction": "column",
             "vertical_on_mobile": false,
             "horizontal_alignment": "space-between",
             "vertical_alignment": "flex-end",
             "align_baseline": true,
-            "horizontal_alignment_flex_direction_column": "flex-start",
+            "horizontal_alignment_flex_direction_column": "center",
             "vertical_alignment_flex_direction_column": "center",
-            "gap": 12,
+            "gap": 0,
             "width": "fill",
             "custom_width": 100,
             "width_mobile": "fill",
@@ -2009,14 +2073,14 @@
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
-                "type_preset": "h4",
+                "type_preset": "custom",
                 "font": "var(--font-body--family)",
-                "font_size": "",
+                "font_size": "1rem",
                 "line_height": "normal",
                 "letter_spacing": "normal",
-                "case": "none",
+                "case": "uppercase",
                 "wrap": "pretty",
-                "text_color": "",
+                "text_color": "{{ settings.color_palette.color1 }}",
                 "background": false,
                 "background_color": "#00000026",
                 "corner_radius": 0,
@@ -2027,28 +2091,95 @@
               },
               "blocks": {}
             },
-            "product_list_button_MWeP9V": {
-              "type": "_product-list-button",
-              "name": "t:names.product_list_button",
+            "text_CRYFtT": {
+              "type": "text",
+              "name": "t:names.heading",
               "settings": {
-                "label": "View all",
-                "open_in_new_tab": false,
-                "style_class": "button-unstyled",
-                "custom_button_background": "{{ settings.color_palette.foreground }}",
-                "custom_button_text": "{{ settings.color_palette.background }}",
-                "custom_button_border": "{{ settings.color_palette.background }}",
-                "link_text_color": "",
+                "text": "<h2>ALL KILLERS. NO FILLERS.</h2>",
+                "mobile_text": "",
                 "width": "fit-content",
-                "custom_width": 100,
-                "width_mobile": "fit-content",
-                "custom_width_mobile": 100
+                "max_width": "normal",
+                "alignment": "left",
+                "height_mode": "auto",
+                "desktop_height": "",
+                "mobile_height": "",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "enable_custom_font_weight": false,
+                "weight": "400",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "custom_line_height": 1.5,
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "type_preset_mobile": "rte",
+                "mobile_font_size": "1rem",
+                "mobile_custom_line_height": 1.5,
+                "text_color": "",
+                "enable_text_shadow": false,
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 10,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
+              },
+              "blocks": {}
+            },
+            "text_a4KW8E": {
+              "type": "text",
+              "name": "t:names.text",
+              "settings": {
+                "text": "<p>All of them go in the bundle. Yes, even Pickle. Especially Pickle.</p>",
+                "mobile_text": "",
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "height_mode": "auto",
+                "desktop_height": "",
+                "mobile_height": "",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "enable_custom_font_weight": false,
+                "weight": "400",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "custom_line_height": 1.5,
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "type_preset_mobile": "rte",
+                "mobile_font_size": "1rem",
+                "mobile_custom_line_height": 1.5,
+                "text_color": "#3a5468",
+                "enable_text_shadow": false,
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
               },
               "blocks": {}
             }
           },
           "block_order": [
             "product_list_text_YFtzcL",
-            "product_list_button_MWeP9V"
+            "text_CRYFtT",
+            "text_a4KW8E"
           ]
         },
         "static-product-card": {
@@ -2166,7 +2297,7 @@
       },
       "name": "t:names.featured_collection",
       "settings": {
-        "collection": "all",
+        "collection": "the-lineup",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 8,
@@ -2180,7 +2311,14 @@
         "section_width": "page-width",
         "horizontal_alignment": "flex-start",
         "gap": 28,
+        "background_media": "none",
         "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
         "padding-block-start": 48,
         "padding-block-end": 48
       }
