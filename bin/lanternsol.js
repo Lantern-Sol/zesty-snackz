@@ -22,6 +22,18 @@ const path = require('path');
 
 const args = process.argv.slice(2);
 
+/**
+ * Clear the terminal screen AND scrollback so a fresh `lanternsol theme dev`
+ * run doesn't show stale logs from a previous session. No-op when stdout isn't
+ * a TTY (e.g. output piped to a file).
+ */
+function clearScreen() {
+  if (process.stdout.isTTY) {
+    // 2J: clear screen, 3J: clear scrollback, H: cursor home.
+    process.stdout.write('\x1b[2J\x1b[3J\x1b[H');
+  }
+}
+
 function runShopify(passthroughArgs, { onExit } = {}) {
   const child = spawn('shopify', passthroughArgs, { stdio: 'inherit' });
   child.on('error', (err) => {
@@ -42,6 +54,7 @@ function runShopify(passthroughArgs, { onExit } = {}) {
 const isThemeDev = args[0] === 'theme' && args[1] === 'dev';
 
 if (isThemeDev) {
+  clearScreen();
   const { startWatcher } = require(path.join(__dirname, '..', 'scripts', 'figma-watch.js'));
 
   const watcher = startWatcher();
