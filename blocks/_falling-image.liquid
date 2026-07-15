@@ -14,6 +14,7 @@
     --falling-size: {{ size_rem }}rem;
     --falling-duration: {{ block_settings.duration }}s;
     --falling-rotation: {{ block_settings.rotation | default: 0 }}deg;
+    --falling-offset: {{ block_settings.motion_offset | default: 0 }}s;
   "
   {{ block.shopify_attributes }}
 >
@@ -55,12 +56,15 @@
   /* The fall/float animations live on an unrotated wrapper so the image always
      falls straight down; rotation is purely visual on the media inside.
      The fall animates `transform` while the float animates `translate` — separate
-     properties, so the held fall end-state and the infinite drift compose. */
+     properties, so the held fall end-state and the infinite drift compose.
+     The motion offset delays the whole set: `both` fill holds the off-screen,
+     transparent start state until the delayed fall begins, so images rain in
+     staggered and their idle loops stay out of phase with their neighbors'. */
   .falling-image__faller {
     animation:
-      falling-image-fall var(--falling-duration, 2s) cubic-bezier(0.11, 0, 0.5, 0) both,
-      falling-image-fade var(--falling-duration, 2s) linear both,
-      falling-image-float 6s ease-in-out var(--falling-duration, 2s) infinite;
+      falling-image-fall var(--falling-duration, 2s) cubic-bezier(0.11, 0, 0.5, 0) var(--falling-offset, 0s) both,
+      falling-image-fade var(--falling-duration, 2s) linear var(--falling-offset, 0s) both,
+      falling-image-float 6s ease-in-out calc(var(--falling-duration, 2s) + var(--falling-offset, 0s)) infinite;
   }
 
   /* drop-shadow instead of box-shadow so the shadow follows the image's alpha
@@ -78,8 +82,8 @@
     /* Base rotation from the setting plus an animated sway offset */
     rotate: calc(var(--falling-rotation, 0deg) + var(--falling-sway, 0deg));
     animation:
-      falling-image-sway-in calc(var(--falling-duration, 2s) * 1.5) cubic-bezier(0.4, 0, 0.2, 1) both,
-      falling-image-sway 5s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--falling-duration, 2s) * 1.5) infinite;
+      falling-image-sway-in calc(var(--falling-duration, 2s) * 1.5) cubic-bezier(0.4, 0, 0.2, 1) var(--falling-offset, 0s) both,
+      falling-image-sway 5s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--falling-duration, 2s) * 1.5 + var(--falling-offset, 0s)) infinite;
   }
 
   .falling-image__media--placeholder {
@@ -276,6 +280,17 @@
       "step": 0.5,
       "unit": "s",
       "default": 2
+    },
+    {
+      "type": "range",
+      "id": "motion_offset",
+      "label": "Motion offset",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "unit": "s",
+      "default": 0,
+      "info": "Delays the fall so images rain in staggered and their float loops stay out of sync."
     }
   ],
   "presets": [

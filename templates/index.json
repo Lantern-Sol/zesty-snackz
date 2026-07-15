@@ -27,7 +27,8 @@
                 "shadow": true,
                 "x_position": 0,
                 "y_position": 40,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.4
               },
               "blocks": {}
             },
@@ -40,7 +41,8 @@
                 "shadow": true,
                 "x_position": 7,
                 "y_position": 25,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.1
               },
               "blocks": {}
             },
@@ -53,7 +55,8 @@
                 "shadow": true,
                 "x_position": 8,
                 "y_position": 45,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.2
               },
               "blocks": {}
             },
@@ -67,7 +70,8 @@
                 "shadow": true,
                 "x_position": 12,
                 "y_position": 0,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.6
               },
               "blocks": {}
             },
@@ -81,7 +85,8 @@
                 "shadow": true,
                 "x_position": 12,
                 "y_position": 60,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.7
               },
               "blocks": {}
             },
@@ -94,7 +99,8 @@
                 "shadow": true,
                 "x_position": 19,
                 "y_position": 42,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.3
               },
               "blocks": {}
             },
@@ -107,7 +113,8 @@
                 "shadow": true,
                 "x_position": 20,
                 "y_position": 20,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0
               },
               "blocks": {}
             },
@@ -120,7 +127,8 @@
                 "shadow": true,
                 "x_position": 27,
                 "y_position": 55,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.8
               },
               "blocks": {}
             },
@@ -133,7 +141,8 @@
                 "shadow": true,
                 "x_position": 58,
                 "y_position": 17,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.5
               },
               "blocks": {}
             },
@@ -146,7 +155,8 @@
                 "shadow": true,
                 "x_position": 63,
                 "y_position": 2,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.4
               },
               "blocks": {}
             },
@@ -159,7 +169,8 @@
                 "shadow": true,
                 "x_position": 68,
                 "y_position": 57,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.9
               },
               "blocks": {}
             },
@@ -172,7 +183,8 @@
                 "shadow": true,
                 "x_position": 79,
                 "y_position": 41,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.1
               },
               "blocks": {}
             },
@@ -185,7 +197,8 @@
                 "shadow": true,
                 "x_position": 90,
                 "y_position": 20,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.7
               },
               "blocks": {}
             },
@@ -198,7 +211,8 @@
                 "shadow": true,
                 "x_position": 93,
                 "y_position": 60,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 0.6
               },
               "blocks": {}
             },
@@ -211,7 +225,8 @@
                 "shadow": true,
                 "x_position": 100,
                 "y_position": 35,
-                "duration": 2
+                "duration": 2,
+                "motion_offset": 1.2
               },
               "blocks": {}
             }
