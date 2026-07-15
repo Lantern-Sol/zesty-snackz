@@ -10,6 +10,10 @@
   assign scoped_class = block.settings.style_class | append: '--' | append: block.id
   assign class = 'add-to-cart-button ' | append: block.settings.style_class | append: ' ' | append: scoped_class
   assign id = 'BuyButtons-ProductSubmitButton-' | append: block.id
+
+  if block.settings.custom_label != blank and can_add_to_cart
+    assign add_to_cart_text = block.settings.custom_label
+  endif
 %}
 {% render 'button-custom-styles', block_settings: block.settings, block_id: block.id %}
 
@@ -32,6 +36,12 @@
   "name": "t:names.add_to_cart",
   "tag": null,
   "settings": [
+    {
+      "type": "text",
+      "id": "custom_label",
+      "label": "Custom label",
+      "info": "Optional. Replaces the default \"Add to cart\" text when the product is available."
+    },
     {
       "type": "select",
       "id": "style_class",

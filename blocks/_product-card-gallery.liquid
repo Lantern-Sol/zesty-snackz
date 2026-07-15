@@ -13,6 +13,8 @@
   assign hover_tagline = product.metafields.custom.card_hover_tagline.value
   assign hover_background = product.metafields.custom.card_hover_background.value
   assign hover_icon = product.metafields.custom.card_hover_icon.value
+  assign sour_level = product.metafields.custom.sour_level.value
+  assign card_badge = product.metafields.custom.card_badge.value
   assign show_hover_panel = false
   if block.settings.show_hover_label and hover_tagline != blank
     assign show_hover_panel = true
@@ -35,6 +37,16 @@
         <p class="card-hover-panel__tagline">{{ hover_tagline }}</p>
       </div>
     {%- endif -%}
+    {%- if sour_level != blank and sour_level > 0 -%}
+      <div class="sour-meter" aria-label="{{ 'content.sour_level' | t: level: sour_level }}">
+        <span class="sour-meter__label">{{ 'content.sour_label' | t }}</span>
+        <span class="sour-meter__dots" aria-hidden="true">
+          {%- for i in (1..4) -%}
+            <span class="sour-meter__dot{% if i <= sour_level %} sour-meter__dot--filled{% endif %}"></span>
+          {%- endfor -%}
+        </span>
+      </div>
+    {%- endif -%}
     <div
       class="product-badges product-badges--{{ settings.badge_position }}"
       style="
@@ -42,21 +54,20 @@
         --badge-font-family: var(--font-{{ settings.badge_font_family }}--family); --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight); --badge-text-transform: {{ settings.badge_text_transform }};
       "
     >
-      {%- if product.available == false or product.compare_at_price > product.price -%}
-        <div
-          class="
-            product-badges__badge product-badges__badge--rectangle
-            {% if product.available == false %} color-custom-badge-sold-out{% elsif product.compare_at_price > product.price %} color-custom-badge-sale{% endif %}
-          "
-        >
-          {%- if product.available == false -%}
-            {{ 'content.product_badge_sold_out' | t }}
-          {%- elsif product.compare_at_price > product.price -%}
-            {{ 'content.product_badge_sale' | t }}
-          {%- endif -%}
+      {%- if card_badge != blank -%}
+        <div class="product-badges__badge product-badges__badge--rectangle product-badges__badge--{{ card_badge | handleize }}">
+          {{ card_badge }}
+        </div>
+      {%- endif -%}
+      {%- if product.compare_at_price > product.price and product.available -%}
+        <div class="product-badges__badge product-badges__badge--rectangle color-custom-badge-sale">
+          {{ 'content.product_badge_sale' | t }}
         </div>
       {%- endif -%}
     </div>
+    {%- if product.available == false -%}
+      <div class="sold-out-stamp">{{ 'content.product_badge_sold_out' | t }}</div>
+    {%- endif -%}
     {%- if block.settings.show_overlay_quick_add and settings.quick_add or block.settings.show_overlay_quick_add and settings.mobile_quick_add -%}
       {% render 'quick-add', product: product, section_id: section.id %}
     {%- endif -%}
@@ -127,7 +138,69 @@
     }
   }
   slideshow-slide.product-media-container.product-media-container--image {
-    background-color: var(--color-background, transparent);
+    background-color: var(--card-media-background, var(--color-background, transparent));
+  }
+
+  .sour-meter {
+    position: absolute;
+    top: var(--padding-sm);
+    left: var(--padding-sm);
+    z-index: var(--layer-flat);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-2xs);
+    padding: 0.25rem 0.625rem;
+    background-color: var(--color-background);
+    border-radius: 100px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+  }
+
+  .sour-meter__label {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-foreground);
+    line-height: 1;
+  }
+
+  .sour-meter__dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1875rem;
+  }
+
+  .sour-meter__dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background-color: rgb(var(--color-foreground-rgb) / var(--opacity-15, 0.15));
+  }
+
+  .sour-meter__dot--filled {
+    background-color: var(--card-accent, var(--color-foreground));
+  }
+
+  .sold-out-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: var(--layer-flat);
+    transform: translate(-50%, -50%) rotate(-8deg);
+    padding: 0.375rem 1rem;
+    background-color: #e8291c;
+    border: 3px solid var(--color-background);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+    color: rgb(255 255 255);
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: var(--font-size--2xl);
+    line-height: 1.1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
   }
 {% endstylesheet %}
 

@@ -239,6 +239,8 @@
     "product_total": "Product total",
     "product_badge_sold_out": "Sold out",
     "product_badge_sale": "Sale",
+    "sour_label": "Sour",
+    "sour_level": "Sour level {{ level }} of 4",
     "product_card_placeholder": "Product title",
     "placeholder_image": "Placeholder image",
     "quantity": "Quantity",

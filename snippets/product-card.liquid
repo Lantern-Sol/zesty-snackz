@@ -54,6 +54,9 @@
     assign onboarding = true
   endif
 
+  assign card_accent = product.metafields.custom.color.value
+  assign card_media_background = product.metafields.custom.color_light.value
+
   if block_settings.background_color != blank
     render 'contrast-override', background_color: block_settings.background_color, text_color: block_settings.text_color, section_id: block.id
   endif
@@ -100,9 +103,12 @@
       border-style
       gap-style
       {% if block_settings.background_color != blank %} color-custom-{{ block.id }}{% endif %}
+      {% if card_accent != blank %} product-card--accent{% endif %}
     "
     style="
       {% render 'border-override', settings: block_settings %}
+      {% if card_accent != blank %}--card-accent: {{ card_accent }}; --border-color: {{ card_accent }}; --border-color-mobile: {{ card_accent }};{% endif %}
+      {% if card_media_background != blank %}--card-media-background: {{ card_media_background }};{% endif %}
       {% render 'layout-panel-style', settings: block_settings %}
       {% render 'spacing-style', settings: block_settings %}
       {% render 'gap-style', value: product_card_gap_value, name: 'product-card-gap' %}
@@ -122,6 +128,42 @@
 {% stylesheet %}
   .product-card__placeholder-image svg {
     height: 100%;
+  }
+
+  /* Accent styling driven by the product's custom.color / custom.color_light metafields */
+  .product-card__content.product-card--accent {
+    box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--card-accent) 45%, transparent);
+  }
+
+  .product-card__content.product-card--accent .card-gallery {
+    background-color: var(--card-media-background, transparent);
+  }
+
+  .product-card__content.product-card--accent .buy-buttons-block {
+    width: fit-content;
+  }
+
+  .product-card__content.product-card--accent .add-to-cart-button {
+    background-color: var(--card-accent);
+    border-color: var(--card-accent);
+    color: rgb(255 255 255);
+    border-radius: 100px;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .product-card__content.product-card--accent .add-to-cart-button:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--card-accent) 85%, black);
+    border-color: color-mix(in srgb, var(--card-accent) 85%, black);
+  }
+
+  /* Keep row groups (e.g. price + buy button) horizontal on mobile unless the
+     group opts into stacking via its "Vertical on mobile" setting */
+  @media screen and (max-width: 749px) {
+    .product-card__content .group-block > .layout-panel-flex--row:not(.mobile-column) {
+      flex-direction: row;
+    }
   }
 
   .product-card__content slideshow-component {
