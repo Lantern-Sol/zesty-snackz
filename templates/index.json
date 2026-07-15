@@ -956,7 +956,7 @@
                 "shadow": true,
                 "x_position": 3,
                 "y_position": 43,
-                "motion_offset": 2
+                "motion_offset": 0
               },
               "blocks": {}
             },
@@ -970,7 +970,7 @@
                 "shadow": true,
                 "x_position": 3,
                 "y_position": 91,
-                "motion_offset": 0
+                "motion_offset": 1.2
               },
               "blocks": {}
             },
@@ -984,7 +984,7 @@
                 "shadow": true,
                 "x_position": 15,
                 "y_position": 67,
-                "motion_offset": 1
+                "motion_offset": 0.6
               },
               "blocks": {}
             },
@@ -998,7 +998,7 @@
                 "shadow": true,
                 "x_position": 81,
                 "y_position": 67,
-                "motion_offset": 3
+                "motion_offset": 1.8
               },
               "blocks": {}
             },
@@ -1012,7 +1012,7 @@
                 "shadow": true,
                 "x_position": 100,
                 "y_position": 38,
-                "motion_offset": 0
+                "motion_offset": 0.9
               },
               "blocks": {}
             },
@@ -1026,7 +1026,7 @@
                 "shadow": true,
                 "x_position": 98,
                 "y_position": 93,
-                "motion_offset": 2
+                "motion_offset": 2.4
               },
               "blocks": {}
             }
