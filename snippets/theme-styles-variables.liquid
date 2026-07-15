@@ -173,10 +173,20 @@
       font-size: calc(16 * 100vw / 950);
     }
   }
-  @media only screen and (max-width: 749px) { 
+  @media only screen and (max-width: 749px) {
     html {
       font-size: calc(16 * 100vw / 393);
     }
+  }
+
+  /* Baseline-align h1 text: trim the text box to cap height (top) and the
+     alphabetic baseline (bottom), removing the font's built-in leading so the
+     heading sits flush. Progressive enhancement — browsers without text-box
+     support simply keep the regular box. */
+  h1,
+  .h1,
+  .h1 > * {
+    text-box: trim-both cap alphabetic;
   }
 
   :root {
@@ -296,7 +306,7 @@
     /* Line height / Leading */
     --line-height: 1;
 
-    --line-height--display-tight: 1;
+    --line-height--display-tight: 0.78;
     --line-height--display-normal: 1.1;
     --line-height--display-loose: 1.2;
 
@@ -614,10 +624,29 @@
     --button-size-sm: 30px;
     --button-size-md: 36px;
     --button-size: var(--minimum-touch-target);
-    --primary-button-shadow-horizontal: {{ settings.primary_button_shadow_horizontal_offset | default: 0 }}px;
-    --primary-button-shadow-vertical: {{ settings.primary_button_shadow_vertical_offset | default: 0 }}px;
-    --primary-button-shadow-blur: {{ settings.primary_button_shadow_blur_radius | default: 0 }}px;
-    --primary-button-shadow-spread: {{ settings.primary_button_shadow_spread_radius | default: 0 }}px;
+    {% if settings.primary_button_shadow_enabled %}
+      --primary-button-shadow-horizontal: {{ settings.primary_button_shadow_horizontal_offset | default: 0 }}px;
+      --primary-button-shadow-vertical: {{ settings.primary_button_shadow_vertical_offset | default: 0 }}px;
+      --primary-button-shadow-blur: {{ settings.primary_button_shadow_blur_radius | default: 0 }}px;
+      --primary-button-shadow-spread: {{ settings.primary_button_shadow_spread_radius | default: 0 }}px;
+      {% if settings.primary_button_shadow_color != blank %}
+        --primary-button-shadow-color: rgb({{ settings.primary_button_shadow_color.rgba }});
+      {% endif %}
+    {% else %}
+      --primary-button-shadow-horizontal: 0px;
+      --primary-button-shadow-vertical: 0px;
+      --primary-button-shadow-blur: 0px;
+      --primary-button-shadow-spread: 0px;
+    {% endif %}
+    {% if settings.secondary_button_shadow_enabled %}
+      --secondary-button-shadow-horizontal: {{ settings.secondary_button_shadow_horizontal_offset | default: 0 }}px;
+      --secondary-button-shadow-vertical: {{ settings.secondary_button_shadow_vertical_offset | default: 0 }}px;
+      --secondary-button-shadow-blur: {{ settings.secondary_button_shadow_blur_radius | default: 0 }}px;
+      --secondary-button-shadow-spread: {{ settings.secondary_button_shadow_spread_radius | default: 0 }}px;
+      {% if settings.secondary_button_shadow_color != blank %}
+        --secondary-button-shadow-color: rgb({{ settings.secondary_button_shadow_color.rgba }});
+      {% endif %}
+    {% endif %}
     --primary-button-desktop-font-size: {{ settings.button_primary_desktop_font_size }};
     --primary-button-mobile-font-size: {{ settings.button_primary_mobile_font_size }};
     --primary-button-font-weight: {{ settings.primary_button_font_weight }};

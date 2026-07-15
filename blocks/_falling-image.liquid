@@ -1,0 +1,288 @@
+{% liquid
+  assign block_settings = block.settings
+  assign size_px = block_settings.size | default: 100
+  assign size_rem = size_px | divided_by: 16.0
+  assign image_width = size_px | times: 3 | at_most: 1400
+  assign sizes_attribute = size_px | append: 'px'
+%}
+
+<div
+  class="falling-image{% if request.design_mode %} falling-image--design-mode{% endif %}{% if block_settings.shadow %} falling-image--shadow{% endif %}"
+  style="
+    --falling-x: {{ block_settings.x_position }};
+    --falling-y: {{ block_settings.y_position }}%;
+    --falling-size: {{ size_rem }}rem;
+    --falling-duration: {{ block_settings.duration }}s;
+    --falling-rotation: {{ block_settings.rotation | default: 0 }}deg;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="falling-image__faller">
+    {% if block_settings.image != blank %}
+      {{
+        block_settings.image
+        | image_url: width: image_width
+        | image_tag: loading: 'lazy', class: 'falling-image__media', sizes: sizes_attribute
+      }}
+    {% else %}
+      {{ 'image' | placeholder_svg_tag: 'falling-image__media falling-image__media--placeholder' }}
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .falling-image {
+    position: absolute;
+    top: var(--falling-y, 50%);
+
+    /* Percentages resolve against the falling group, which spans the full section */
+    left: calc(var(--falling-x, 50) * 1%);
+
+    /* Anchor the image at its top center: X positions the horizontal middle,
+       Y the top edge. At the extremes the image may hang past the section
+       edges; the section's overflow clipping handles it. */
+    translate: -50% 0;
+    width: var(--falling-size, 7.5rem);
+    z-index: var(--layer-flat);
+    pointer-events: none;
+  }
+
+  /* Keep the block clickable in the theme editor so it can be selected on canvas */
+  .falling-image--design-mode {
+    pointer-events: auto;
+  }
+
+  /* The fall/float animations live on an unrotated wrapper so the image always
+     falls straight down; rotation is purely visual on the media inside.
+     The fall animates `transform` while the float animates `translate` — separate
+     properties, so the held fall end-state and the infinite drift compose. */
+  .falling-image__faller {
+    animation:
+      falling-image-fall var(--falling-duration, 2s) cubic-bezier(0.11, 0, 0.5, 0) both,
+      falling-image-fade var(--falling-duration, 2s) linear both,
+      falling-image-float 6s ease-in-out var(--falling-duration, 2s) infinite;
+  }
+
+  /* drop-shadow instead of box-shadow so the shadow follows the image's alpha
+     silhouette (not its rectangle). On the faller, not the rotated media, so
+     the shadow always drops downward in screen space */
+  .falling-image--shadow .falling-image__faller {
+    filter: drop-shadow(0 18px 24px rgb(11 27 43 / 0.18));
+  }
+
+  .falling-image__media {
+    display: block;
+    width: 100%;
+    height: auto;
+
+    /* Base rotation from the setting plus an animated sway offset */
+    rotate: calc(var(--falling-rotation, 0deg) + var(--falling-sway, 0deg));
+    animation:
+      falling-image-sway-in calc(var(--falling-duration, 2s) * 1.5) cubic-bezier(0.4, 0, 0.2, 1) both,
+      falling-image-sway 5s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--falling-duration, 2s) * 1.5) infinite;
+  }
+
+  .falling-image__media--placeholder {
+    aspect-ratio: 1;
+  }
+
+  /* Registered so the sway offset interpolates smoothly instead of stepping */
+  @property --falling-sway {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  /* Gravity-accelerated drop (easeInQuad matches the sampled source curve) */
+  @keyframes falling-image-fall {
+    from {
+      transform: translateY(-100vh);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  /* Fade in near the start of the fall, while the image is still high up */
+  @keyframes falling-image-fade {
+    0% {
+      opacity: 0;
+    }
+
+    15%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Organic drift around the landing point, traced from the source export's
+     float section; starts with the small bounce-up after landing and closes
+     back at 0 0 so the loop never pops */
+  @keyframes falling-image-float {
+    0% {
+      translate: 0 0;
+    }
+
+    12% {
+      translate: 7px -9px;
+    }
+
+    25% {
+      translate: 5px 0;
+    }
+
+    37% {
+      translate: -4px 5px;
+    }
+
+    50% {
+      translate: -5px 0;
+    }
+
+    62% {
+      translate: 2px -7px;
+    }
+
+    75% {
+      translate: 3.5px 1px;
+    }
+
+    87% {
+      translate: -3px -8px;
+    }
+
+    100% {
+      translate: 0 0;
+    }
+  }
+
+  /* Entrance sway: swing in tilted, rock past the resting angle, settle */
+  @keyframes falling-image-sway-in {
+    0% {
+      --falling-sway: -12deg;
+    }
+
+    27% {
+      --falling-sway: 7deg;
+    }
+
+    53% {
+      --falling-sway: -4deg;
+    }
+
+    80% {
+      --falling-sway: 2deg;
+    }
+
+    100% {
+      --falling-sway: 0deg;
+    }
+  }
+
+  /* Idle sway: subtle pendulum around the resting angle. 5s against the 6s
+     float loop so the combined motion only repeats every 30s */
+  @keyframes falling-image-sway {
+    0%,
+    100% {
+      --falling-sway: 0deg;
+    }
+
+    30% {
+      --falling-sway: -3deg;
+    }
+
+    70% {
+      --falling-sway: 2.5deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .falling-image__faller,
+    .falling-image__media {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Falling image",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "number",
+      "id": "size",
+      "label": "t:settings.width",
+      "default": 100,
+      "info": "Width in pixels."
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Rotation",
+      "min": -180,
+      "max": 180,
+      "step": 5,
+      "unit": "deg",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "shadow",
+      "label": "Shadow",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:settings.position"
+    },
+    {
+      "type": "range",
+      "id": "x_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y_position",
+      "label": "Vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "info": "Where the image lands after falling, relative to the section content area."
+    },
+    {
+      "type": "header",
+      "content": "t:settings.animation"
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "label": "Duration",
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "unit": "s",
+      "default": 2
+    }
+  ],
+  "presets": [
+    {
+      "name": "Falling image",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

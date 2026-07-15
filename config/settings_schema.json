@@ -1520,6 +1520,20 @@
         "alpha": true
       },
       {
+        "type": "color",
+        "id": "palette_primary_button_hover_background",
+        "label": "Hover background",
+        "info": "Leave empty for an automatic shade of the background",
+        "alpha": true
+      },
+      {
+        "type": "color",
+        "id": "palette_primary_button_hover_text",
+        "label": "Hover text",
+        "info": "Leave empty for an automatic contrast color",
+        "alpha": true
+      },
+      {
         "type": "range",
         "id": "primary_button_border_width",
         "min": 0,
@@ -1540,6 +1554,12 @@
         "default": 100
       },
       {
+        "type": "checkbox",
+        "id": "primary_button_shadow_enabled",
+        "label": "Enable shadow",
+        "default": true
+      },
+      {
         "type": "range",
         "id": "primary_button_shadow_horizontal_offset",
         "label": "Horizontal offset",
@@ -1547,7 +1567,8 @@
         "max": 20,
         "step": 1,
         "unit": "px",
-        "default": 0
+        "default": 0,
+        "visible_if": "{{ settings.primary_button_shadow_enabled }}"
       },
       {
         "type": "range",
@@ -1557,7 +1578,8 @@
         "max": 20,
         "step": 1,
         "unit": "px",
-        "default": 0
+        "default": 0,
+        "visible_if": "{{ settings.primary_button_shadow_enabled }}"
       },
       {
         "type": "range",
@@ -1567,7 +1589,8 @@
         "max": 40,
         "step": 1,
         "unit": "px",
-        "default": 0
+        "default": 0,
+        "visible_if": "{{ settings.primary_button_shadow_enabled }}"
       },
       {
         "type": "range",
@@ -1577,7 +1600,16 @@
         "max": 20,
         "step": 1,
         "unit": "px",
-        "default": 0
+        "default": 0,
+        "visible_if": "{{ settings.primary_button_shadow_enabled }}"
+      },
+      {
+        "type": "color",
+        "id": "primary_button_shadow_color",
+        "label": "Shadow color",
+        "info": "Leave empty for the default shadow color",
+        "alpha": true,
+        "visible_if": "{{ settings.primary_button_shadow_enabled }}"
       },
       {
         "type": "select",
@@ -1915,6 +1947,20 @@
         "alpha": true
       },
       {
+        "type": "color",
+        "id": "palette_secondary_button_hover_background",
+        "label": "Hover background",
+        "info": "Leave empty for an automatic shade of the background",
+        "alpha": true
+      },
+      {
+        "type": "color",
+        "id": "palette_secondary_button_hover_text",
+        "label": "Hover text",
+        "info": "Leave empty for an automatic contrast color",
+        "alpha": true
+      },
+      {
         "type": "range",
         "id": "secondary_button_border_width",
         "min": 0,
@@ -1933,6 +1979,64 @@
         "unit": "px",
         "label": "t:settings.border_radius",
         "default": 100
+      },
+      {
+        "type": "checkbox",
+        "id": "secondary_button_shadow_enabled",
+        "label": "Enable shadow",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_shadow_horizontal_offset",
+        "label": "Horizontal offset",
+        "min": -20,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "visible_if": "{{ settings.secondary_button_shadow_enabled }}"
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_shadow_vertical_offset",
+        "label": "Vertical offset",
+        "min": -20,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "visible_if": "{{ settings.secondary_button_shadow_enabled }}"
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_shadow_blur_radius",
+        "label": "Blur radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "visible_if": "{{ settings.secondary_button_shadow_enabled }}"
+      },
+      {
+        "type": "range",
+        "id": "secondary_button_shadow_spread_radius",
+        "label": "Spread radius",
+        "min": -20,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 0,
+        "visible_if": "{{ settings.secondary_button_shadow_enabled }}"
+      },
+      {
+        "type": "color",
+        "id": "secondary_button_shadow_color",
+        "label": "Shadow color",
+        "info": "Leave empty for the default shadow color",
+        "alpha": true,
+        "visible_if": "{{ settings.secondary_button_shadow_enabled }}"
       },
       {
         "type": "select",

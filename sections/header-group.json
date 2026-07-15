@@ -55,6 +55,25 @@
     "header_section": {
       "type": "header",
       "blocks": {
+        "button_4aExfC": {
+          "type": "button",
+          "name": "t:names.button",
+          "settings": {
+            "label": "BUILD A BUNDLE",
+            "link": "shopify://pages/build-a-bag",
+            "open_in_new_tab": false,
+            "style_class": "button",
+            "custom_button_background": "{{ settings.color_palette.foreground }}",
+            "custom_button_text": "{{ settings.color_palette.background }}",
+            "custom_button_border": "{{ settings.color_palette.background }}",
+            "link_text_color": "",
+            "width": "fit-content",
+            "custom_width": 100,
+            "width_mobile": "fit-content",
+            "custom_width_mobile": 100
+          },
+          "blocks": {}
+        },
         "header-logo": {
           "type": "_header-logo",
           "static": true,
@@ -91,6 +110,9 @@
           "blocks": {}
         }
       },
+      "block_order": [
+        "button_4aExfC"
+      ],
       "settings": {
         "logo_position": "left",
         "menu_position": "right",

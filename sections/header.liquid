@@ -1,8 +1,8 @@
 {% liquid
-  assign order = 'logo,menu,localization,search,drawer_search,actions'
+  assign order = 'logo,menu,localization,actions,search,drawer_search'
 
   if shop.customer_accounts_enabled
-    assign order = 'drawer_search,logo,menu,localization,search,actions'
+    assign order = 'drawer_search,logo,menu,localization,actions,search'
   endif
 
   assign rows = 'top,bottom' | split: ','
@@ -96,6 +96,10 @@
 
   capture actions
     render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
+  endcapture
+
+  capture header_blocks
+    content_for 'blocks'
   endcapture
 
   if shop.customer_accounts_enabled
@@ -435,6 +439,13 @@
       {% if custom_color_styles %}
         {% render 'contrast-override', background_color: section.settings[row_setting], text_color: section.settings[text_setting], section_id: row_class_id %}
       {% endif %}
+      {% liquid
+        # Section blocks (e.g. buttons) render once, at the end of the top row
+        assign blocks_for_row = ''
+        if row == 'top'
+          assign blocks_for_row = header_blocks
+        endif
+      %}
       {% render 'header-row',
         row: row,
         order: order,
@@ -445,7 +456,8 @@
         actions: actions,
         localization: localization_markup,
         search: search,
-        drawer_search: drawer_search
+        drawer_search: drawer_search,
+        blocks_html: blocks_for_row
       %}
     {% endcapture %}
 
@@ -575,8 +587,11 @@
       }
     }
 
-    /** For transparent header, apply transparent text color to rows when menu is not hovered */
-    &:not([data-sticky-state='active']):not(:has(.menu-list__link:is(:hover, [aria-expanded='true']))):not(:has(#Details-menu-drawer-container[open])) .header__row {
+    /** For transparent header, apply transparent text color to rows when menu is not hovered.
+        The floating pill keeps its regular colors in every state, so it is excluded —
+        otherwise buttons lose their background (transparent text color is blank in
+        floating mode) and hovering any menu link flips their colors back. */
+    &:not(.header--floating):not([data-sticky-state='active']):not(:has(.menu-list__link:is(:hover, [aria-expanded='true']))):not(:has(#Details-menu-drawer-container[open])) .header__row {
       --color-foreground: var(--color-transparent-text);
       --color-foreground-rgb: var(--color-transparent-text-rgb);
       --color-border: var(--color-transparent-text);
@@ -587,7 +602,7 @@
 
     /* Swap the cart bubble in transparent state only when using the default
        style. Custom bubble colors apply unchanged across header states. */
-    &[data-bubble-style='default']:not([data-sticky-state='active']):not(
+    &[data-bubble-style='default']:not(.header--floating):not([data-sticky-state='active']):not(
         :has(.menu-list__link:is(:hover, [aria-expanded='true']))
       ):not(:has(#Details-menu-drawer-container[open]))
       .header__row {
@@ -1323,6 +1338,11 @@
   "name": "t:names.header",
   "tag": "header",
   "class": "header-section",
+  "blocks": [
+    {
+      "type": "button"
+    }
+  ],
   "settings": [
     {
       "type": "header",

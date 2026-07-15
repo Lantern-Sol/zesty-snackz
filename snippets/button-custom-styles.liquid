@@ -49,12 +49,46 @@
   {%- assign effective_hover_bg = hover_parts[0] -%}
   {%- assign effective_hover_text = hover_parts[1] -%}
   {%- assign effective_hover_border = hover_parts[2] -%}
+  {%- if block_settings.custom_button_shadow_color != blank -%}
+    {%- capture custom_shadow_color -%}rgb({{ block_settings.custom_button_shadow_color.rgba }}){%- endcapture -%}
+  {%- else -%}
+    {%- assign custom_shadow_color = 'var(--color-shadow)' -%}
+  {%- endif -%}
   {% style %}
     .button-custom--{{ block_id }} {
       --button-background-color: rgb({{ effective_background_color.rgba }});
       --button-color: rgb({{ effective_text_color.rgba }});
       --button-border-color: rgb({{ effective_border_color.rgba }});
       --button-focus-outline-color: rgb({{ effective_focus_outline_color.rgb }});
+      {%- if block_settings.custom_button_shadow_enabled %}
+        box-shadow: {{ block_settings.custom_button_shadow_horizontal_offset | default: 0 }}px {{ block_settings.custom_button_shadow_vertical_offset | default: 0 }}px {{ block_settings.custom_button_shadow_blur_radius | default: 0 }}px {{ block_settings.custom_button_shadow_spread_radius | default: 0 }}px {{ custom_shadow_color }};
+      {%- else %}
+        /* Custom buttons own their shadow; don't inherit the primary's */
+        box-shadow: none;
+      {%- endif %}
+      {%- if block_settings.custom_button_padding_enabled %}
+        {%- liquid
+          assign pad_block_start = block_settings.custom_button_padding_block_start | default: 16 | divided_by: 16.0
+          assign pad_block_end = block_settings.custom_button_padding_block_end | default: 16 | divided_by: 16.0
+          assign pad_inline_start = block_settings.custom_button_padding_inline_start | default: 24 | divided_by: 16.0
+          assign pad_inline_end = block_settings.custom_button_padding_inline_end | default: 24 | divided_by: 16.0
+          assign pad_block = pad_block_start | append: 'rem ' | append: pad_block_end | append: 'rem'
+          assign pad_inline = pad_inline_start | append: 'rem ' | append: pad_inline_end | append: 'rem'
+        -%}
+        --button-padding-block: {{ pad_block }};
+        --button-padding-inline: {{ pad_inline }};
+        {%- if block_settings.custom_button_use_mobile_padding %}
+          --mobile-button-padding-block: {{ block_settings.custom_button_padding_block_start_mobile | default: 16 | divided_by: 16.0 }}rem {{ block_settings.custom_button_padding_block_end_mobile | default: 16 | divided_by: 16.0 }}rem;
+          --mobile-button-padding-inline: {{ block_settings.custom_button_padding_inline_start_mobile | default: 24 | divided_by: 16.0 }}rem {{ block_settings.custom_button_padding_inline_end_mobile | default: 24 | divided_by: 16.0 }}rem;
+        {%- else %}
+          {%- comment -%}
+            The root-level mobile vars capture the theme's desktop values, so
+            they must be re-declared here for the override to apply on mobile.
+          {%- endcomment -%}
+          --mobile-button-padding-block: {{ pad_block }};
+          --mobile-button-padding-inline: {{ pad_inline }};
+        {%- endif %}
+      {%- endif %}
     }
     .button-custom--{{ block_id }}:hover {
       --button-background-color: {{ effective_hover_bg }};

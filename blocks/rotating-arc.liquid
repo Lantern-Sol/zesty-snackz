@@ -1,0 +1,340 @@
+<rotating-arc-component
+  class="rotating-arc{% if block.settings.pause_on_hover %} rotating-arc--pause-hover{% endif %}"
+  style="--arc-radius: {{ block.settings.radius }}px; --arc-item-height: {{ block.settings.item_height }}px; --arc-crop: {{ block.settings.bottom_crop }}px;"
+  data-radius="{{ block.settings.radius }}"
+  data-gap="{{ block.settings.gap }}"
+  data-speed="{{ block.settings.speed }}"
+  {% if block.settings.reverse %}
+    data-reverse
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  <div class="rotating-arc__viewport">
+    <div class="rotating-arc__disc">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</rotating-arc-component>
+
+{% stylesheet %}
+  .rotating-arc {
+    /* Distance from the viewport edge to the page-width central column */
+    --arc-edge-offset: calc(var(--page-margin) + max((100vw - var(--page-width)) / 2, 0px));
+
+    display: block;
+    width: 100%;
+  }
+
+  /* Full-bleed: when the section constrains content to page width, pull the
+     arc out to the exact section edges (direct children only) */
+  @media screen and (min-width: 750px) {
+    .section-content-wrapper.page-width > .rotating-arc {
+      margin-inline: calc(-1 * var(--arc-edge-offset));
+      width: calc(100% + var(--arc-edge-offset) * 2);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .section-content-wrapper.page-width-mobile > .rotating-arc {
+      margin-inline: calc(-1 * var(--arc-edge-offset));
+      width: calc(100% + var(--arc-edge-offset) * 2);
+    }
+  }
+
+  .rotating-arc__viewport {
+    position: relative;
+    overflow: clip;
+    height: max(0px, calc(var(--arc-height, 0px) - var(--arc-crop, 0px)));
+  }
+
+  /* Until the JS has measured, --arc-height is unset; keep the natural height */
+  .rotating-arc__viewport:not(:has(.rotating-arc__disc--positioned)) {
+    height: auto;
+  }
+
+  /* Before layout (and without JS) the items render as a plain centered row */
+  .rotating-arc__disc {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--gap-lg);
+    width: 100%;
+  }
+
+  /* Uniform height, width from each image's own aspect ratio (the image block
+     exposes it as --ratio). Overrides the image blocks' width settings. */
+  .rotating-arc__disc > * {
+    flex: none;
+    height: var(--arc-item-height, auto);
+    width: auto;
+    aspect-ratio: var(--ratio, auto);
+  }
+
+  /* After layout the disc is a full-width strip whose top-center point is the
+     circle center, sitting --arc-radius below the crest; one rotation animation
+     on it spins every item along the arc */
+  .rotating-arc__disc--positioned {
+    display: block;
+    position: absolute;
+    inset: calc(var(--arc-radius) + var(--arc-max-item-height, 0px) / 2) 0 auto;
+    height: 0;
+    transform-origin: 50% 0;
+    animation: rotating-arc-spin var(--arc-duration, 120s) linear infinite;
+  }
+
+  [data-reverse] .rotating-arc__disc--positioned {
+    animation-direction: reverse;
+  }
+
+  .rotating-arc--pause-hover:hover .rotating-arc__disc--positioned {
+    animation-play-state: paused;
+  }
+
+  /* Hover pop on individual items. Scales the image inside the positioned
+     wrapper — scaling the wrapper itself would multiply the radius transform
+     (its origin is the circle center) and throw the item off the arc. */
+  @media (hover: hover) {
+    .rotating-arc__disc--positioned > * > * {
+      scale: 1;
+      filter: drop-shadow(0 0 0 rgb(11 27 43 / 0));
+      transition:
+        scale var(--animation-speed-slow, 0.2s) var(--animation-timing-bounce, ease),
+        filter var(--animation-speed-slow, 0.2s) ease;
+    }
+
+    .rotating-arc__disc--positioned > *:hover > * {
+      scale: 1.08;
+      filter: drop-shadow(0 14px 20px rgb(11 27 43 / 0.22));
+    }
+  }
+
+  /* Each item pivots around the circle center (its 0 0 origin), travels up the
+     rotated axis by the radius, then centers itself on that point — so it sits
+     on the circle and tilts with the tangent */
+  .rotating-arc__disc--positioned > * {
+    position: absolute;
+    top: 0;
+
+    /* The item's 0 0 origin must sit on the circle center: the disc's top-center */
+    left: 50%;
+    margin: 0;
+    transform-origin: 0 0;
+    transform: rotate(var(--arc-angle, 0rad)) translateY(calc(-1 * var(--arc-radius))) translate(-50%, -50%);
+  }
+
+  @keyframes rotating-arc-spin {
+    from {
+      rotate: 0deg;
+    }
+
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rotating-arc__disc--positioned {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  if (!customElements.get('rotating-arc-component')) {
+    class RotatingArcComponent extends HTMLElement {
+      connectedCallback() {
+        this.disc = this.querySelector('.rotating-arc__disc');
+        this.viewport = this.querySelector('.rotating-arc__viewport');
+        if (!this.disc) return;
+        this.originals = Array.from(this.disc.children);
+        this.handleResize = () => {
+          clearTimeout(this.resizeTimer);
+          this.resizeTimer = setTimeout(() => this.layout(), 150);
+        };
+        window.addEventListener('resize', this.handleResize);
+        requestAnimationFrame(() => this.layout());
+      }
+
+      disconnectedCallback() {
+        window.removeEventListener('resize', this.handleResize);
+        clearTimeout(this.resizeTimer);
+      }
+
+      layout() {
+        const radius = Math.max(parseFloat(this.dataset.radius) || 1600, 100);
+        const gap = parseFloat(this.dataset.gap) || 0;
+        const speed = Math.max(parseFloat(this.dataset.speed) || 60, 1);
+        const MAX_ITEMS = 200;
+
+        this.disc.querySelectorAll('[data-arc-clone]').forEach((el) => el.remove());
+        const items = this.originals.filter((el) => el.isConnected);
+        if (!items.length) return;
+
+        // Measure in the flat flex-row state
+        this.disc.classList.remove('rotating-arc__disc--positioned');
+        items.forEach((el) => el.style.removeProperty('width'));
+        const sizes = items.map((el) => ({
+          w: Math.max(el.offsetWidth, 1),
+          h: Math.max(el.offsetHeight, 1),
+        }));
+        const maxHeight = Math.max(...sizes.map((s) => s.h));
+
+        // Lock the measured width so percentage-based image widths don't
+        // re-resolve against the full-width disc once positioned
+        items.forEach((el, i) => {
+          el.style.width = sizes[i].w + 'px';
+        });
+
+        // Angle between consecutive item centers so the straight-line gap holds
+        const steps = items.map((_, i) => {
+          const next = sizes[(i + 1) % sizes.length];
+          return ((sizes[i].w + next.w) / 2 + gap) / radius;
+        });
+        const setAngle = steps.reduce((sum, a) => sum + a, 0);
+
+        // Repeat the set until the circle is filled, then scale spacing so the
+        // loop closes exactly (seamless rotation with no seam gap)
+        const maxSets = Math.max(1, Math.floor(MAX_ITEMS / items.length));
+        const sets = Math.min(Math.max(1, Math.ceil((Math.PI * 2) / setAngle)), maxSets);
+        const scale = (Math.PI * 2) / (setAngle * sets);
+
+        const all = [...items];
+        for (let s = 1; s < sets; s++) {
+          for (const el of items) {
+            const clone = el.cloneNode(true);
+            clone.setAttribute('data-arc-clone', '');
+            clone.setAttribute('aria-hidden', 'true');
+            for (const node of [clone, ...clone.querySelectorAll('[data-block-id], [id]')]) {
+              node.removeAttribute('data-block-id');
+              node.removeAttribute('id');
+            }
+            this.disc.appendChild(clone);
+            all.push(clone);
+          }
+        }
+
+        let angle = 0;
+        all.forEach((el, i) => {
+          el.style.setProperty('--arc-angle', angle.toFixed(5) + 'rad');
+          angle += steps[i % steps.length] * scale;
+        });
+
+        // Viewport height matches the crest item; the arc's drop toward the
+        // edges intentionally runs past the bottom and gets clipped
+        this.style.setProperty('--arc-max-item-height', Math.ceil(maxHeight) + 'px');
+        this.style.setProperty('--arc-height', Math.ceil(maxHeight) + 'px');
+        this.style.setProperty('--arc-duration', ((Math.PI * 2 * radius) / speed).toFixed(1) + 's');
+        this.disc.classList.add('rotating-arc__disc--positioned');
+      }
+    }
+    customElements.define('rotating-arc-component', RotatingArcComponent);
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Rotating arc",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "image"
+    }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Arranges image blocks along a slowly rotating arc, spanning the full section width. Images are scaled to a shared height; set their ratio to \"Adapt\" to keep natural proportions."
+    },
+    {
+      "type": "range",
+      "id": "item_height",
+      "label": "Image height",
+      "min": 60,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 220,
+      "info": "All images share this height; width follows each image's aspect ratio."
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Horizontal gap",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "bottom_crop",
+      "label": "Bottom crop",
+      "min": 0,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 0,
+      "info": "Cuts the arc off at the bottom so the images run past the section edge."
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Arc radius",
+      "min": 600,
+      "max": 4000,
+      "step": 100,
+      "unit": "px",
+      "default": 1600,
+      "info": "Larger radius, flatter arc."
+    },
+    {
+      "type": "header",
+      "content": "t:settings.animation"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "t:settings.speed",
+      "min": 10,
+      "max": 200,
+      "step": 10,
+      "default": 60,
+      "info": "Travel speed along the arc, in pixels per second."
+    },
+    {
+      "type": "checkbox",
+      "id": "reverse",
+      "label": "Reverse direction",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rotating arc",
+      "category": "t:categories.basic",
+      "blocks": {
+        "arc-image-1": {
+          "type": "image"
+        },
+        "arc-image-2": {
+          "type": "image"
+        },
+        "arc-image-3": {
+          "type": "image"
+        },
+        "arc-image-4": {
+          "type": "image"
+        }
+      },
+      "block_order": ["arc-image-1", "arc-image-2", "arc-image-3", "arc-image-4"]
+    }
+  ]
+}
+{% endschema %}

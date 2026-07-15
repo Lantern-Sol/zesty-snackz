@@ -44,6 +44,9 @@
     if block_settings.background
       echo ' text-block--background '
     endif
+    if block_settings.enable_text_shadow
+      echo ' text-block--text-shadow '
+    endif
     if is_rte
       echo ' rte '
     endif
@@ -296,6 +299,17 @@
   .custom-color,
   .custom-color > :is(h1, h2, h3, h4, h5, h6, p, *) {
     color: var(--color);
+  }
+
+  /* Sticker-style heading shadow: hard offset + thin outline + soft ambient
+     drop, in the brand navy. text-shadow inherits into the heading elements. */
+  .text-block--text-shadow {
+    text-shadow:
+      4px 5px 0 #0b1b2b,
+      -2px -2px 0 #0b1b2b,
+      2px -2px 0 #0b1b2b,
+      -2px 2px 0 #0b1b2b,
+      0 26px 44px rgb(11 27 43 / 0.28);
   }
 
   /*

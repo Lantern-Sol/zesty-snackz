@@ -77,6 +77,167 @@
       "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
     },
     {
+      "type": "checkbox",
+      "id": "custom_button_shadow_enabled",
+      "label": "Enable shadow",
+      "default": false,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_shadow_horizontal_offset",
+      "label": "Horizontal offset",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_shadow_vertical_offset",
+      "label": "Vertical offset",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_shadow_blur_radius",
+      "label": "Blur radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_shadow_spread_radius",
+      "label": "Spread radius",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_shadow_color",
+      "label": "Shadow color",
+      "info": "Leave empty for the default shadow color",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_button_padding_enabled",
+      "label": "Override padding",
+      "default": false,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_block_start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_block_end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_inline_start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_inline_end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_button_use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": false,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_block_start_mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_block_end_mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_inline_start_mobile",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_padding_inline_end_mobile",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+    },
+    {
       "type": "color",
       "id": "link_text_color",
       "label": "t:settings.link_text_color",

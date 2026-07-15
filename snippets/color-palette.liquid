@@ -32,13 +32,22 @@
     assign effective_primary_button_focus_outline = settings.palette_primary_button_background
   endif
 
-  capture effective_primary_button_hover_background
-    render 'util-palette-hover-shift', color: settings.palette_primary_button_background
-  endcapture
-  if settings.palette_primary_button_background.alpha == 1
-    assign primary_hover_background_has_alpha = false
+  if settings.palette_primary_button_hover_background != blank
+    assign effective_primary_button_hover_background = settings.palette_primary_button_hover_background
+    if settings.palette_primary_button_hover_background.alpha == 1
+      assign primary_hover_background_has_alpha = false
+    else
+      assign primary_hover_background_has_alpha = true
+    endif
   else
-    assign primary_hover_background_has_alpha = true
+    capture effective_primary_button_hover_background
+      render 'util-palette-hover-shift', color: settings.palette_primary_button_background
+    endcapture
+    if settings.palette_primary_button_background.alpha == 1
+      assign primary_hover_background_has_alpha = false
+    else
+      assign primary_hover_background_has_alpha = true
+    endif
   endif
 
   assign primary_hover_brightness = effective_primary_button_hover_background | color_brightness
@@ -48,7 +57,9 @@
     assign primary_button_hover_contrast = palette_lightest
   endif
 
-  if primary_hover_background_has_alpha
+  if settings.palette_primary_button_hover_text != blank
+    assign effective_primary_button_hover_text = settings.palette_primary_button_hover_text
+  elsif primary_hover_background_has_alpha
     assign effective_primary_button_hover_text = settings.palette_primary_button_text
   else
     assign effective_primary_button_hover_text = primary_button_hover_contrast
@@ -65,13 +76,22 @@
 
 {% comment %} Secondary button hover effective values {% endcomment %}
 {% liquid
-  capture effective_secondary_button_hover_background
-    render 'util-palette-hover-shift', color: settings.palette_secondary_button_background
-  endcapture
-  if settings.palette_secondary_button_background.alpha == 1
-    assign secondary_hover_background_has_alpha = false
+  if settings.palette_secondary_button_hover_background != blank
+    assign effective_secondary_button_hover_background = settings.palette_secondary_button_hover_background
+    if settings.palette_secondary_button_hover_background.alpha == 1
+      assign secondary_hover_background_has_alpha = false
+    else
+      assign secondary_hover_background_has_alpha = true
+    endif
   else
-    assign secondary_hover_background_has_alpha = true
+    capture effective_secondary_button_hover_background
+      render 'util-palette-hover-shift', color: settings.palette_secondary_button_background
+    endcapture
+    if settings.palette_secondary_button_background.alpha == 1
+      assign secondary_hover_background_has_alpha = false
+    else
+      assign secondary_hover_background_has_alpha = true
+    endif
   endif
 
   assign secondary_hover_brightness = effective_secondary_button_hover_background | color_brightness
@@ -81,7 +101,9 @@
     assign secondary_button_hover_contrast = palette_lightest
   endif
 
-  if secondary_hover_background_has_alpha
+  if settings.palette_secondary_button_hover_text != blank
+    assign effective_secondary_button_hover_text = settings.palette_secondary_button_hover_text
+  elsif secondary_hover_background_has_alpha
     assign effective_secondary_button_hover_text = settings.palette_secondary_button_text
   else
     assign effective_secondary_button_hover_text = secondary_button_hover_contrast

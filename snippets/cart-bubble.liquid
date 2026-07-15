@@ -66,6 +66,7 @@
   }
 
   .cart-bubble__background {
+    aspect-ratio: 1;
     position: absolute;
     inset: 0;
     background-color: var(--cart-bubble-background, var(--cart-bubble-background-fallback));
@@ -73,7 +74,8 @@
   }
 
   .cart-bubble__text {
-    font-size: var(--font-size--3xs);
+    font-size: 8px;
+    font-weight: 900;
     z-index: var(--layer-flat);
     line-height: 1;
     display: flex;

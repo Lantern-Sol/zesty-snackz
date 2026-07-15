@@ -12,6 +12,7 @@
   @param {string} [localization] - Captured HTML for language/country selector
   @param {string} [search] - Captured HTML for search input
   @param {string} [drawer_search] - Captured HTML for drawer-based search
+  @param {string} [blocks_html] - Captured HTML for section blocks, appended to the right column
 {% enddoc %}
 
 {%- liquid
@@ -92,6 +93,9 @@
           {% endcase %}
         {% endunless %}
       {% endfor %}
+      {% if column == 'right' and blocks_html != blank %}
+        {{ blocks_html }}
+      {% endif %}
     </div>
   {%- endif -%}
 {%- endfor -%}
