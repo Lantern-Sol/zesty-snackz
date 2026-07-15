@@ -1777,12 +1777,12 @@
           "type": "scroll-highlight-text",
           "name": "Scroll highlight text",
           "settings": {
-            "text": "<p>Sour candy, sliced paper-thin. It crunches. It melts. It never takes a molar hostage. AND FOR THE HEALTH-CONSCIOUS: WE DRIED YOU SOME FRUIT</p>",
+            "text": "<p>Sour [sticker1] candy, sliced paper-thin. It [sticker2] crunches. It melts. It never takes a molar hostage. [sticker3] AND FOR THE [sticker4] HEALTH-CONSCIOUS: WE DRIED YOU SOME [sticker5] FRUIT</p>",
             "split": "characters",
             "start_position": 85,
             "end_position": 45,
             "font": "var(--font-heading--family)",
-            "font_size": "5.5rem",
+            "font_size": "5rem",
             "mobile_font_size": "2rem",
             "line_height": "1.2",
             "alignment": "center",
@@ -1795,7 +1795,75 @@
             "padding-block-start": 0,
             "padding-block-end": 0
           },
-          "blocks": {}
+          "blocks": {
+            "text_sticker_KMdkbP": {
+              "type": "_text-sticker",
+              "name": "Sticker",
+              "settings": {
+                "key": "[sticker1]",
+                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_02_05_PM_1.webp",
+                "size": 100,
+                "mobile_size": 40,
+                "vertical_offset": 0
+              },
+              "blocks": {}
+            },
+            "text_sticker_KXiTyK": {
+              "type": "_text-sticker",
+              "name": "Sticker",
+              "settings": {
+                "key": "[sticker2]",
+                "image": "shopify://shop_images/Frame_127_66bb84ee-473a-4cc6-af87-4bad61454f81.webp",
+                "size": 76,
+                "mobile_size": 40,
+                "vertical_offset": 0
+              },
+              "blocks": {}
+            },
+            "text_sticker_BEhxdd": {
+              "type": "_text-sticker",
+              "name": "Sticker",
+              "settings": {
+                "key": "[sticker3]",
+                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_03_51_45_PM_1.webp",
+                "size": 60,
+                "mobile_size": 40,
+                "vertical_offset": 0
+              },
+              "blocks": {}
+            },
+            "text_sticker_Wafw7y": {
+              "type": "_text-sticker",
+              "name": "Sticker",
+              "settings": {
+                "key": "[sticker4]",
+                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_at_04_13_11_PM_1.webp",
+                "size": 120,
+                "mobile_size": 40,
+                "vertical_offset": 0
+              },
+              "blocks": {}
+            },
+            "text_sticker_hqkH3P": {
+              "type": "_text-sticker",
+              "name": "Sticker",
+              "settings": {
+                "key": "[sticker5]",
+                "image": "shopify://shop_images/ChatGPT_Image_Jul_6_2026_04_19_37_PM_1.webp",
+                "size": 124,
+                "mobile_size": 40,
+                "vertical_offset": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "text_sticker_KMdkbP",
+            "text_sticker_KXiTyK",
+            "text_sticker_BEhxdd",
+            "text_sticker_Wafw7y",
+            "text_sticker_hqkH3P"
+          ]
         },
         "button_ehNTR4": {
           "type": "button",
