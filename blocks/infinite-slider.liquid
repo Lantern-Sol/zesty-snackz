@@ -1,0 +1,299 @@
+<script
+  src="{{ 'infinite-slider.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{%- capture children %}
+  {% content_for 'blocks' %}
+{% endcapture %}
+
+{% render 'contrast-override',
+  background_color: block.settings.background_color,
+  section_id: block.id
+%}
+
+{% liquid
+  assign infinite_slider_class = ''
+  if block.settings.background_color != blank
+    assign infinite_slider_class = 'color-custom-' | append: block.id
+  endif
+%}
+
+{% render 'infinite-slider',
+  children: children,
+  settings: block.settings,
+  shopify_attributes: block.shopify_attributes,
+  class: infinite_slider_class
+%}
+
+{% schema %}
+{
+  "name": "Infinite slider",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    },
+    {
+      "type": "_divider"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "range",
+      "id": "slides_to_show_desktop",
+      "label": "Desktop slides per view",
+      "info": "Use decimals to show a partial slide peeking in, e.g. 6.5.",
+      "min": 1,
+      "max": 8,
+      "step": 0.1,
+      "default": 6.5
+    },
+    {
+      "type": "range",
+      "id": "mobile_slides_to_show",
+      "label": "Mobile slides per view",
+      "min": 1,
+      "max": 4,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "t:settings.position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.top"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.bottom"
+        },
+        {
+          "value": "stretch",
+          "label": "Stretch"
+        }
+      ],
+      "default": "stretch"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Extend to full page width",
+      "info": "Breaks out of the page margins to span the full viewport.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "infinite",
+      "label": "Infinite loop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_scroll",
+      "label": "Auto scroll",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "auto_scroll_speed",
+      "label": "Auto scroll speed",
+      "info": "Pixels per second",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "default": 40,
+      "visible_if": "{{ block.settings.auto_scroll }}"
+    },
+    {
+      "type": "select",
+      "id": "auto_scroll_direction",
+      "label": "Auto scroll direction",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "visible_if": "{{ block.settings.auto_scroll }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true,
+      "visible_if": "{{ block.settings.auto_scroll }}"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows_desktop",
+      "label": "Show arrows on desktop",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows_mobile",
+      "label": "Show arrows on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Mobile padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start-mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end-mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start-mobile",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end-mobile",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Infinite slider",
+      "category": "t:categories.layout",
+      "settings": {
+        "infinite": true,
+        "auto_scroll": true,
+        "slides_to_show_desktop": 6.5,
+        "mobile_slides_to_show": 1.2
+      }
+    }
+  ]
+}
+{% endschema %}

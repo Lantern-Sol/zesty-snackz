@@ -1,0 +1,177 @@
+{%- doc -%}
+  Renders block content for the infinite-slider block. Children are laid out
+  as slides in a horizontally scrollable track wrapped in an
+  <infinite-slider-component>, which supports seamless infinite looping,
+  continuous auto-scroll, and decimal slides-per-view (e.g. 6.5 shows six
+  slides plus one peeking).
+
+  @param {string} children - The DOM content of the block's children.
+  @param {object} settings - The settings of the infinite-slider block.
+  @param {string} shopify_attributes - String with Shopify attributes for the editor.
+  @param {string} [class] - Custom classes for the block.
+  @param {string} [style] - Custom inline styles for the block.
+{%- enddoc -%}
+
+{%- liquid
+  assign desktop_slides = settings.slides_to_show_desktop | default: 6.5
+  assign mobile_slides = settings.mobile_slides_to_show | default: 1.2
+  assign gap = settings.gap | default: 0
+
+  assign show_arrows_desktop = settings.show_arrows_desktop
+  assign show_arrows_mobile = settings.show_arrows_mobile
+  assign show_any_arrows = false
+  if show_arrows_desktop or show_arrows_mobile
+    assign show_any_arrows = true
+  endif
+-%}
+
+<div
+  class="
+    infinite-slider
+    {% if settings.full_width %}infinite-slider--full-bleed{% endif %}
+    spacing-style
+    {{ class }}
+  "
+  style="
+    {% render 'spacing-style', settings: settings %}
+    {{ style }}
+  "
+  {{ shopify_attributes }}
+  data-testid="infinite-slider-block"
+>
+  <infinite-slider-component
+    class="infinite-slider__slider"
+    {% if settings.infinite %}
+      infinite
+    {% endif %}
+    {% if settings.auto_scroll %}
+      auto-scroll
+      auto-scroll-speed="{{ settings.auto_scroll_speed | default: 40 }}"
+      auto-scroll-direction="{{ settings.auto_scroll_direction | default: 'left' }}"
+      {% if settings.pause_on_hover %}
+        pause-on-hover
+      {% endif %}
+    {% endif %}
+    style="
+      --slides-per-view-desktop: {{ desktop_slides }};
+      --slides-per-view-mobile: {{ mobile_slides }};
+      --infinite-slider-gap: {{ gap }}px;
+      --infinite-slider-align: {{ settings.vertical_alignment | default: 'stretch' }};
+    "
+  >
+    {% if show_any_arrows %}
+      {% render 'slideshow-arrows',
+        icon_style: 'arrows_large',
+        arrows_position: 'center',
+        mobile_arrows_position: 'center',
+        show_arrows_desktop: show_arrows_desktop,
+        show_arrows_mobile: show_arrows_mobile
+      %}
+    {% endif %}
+    <div
+      class="infinite-slider__track"
+      ref="track"
+      tabindex="-1"
+    >
+      {{- children -}}
+    </div>
+  </infinite-slider-component>
+</div>
+
+{% stylesheet %}
+  .infinite-slider {
+    position: relative;
+    width: 100%;
+  }
+
+  /*
+    Break out to the full page width. 100% resolves against the parent's
+    content box, so this self-corrects: inside a page-width section it
+    escapes the page margins; inside a full-width section it stays put.
+  */
+  .infinite-slider--full-bleed {
+    margin-inline: calc((100% - 100vw) / 2);
+    width: auto;
+    max-width: none;
+  }
+
+  .infinite-slider__slider {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
+
+  .infinite-slider__track {
+    display: flex;
+    align-items: var(--infinite-slider-align, stretch);
+    gap: var(--infinite-slider-gap, 0px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .infinite-slider__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+    Each slide takes 1/N of the track minus its share of the gap. N accepts
+    decimals, so e.g. 6.5 shows six full slides with a seventh peeking in.
+  */
+  .infinite-slider__track > * {
+    min-width: 0;
+
+    @media screen and (min-width: 750px) {
+      flex: 0 0
+        calc(
+          (100% - (var(--infinite-slider-gap, 0px) * (var(--slides-per-view-desktop, 3) - 1))) /
+            var(--slides-per-view-desktop, 3)
+        );
+    }
+
+    @media screen and (max-width: 749px) {
+      flex: 0 0
+        calc(
+          (100% - (var(--infinite-slider-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))) /
+            var(--slides-per-view-mobile, 1)
+        );
+    }
+  }
+
+  /* Snap slide starts when idle, but not while auto-scrolling or dragging. */
+  .infinite-slider__slider:not([auto-scroll]):not([dragging]) .infinite-slider__track {
+    scroll-snap-type: x mandatory;
+  }
+
+  .infinite-slider__slider:not([auto-scroll]) .infinite-slider__track > * {
+    scroll-snap-align: start;
+  }
+
+  .infinite-slider__slider[dragging] .infinite-slider__track {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  /*
+    Arrows reuse the slideshow arrow styles, but the base.css hover reveal is
+    scoped to slideshow-component, so replicate it here.
+  */
+  .infinite-slider__slider:is(:hover, :focus-within) slideshow-arrows .slideshow-control {
+    animation: arrowsSlideIn var(--animation-speed) var(--animation-easing) forwards;
+  }
+
+  /* Touch devices never hover, so show enabled arrows outright. */
+  @media (hover: none) {
+    .infinite-slider__slider slideshow-arrows .slideshow-control {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .infinite-slider__slider slideshow-arrows .slideshow-control {
+      opacity: 1;
+      animation: none;
+    }
+  }
+{% endstylesheet %}
