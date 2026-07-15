@@ -4,10 +4,35 @@
   assign size_rem = size_px | divided_by: 16.0
   assign image_width = size_px | times: 3 | at_most: 1400
   assign sizes_attribute = size_px | append: 'px'
+
+  assign peel_enabled = false
+  if block_settings.peel_enabled and block_settings.peel_code != blank
+    assign peel_enabled = true
+  endif
 %}
 
+{%- capture sticker_image -%}
+  {% if block_settings.image != blank %}
+    {{
+      block_settings.image
+      | image_url: width: image_width
+      | image_tag: loading: 'lazy', class: 'floating-sticker__media', sizes: sizes_attribute
+    }}
+  {% else %}
+    {{ 'image' | placeholder_svg_tag: 'floating-sticker__media floating-sticker__media--placeholder' }}
+  {% endif %}
+{%- endcapture -%}
+
+{% if peel_enabled %}
+  <script
+    src="{{ 'sticker-peel.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
 <div
-  class="floating-sticker{% if request.design_mode %} floating-sticker--design-mode{% endif %}{% if block_settings.shadow %} floating-sticker--shadow{% endif %}"
+  class="floating-sticker{% if request.design_mode %} floating-sticker--design-mode{% endif %}{% if block_settings.shadow %} floating-sticker--shadow{% endif %}{% if peel_enabled %} floating-sticker--peelable{% endif %}"
   style="
     --sticker-x: {{ block_settings.x_position }};
     --sticker-y: {{ block_settings.y_position }}%;
@@ -18,15 +43,37 @@
   {{ block.shopify_attributes }}
 >
   <div class="floating-sticker__floater">
-    {% if block_settings.image != blank %}
-      {{
-        block_settings.image
-        | image_url: width: image_width
-        | image_tag: loading: 'lazy', class: 'floating-sticker__media', sizes: sizes_attribute
-      }}
-    {% else %}
-      {{ 'image' | placeholder_svg_tag: 'floating-sticker__media floating-sticker__media--placeholder' }}
-    {% endif %}
+    <div class="floating-sticker__rotor">
+      {% if peel_enabled %}
+        <sticker-peel class="floating-sticker__peel">
+          <span class="floating-sticker__reveal">
+            <button
+              type="button"
+              class="floating-sticker__code"
+              data-peel-code="{{ block_settings.peel_code | escape }}"
+              aria-label="Copy discount code {{ block_settings.peel_code | escape }}"
+            >
+              <span class="floating-sticker__code-label">{{ block_settings.peel_code | escape }}</span>
+              <span class="floating-sticker__code-copied" aria-hidden="true">Copied!</span>
+            </button>
+          </span>
+          <button
+            type="button"
+            class="floating-sticker__front"
+            data-peel-trigger
+            aria-expanded="false"
+            aria-label="Peel the sticker to reveal a discount code"
+          >
+            {{ sticker_image }}
+          </button>
+          <span class="floating-sticker__flap" aria-hidden="true">
+            {{ sticker_image }}
+          </span>
+        </sticker-peel>
+      {% else %}
+        {{ sticker_image }}
+      {% endif %}
+    </div>
   </div>
 </div>
 
@@ -48,36 +95,164 @@
   }
 
   /* Keep the block clickable in the theme editor so it can be selected on canvas */
-  .floating-sticker--design-mode {
+  .floating-sticker--design-mode,
+  .floating-sticker--peelable {
     pointer-events: auto;
   }
 
   /* The bob animates `translate` on an unrotated wrapper so the sticker always
-     drifts straight up and down; the wobble is purely visual on the media
+     drifts straight up and down; the wobble is purely visual on the rotor
      inside. Separate elements, separate properties — the two loops compose. */
   .floating-sticker__floater {
     animation: floating-sticker-bob 2.9s ease-in-out calc(-1 * var(--sticker-offset, 0s)) infinite;
   }
 
   /* drop-shadow instead of box-shadow so the shadow follows the sticker's alpha
-     silhouette (not its rectangle). On the floater, not the rotated media, so
+     silhouette (not its rectangle). On the floater, not the rotated rotor, so
      the shadow always drops downward in screen space */
   .floating-sticker--shadow .floating-sticker__floater {
     filter: drop-shadow(0 18px 24px rgb(11 27 43 / 0.18));
+  }
+
+  /* Base rotation from the setting plus an animated wobble offset. The rotor
+     carries the rotation (rather than the media) so the peel layers and the
+     revealed code all turn together as one piece. */
+  .floating-sticker__rotor {
+    rotate: calc(var(--sticker-rotation, 0deg) + var(--floating-sticker-wobble, 0deg));
+    animation: floating-sticker-wobble 3.2s ease-in-out calc(-1 * var(--sticker-offset, 0s)) infinite;
   }
 
   .floating-sticker__media {
     display: block;
     width: 100%;
     height: auto;
-
-    /* Base rotation from the setting plus an animated wobble offset */
-    rotate: calc(var(--sticker-rotation, 0deg) + var(--floating-sticker-wobble, 0deg));
-    animation: floating-sticker-wobble 3.2s ease-in-out calc(-1 * var(--sticker-offset, 0s)) infinite;
   }
 
   .floating-sticker__media--placeholder {
     aspect-ratio: 1;
+  }
+
+  /* ---- Peel-to-reveal easter egg ----------------------------------------
+     One animatable fraction (--sticker-peel) drives the whole effect: the
+     fold line sits at (1 - peel) of the sticker's height, the front layer is
+     clipped away below it, and a mirrored copy of the image — the sticker's
+     underside — folds over to occupy the band just above it. Hover teases
+     the fold open; clicking holds it open. */
+
+  /* Registered so the peel fraction transitions smoothly; inherits so the
+     front/flap/reveal children can derive their clip-paths from it */
+  @property --sticker-peel {
+    syntax: '<number>';
+    initial-value: 0;
+    inherits: true;
+  }
+
+  .floating-sticker__peel {
+    --sticker-peel: 0;
+
+    position: relative;
+    display: block;
+    transition: --sticker-peel 0.55s cubic-bezier(0.25, 1, 0.4, 1);
+  }
+
+  .floating-sticker__peel:hover {
+    --sticker-peel: 0.16;
+  }
+
+  /* After :hover so a held-open sticker stays fully open while hovered */
+  .floating-sticker__peel.is-peeled {
+    --sticker-peel: 0.62;
+  }
+
+  /* The front of the sticker, clipped away below the fold line. clip-path
+     also clips the button's hit area, so once peeled the code underneath
+     becomes clickable through the opened region. */
+  .floating-sticker__front {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    appearance: none;
+    cursor: pointer;
+    clip-path: inset(0 0 calc(var(--sticker-peel) * 100%) 0);
+  }
+
+  /* The underside: a mirrored copy of the image, flipped about its bottom
+     edge and pulled up so the strip just below the fold (in its own,
+     pre-transform coordinates) lands seamlessly in the band just above the
+     fold. Clipped to a thin strip — a tight curl — rather than the full
+     folded-over flap: a true fold grows at twice the peel distance and would
+     bury the sticker's face past a half peel. The curl grows with the peel
+     up to a cap (min()), and the max() keeps the strip inside the image while
+     the peel is still smaller than the cap. Brightened and desaturated to
+     read as the sticker's backing; the local upward drop-shadow flips to
+     fall onto the front below the curl. */
+  .floating-sticker__flap {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    clip-path: inset(
+      calc(100% - var(--sticker-peel) * 100%)
+      0
+      max(0%, calc(var(--sticker-peel) * 100% - min(var(--sticker-peel) * 60%, 14%)))
+      0
+    );
+    transform: translateY(calc(var(--sticker-peel) * -200%)) scaleY(-1);
+    transform-origin: bottom;
+    filter: brightness(1.7) saturate(0.35) drop-shadow(0 -6px 8px rgb(11 27 43 / 0.25));
+  }
+
+  /* The prize behind the sticker. Clipped to the peeled-away band — the
+     sticker images are die-cut with alpha, so without this clip the code
+     would show through the transparent parts while the sticker is closed. */
+  .floating-sticker__reveal {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6%;
+    visibility: hidden;
+    clip-path: inset(calc(100% - var(--sticker-peel) * 100%) 0 0 0);
+
+    /* Delay hiding until the flap has folded back down */
+    transition: visibility 0s 0.45s;
+  }
+
+  .floating-sticker__peel:hover .floating-sticker__reveal,
+  .floating-sticker__peel.is-peeled .floating-sticker__reveal {
+    visibility: visible;
+    transition: visibility 0s;
+  }
+
+  .floating-sticker__code {
+    font-family: var(--font-heading--family);
+    font-size: calc(var(--sticker-size, 7.5rem) / 9);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--color-foreground);
+    background: var(--color-background);
+    border: 2px dashed currentcolor;
+    border-radius: 0.5em;
+    padding: 0.3em 0.65em;
+    cursor: pointer;
+  }
+
+  .floating-sticker__code-copied {
+    display: none;
+  }
+
+  .floating-sticker__code.is-copied .floating-sticker__code-label {
+    display: none;
+  }
+
+  .floating-sticker__code.is-copied .floating-sticker__code-copied {
+    display: inline;
   }
 
   /* Registered so the wobble offset interpolates smoothly instead of stepping */
@@ -126,8 +301,12 @@
 
   @media (prefers-reduced-motion: reduce) {
     .floating-sticker__floater,
-    .floating-sticker__media {
+    .floating-sticker__rotor {
       animation: none;
+    }
+
+    .floating-sticker__peel {
+      transition: none;
     }
   }
 {% endstylesheet %}
@@ -203,6 +382,23 @@
       "unit": "s",
       "default": 0,
       "info": "Staggers the float loop so neighboring stickers don't move in sync."
+    },
+    {
+      "type": "header",
+      "content": "Peel effect"
+    },
+    {
+      "type": "checkbox",
+      "id": "peel_enabled",
+      "label": "Peel to reveal",
+      "default": false,
+      "info": "Hovering teases the sticker's corner; clicking peels it open."
+    },
+    {
+      "type": "text",
+      "id": "peel_code",
+      "label": "Discount code",
+      "info": "Hidden behind the sticker. Clicking the revealed code copies it. Leave empty to disable the peel."
     }
   ],
   "presets": [
