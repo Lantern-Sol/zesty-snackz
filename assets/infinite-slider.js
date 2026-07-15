@@ -167,6 +167,8 @@ class InfiniteSliderComponent extends Component {
   #setup() {
     const { track } = this.refs;
 
+    this.#updateFullBleed();
+
     for (const clone of track.querySelectorAll('[data-infinite-slider-clone]')) clone.remove();
 
     this.#setWidth = 0;
@@ -203,6 +205,32 @@ class InfiniteSliderComponent extends Component {
 
     this.#suspendNormalize = false;
     track.scrollLeft = this.#setWidth;
+  }
+
+  /**
+   * Extends the slider to the full width of its section. Measured in JS
+   * because the layout width isn't knowable in CSS: the page scrolls inside
+   * .page-wrapper (so 100vw overshoots by the scrollbar and any open drawer),
+   * and on viewports wider than the page width the grid gutters exceed
+   * --page-margin. Deltas are applied on top of the current computed margins,
+   * so repeated calls converge and it re-corrects on every resize.
+   */
+  #updateFullBleed() {
+    if (!this.closest('.infinite-slider--full-bleed')) return;
+
+    const section = this.closest('.section, .shopify-section');
+    if (!section) return;
+
+    const style = getComputedStyle(this);
+    const rect = this.getBoundingClientRect();
+    const sectionRect = section.getBoundingClientRect();
+    if (rect.width === 0 || sectionRect.width === 0) return;
+
+    const marginLeft = (parseFloat(style.marginLeft) || 0) + (sectionRect.left - rect.left);
+    const marginRight = (parseFloat(style.marginRight) || 0) + (rect.right - sectionRect.right);
+
+    this.style.marginLeft = `${marginLeft}px`;
+    this.style.marginRight = `${marginRight}px`;
   }
 
   /**

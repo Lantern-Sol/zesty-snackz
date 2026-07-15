@@ -1,0 +1,573 @@
+{%- assign glow_color = 'transparent' -%}
+{%- assign glow_size = 0 -%}
+{%- if block.settings.enable_glow -%}
+  {%- assign glow_color = block.settings.glow_color -%}
+  {%- assign glow_size = block.settings.glow_size -%}
+{%- endif -%}
+
+<scroll-highlight-text
+  class="scroll-highlight-text{% if request.design_mode %} scroll-highlight-text--design-mode{% endif %}"
+  style="
+    --sht-dim-color: {{ block.settings.dim_color }};
+    --sht-highlight-color: {{ block.settings.highlight_color }};
+    --sht-glow-color: {{ glow_color }};
+    --sht-glow-size: {{ glow_size }}px;
+    --sht-font-family: {{ block.settings.font }};
+    --sht-font-size: {{ block.settings.font_size }};
+    --sht-font-size-mobile: {{ block.settings.mobile_font_size }};
+    --sht-line-height: {{ block.settings.line_height }};
+    text-align: {{ block.settings.alignment }};
+    text-transform: {{ block.settings.case }};
+    padding-block-start: {{ block.settings.padding-block-start }}px;
+    padding-block-end: {{ block.settings.padding-block-end }}px;
+  "
+  data-split="{{ block.settings.split }}"
+  data-start="{{ block.settings.start_position }}"
+  data-end="{{ block.settings.end_position }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="scroll-highlight-text__content rte">
+    {{ block.settings.text }}
+  </div>
+  <div class="scroll-highlight-text__stickers" hidden>
+    {% content_for 'blocks' %}
+  </div>
+</scroll-highlight-text>
+
+{% stylesheet %}
+  .scroll-highlight-text {
+    display: block;
+    width: 100%;
+  }
+
+  .scroll-highlight-text__content {
+    font-family: var(--sht-font-family);
+    font-size: var(--sht-font-size-mobile);
+    line-height: var(--sht-line-height);
+    /* Fully lit by default: no-JS, no-GSAP, and reduced-motion all get readable text */
+    color: var(--sht-highlight-color);
+  }
+
+  @media screen and (min-width: 750px) {
+    .scroll-highlight-text__content {
+      font-size: var(--sht-font-size);
+    }
+  }
+
+  .scroll-highlight-text__content p {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+  }
+
+  /* Words never break across lines; characters light up inside them */
+  .sht-word {
+    display: inline-block;
+    white-space: pre;
+  }
+
+  .sht-unit {
+    color: var(--sht-dim-color);
+    transition: color 0.35s ease, text-shadow 0.35s ease, filter 0.35s ease;
+  }
+
+  .sht-unit.is-lit {
+    color: var(--sht-highlight-color);
+    text-shadow: 0 0 var(--sht-glow-size) var(--sht-glow-color);
+  }
+
+  /* Stickers dim to a washed-out state and return to full color when lit */
+  .text-sticker.sht-unit {
+    filter: grayscale(0.7) brightness(0.7) opacity(0.65);
+  }
+
+  .text-sticker.sht-unit.is-lit {
+    filter: drop-shadow(0 0 calc(var(--sht-glow-size) / 2) var(--sht-glow-color));
+  }
+
+  /* In the theme editor, stickers whose key isn't placed in the text yet
+     show in a dashed strip below so merchants can see and select them */
+  .scroll-highlight-text--design-mode .scroll-highlight-text__stickers[hidden]:has([data-sticker-key]) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    border: 1px dashed rgb(from var(--sht-dim-color) r g b / 60%);
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  if (!customElements.get('scroll-highlight-text')) {
+    class ScrollHighlightText extends HTMLElement {
+      connectedCallback() {
+        this.#refresh();
+        if (window.Shopify && window.Shopify.designMode) {
+          document.addEventListener('shopify:section:load', this.#onSectionLoad);
+        }
+      }
+
+      disconnectedCallback() {
+        if (this.#onLoad) window.removeEventListener('load', this.#onLoad);
+        document.removeEventListener('shopify:section:load', this.#onSectionLoad);
+        this.#squeezeQuery.removeEventListener('change', this.#onLayoutChange);
+        if (this.#trigger) this.#trigger.kill();
+      }
+
+      #onLoad = null;
+      #trigger = null;
+      #units = [];
+      #litCount = -1;
+      #stickers = new Map();
+      #usedStickers = new Set();
+      #tokenSplitter = /(\[[a-zA-Z0-9_-]+\])/;
+      // Editor edits morph the section DOM in place without reconnecting
+      // this element, so re-run on section load
+      #onSectionLoad = (event) => {
+        if (event.target instanceof HTMLElement && event.target.contains(this)) this.#refresh();
+      };
+
+      #refresh() {
+        this.#prepare();
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          this.#light(1);
+          return;
+        }
+
+        if (window.gsap && window.ScrollTrigger) {
+          this.#init();
+        } else if (document.readyState === 'complete') {
+          // GSAP disabled in theme settings — show the text fully lit
+          this.#light(1);
+        } else if (!this.#onLoad) {
+          this.#onLoad = () => (window.gsap && window.ScrollTrigger ? this.#init() : this.#light(1));
+          window.addEventListener('load', this.#onLoad, { once: true });
+        }
+      }
+      // On desktop the theme scrolls .page-wrapper, not the window (see scroll-container.js)
+      #squeezeQuery = window.matchMedia('(min-width: 990px)');
+      #onLayoutChange = () => this.#init();
+
+      #scroller() {
+        if (this.#squeezeQuery.matches) {
+          return document.querySelector('.page-wrapper') ?? window;
+        }
+        return window;
+      }
+
+      #prepare() {
+        const content = this.querySelector('.scroll-highlight-text__content');
+        if (!content) return;
+
+        // Detect the split by its spans, not a flag: editor edits can morph
+        // the DOM back to its server-rendered (unsplit) state in place
+        if (!content.querySelector('.sht-unit')) {
+          this.#stickers = new Map(
+            Array.from(this.querySelectorAll('.scroll-highlight-text__stickers [data-sticker-key]')).map(
+              (el) => [el.dataset.stickerKey, el]
+            )
+          );
+          this.#usedStickers = new Set();
+
+          // Keys match bracketed ([gummy]) or bare (gummy), longest key first
+          const keys = Array.from(this.#stickers.keys())
+            .filter(Boolean)
+            .sort((a, b) => b.length - a.length)
+            .map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+          this.#tokenSplitter = keys.length
+            ? new RegExp(`(\\[[a-zA-Z0-9_-]+\\]|\\b(?:${keys.join('|')})\\b)`, 'i')
+            : /(\[[a-zA-Z0-9_-]+\])/;
+
+          this.#splitWords(content, this.dataset.split === 'characters');
+        }
+        this.#units = Array.from(content.querySelectorAll('.sht-unit'));
+        this.#litCount = -1;
+      }
+
+      #init() {
+        if (!this.#units.length) return;
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        if (this.#trigger) this.#trigger.kill();
+        this.#litCount = -1;
+
+        const start = parseInt(this.dataset.start, 10) || 85;
+        const end = parseInt(this.dataset.end, 10) || 45;
+
+        this.#trigger = ScrollTrigger.create({
+          trigger: this,
+          scroller: this.#scroller(),
+          start: `top ${start}%`,
+          end: `bottom ${end}%`,
+          onUpdate: (self) => this.#light(self.progress),
+          onRefresh: (self) => this.#light(self.progress),
+        });
+
+        this.#squeezeQuery.removeEventListener('change', this.#onLayoutChange);
+        this.#squeezeQuery.addEventListener('change', this.#onLayoutChange);
+      }
+
+      // Moves the sticker element into the text; clones it if the key is reused
+      #takeSticker(key) {
+        const source = this.#stickers.get(key);
+        if (!source) return null;
+        const sticker = this.#usedStickers.has(key) ? source.cloneNode(true) : source;
+        this.#usedStickers.add(key);
+        sticker.classList.add('sht-unit');
+        return sticker;
+      }
+
+      #light(progress) {
+        // Re-split if a DOM morph replaced the spans since the last update
+        if (this.#units.length && !this.#units[0].isConnected) this.#prepare();
+        const count = Math.round(progress * this.#units.length);
+        if (count === this.#litCount) return;
+        this.#units.forEach((unit, i) => unit.classList.toggle('is-lit', i < count));
+        this.#litCount = count;
+      }
+
+      // Wraps each word in a span (and each character in a nested span when
+      // perCharacter), preserving inline elements like <strong> and <a>
+      #splitWords(node, perCharacter) {
+        Array.from(node.childNodes).forEach((child) => {
+          if (child.nodeType === Node.ELEMENT_NODE) {
+            this.#splitWords(child, perCharacter);
+            return;
+          }
+          if (child.nodeType !== Node.TEXT_NODE || !child.textContent.trim()) return;
+
+          const fragment = document.createDocumentFragment();
+          // [key] placeholders are replaced by their sticker; a bare key keeps
+          // the word and renders its sticker just before it
+          child.textContent.split(this.#tokenSplitter).forEach((segment) => {
+            if (!segment) return;
+
+            const bracket = segment.match(/^\[([a-zA-Z0-9_-]+)\]$/);
+            if (bracket) {
+              const sticker = this.#takeSticker(bracket[1].toLowerCase());
+              if (sticker) {
+                fragment.appendChild(sticker);
+                return;
+              }
+            } else {
+              const sticker = this.#takeSticker(segment.toLowerCase());
+              if (sticker) fragment.appendChild(sticker);
+            }
+
+            segment.split(/(\s+)/).forEach((part) => {
+              if (!part) return;
+              if (!part.trim()) {
+                fragment.appendChild(document.createTextNode(part));
+                return;
+              }
+              const word = document.createElement('span');
+              word.className = 'sht-word';
+              if (perCharacter) {
+                for (const char of part) {
+                  const unit = document.createElement('span');
+                  unit.className = 'sht-unit';
+                  unit.textContent = char;
+                  word.appendChild(unit);
+                }
+              } else {
+                word.classList.add('sht-unit');
+                word.textContent = part;
+              }
+              fragment.appendChild(word);
+            });
+          });
+          child.replaceWith(fragment);
+        });
+      }
+    }
+
+    customElements.define('scroll-highlight-text', ScrollHighlightText);
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Scroll highlight text",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_text-sticker"
+    }
+  ],
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:settings.text",
+      "default": "<p>Sour candy, sliced paper-thin. It crunches. It melts. It never takes a molar hostage.</p>",
+      "info": "Add a sticker block, give it a key, and place the key in square brackets — e.g. [gummy] — where the sticker should appear."
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "select",
+      "id": "split",
+      "label": "Highlight by",
+      "options": [
+        {
+          "value": "characters",
+          "label": "Character"
+        },
+        {
+          "value": "words",
+          "label": "Word"
+        }
+      ],
+      "default": "characters"
+    },
+    {
+      "type": "range",
+      "id": "start_position",
+      "label": "Start when top of text reaches",
+      "info": "Percentage of the viewport height, measured from the top.",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "end_position",
+      "label": "Finish when bottom of text reaches",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 45
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "var(--font-heading--family)"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.5rem",
+          "label": "56px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        },
+        {
+          "value": "5rem",
+          "label": "80px"
+        }
+      ],
+      "default": "3.5rem"
+    },
+    {
+      "type": "select",
+      "id": "mobile_font_size",
+      "label": "Mobile size",
+      "options": [
+        {
+          "value": "1.25rem",
+          "label": "20px"
+        },
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        }
+      ],
+      "default": "2rem"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "1.2",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "1.4",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "1.2"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "dim_color",
+      "label": "Dimmed color",
+      "alpha": true,
+      "default": "#5c718f"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "alpha": true,
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_glow",
+      "label": "Glow on highlighted text",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "glow_color",
+      "label": "Glow color",
+      "alpha": true,
+      "default": "#ffffff8c",
+      "visible_if": "{{ block.settings.enable_glow }}"
+    },
+    {
+      "type": "range",
+      "id": "glow_size",
+      "label": "Glow size",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18,
+      "visible_if": "{{ block.settings.enable_glow }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scroll highlight text",
+      "category": "t:categories.decorative",
+      "settings": {
+        "text": "<p>Sour [gummy] candy, sliced paper-thin. It crunches. It melts. It never takes a molar hostage.</p>"
+      },
+      "blocks": {
+        "sticker-1": {
+          "type": "_text-sticker",
+          "settings": {
+            "key": "gummy"
+          }
+        }
+      },
+      "block_order": ["sticker-1"]
+    }
+  ]
+}
+{% endschema %}

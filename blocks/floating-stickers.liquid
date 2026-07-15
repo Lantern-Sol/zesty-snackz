@@ -16,6 +16,15 @@
     pointer-events: none;
   }
 
+  /* Stickers near the edges intentionally overhang the group into the page
+     margins, so clip at the section (which spans the full page width) —
+     otherwise they widen the page's horizontal scroll area. Only the x axis:
+     vertical overhang must stay visible. `clip` not `hidden`, so no scroll
+     container is created. */
+  .section:has(.floating-stickers) {
+    overflow-x: clip;
+  }
+
   /* When the section constrains its content to page width, stretch the group
      to the full section width so the stickers inside position against it */
   @media screen and (min-width: 750px) {

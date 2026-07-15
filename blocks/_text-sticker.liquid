@@ -1,0 +1,115 @@
+{% liquid
+  assign block_settings = block.settings
+  assign size_px = block_settings.size | default: 64
+  assign size_rem = size_px | divided_by: 16.0
+  assign mobile_size_px = block_settings.mobile_size | default: 40
+  assign mobile_size_rem = mobile_size_px | divided_by: 16.0
+  assign image_width = size_px | times: 3 | at_most: 1200
+  assign sizes_attribute = size_px | append: 'px'
+%}
+
+<span
+  class="text-sticker"
+  data-sticker-key="{{ block_settings.key | handleize }}"
+  style="
+    --sticker-size: {{ size_rem }}rem;
+    --sticker-size-mobile: {{ mobile_size_rem }}rem;
+    --sticker-offset: {{ block_settings.vertical_offset | default: 0 }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.image != blank %}
+    {{
+      block_settings.image
+      | image_url: width: image_width
+      | image_tag: loading: 'lazy', class: 'text-sticker__media', sizes: sizes_attribute
+    }}
+  {% else %}
+    {{ 'image' | placeholder_svg_tag: 'text-sticker__media text-sticker__media--placeholder' }}
+  {% endif %}
+</span>
+
+{% stylesheet %}
+  .text-sticker {
+    display: inline-block;
+    width: var(--sticker-size-mobile);
+    vertical-align: middle;
+    margin-inline: 0.1em;
+    transform: translateY(var(--sticker-offset, 0px));
+  }
+
+  @media screen and (min-width: 750px) {
+    .text-sticker {
+      width: var(--sticker-size);
+    }
+  }
+
+  .text-sticker__media {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .text-sticker__media--placeholder {
+    background-color: rgb(from currentcolor r g b / 20%);
+    border-radius: var(--style-border-radius-inputs, 4px);
+    aspect-ratio: 1;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Sticker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "key",
+      "label": "Key",
+      "default": "sticker",
+      "info": "Place this key in square brackets inside the text — e.g. [sticker] — to position the sticker."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "size",
+      "label": "t:settings.size",
+      "min": 16,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "mobile_size",
+      "label": "Mobile size",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "vertical_offset",
+      "label": "Vertical offset",
+      "min": -24,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticker",
+      "category": "t:categories.decorative"
+    }
+  ]
+}
+{% endschema %}

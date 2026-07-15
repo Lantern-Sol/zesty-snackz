@@ -84,21 +84,23 @@
     width: 100%;
   }
 
-  /*
-    Break out to the full page width. 100% resolves against the parent's
-    content box, so this self-corrects: inside a page-width section it
-    escapes the page margins; inside a full-width section it stays put.
-  */
-  .infinite-slider--full-bleed {
-    margin-inline: calc((100% - 100vw) / 2);
-    width: auto;
-    max-width: none;
-  }
-
   .infinite-slider__slider {
     display: block;
     position: relative;
     width: 100%;
+  }
+
+  /*
+    Break out to the full section width. The CSS below only escapes the page
+    margins (a safe baseline that can never overflow); the component measures
+    its .section ancestor and applies exact negative margins in JS, which
+    handles the page-wrapper scroll container, open drawers, and viewports
+    wider than the page width. Viewport units are wrong here — the page
+    scrolls inside .page-wrapper, so 100vw overshoots the layout width.
+  */
+  .infinite-slider--full-bleed .infinite-slider__slider {
+    width: auto;
+    margin-inline: calc(-1 * var(--page-margin, 0px));
   }
 
   .infinite-slider__track {

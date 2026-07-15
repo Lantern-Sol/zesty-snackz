@@ -80,6 +80,7 @@
     "primary-button-padding-inline-start": 63,
     "primary-button-padding-inline-end": 63,
     "palette_secondary_button_background": "#FFFFFF00",
+    "palette_secondary_button_text": "{{ settings.color_palette.color3 }}",
     "palette_secondary_button_border": "#FFD23F73",
     "palette_secondary_button_hover_background": "{{ settings.color_palette.color2 }}",
     "palette_secondary_button_hover_text": "{{ settings.color_palette.foreground }}",
