@@ -193,6 +193,16 @@
     assign class = class | append: ' ' | append: collapse_header_paddings_class
   endif
 
+  if section.settings.floating_header
+    assign class = class | append: ' header--floating'
+    # The floating pill keeps its background and regular colors in transparent mode;
+    # transparent only contributes the overlay positioning. Clearing the transparent
+    # text color prevents the transparent color swap from applying.
+    if transparent
+      assign text_color_transparent = ''
+    endif
+  endif
+
   # Determine transparent background value
   assign top_transparent = false
   assign bottom_transparent = false
@@ -448,7 +458,12 @@
           style="{{ style | strip }}"
         {%- endif -%}
       >
-        <div class="header__columns spacing-style">
+        <div
+          class="header__columns spacing-style"
+          {%- if section.settings.floating_header %}
+            style="{% render 'spacing-style', settings: section.settings %}"
+          {%- endif %}
+        >
           {{ content }}
         </div>
       </div>
@@ -594,6 +609,59 @@
       --color-border-rgb: inherit;
       --header-content-transition-timing: var(--submenu-animation-speed) var(--ease-out-cubic);
     }
+  }
+
+  /* ================================
+     * Floating (pill) header
+     * ================================ */
+  .header--floating {
+    --floating-header-inset: 0.75rem;
+
+    /* Horizontal inset tracks the page content column (matching the .section
+       grid: min(page-width - 2 * margin, 100% - 2 * margin), centered) so the
+       pill spans the page width instead of a fixed offset from the viewport. */
+    --floating-header-inset-x: max(calc(var(--page-margin) + 2.1875rem), calc((100% - var(--page-width)  + 2.1875rem) / 2 + var(--page-margin)));
+    --floating-header-radius: 100px;
+
+    padding-inline: var(--floating-header-inset-x);
+    padding-block-start: var(--floating-header-inset);
+  }
+
+  @media screen and (min-width: 750px) {
+    .header--floating {
+      --floating-header-inset: 2.625rem;
+    }
+  }
+
+  .header--floating .header__underlay {
+    top: var(--floating-header-inset);
+    right: var(--floating-header-inset-x);
+    left: var(--floating-header-inset-x);
+  }
+
+  .header--floating .header__underlay-closed {
+    border-radius: var(--floating-header-radius);
+    box-shadow: 0 12px 34px 0 rgba(11, 27, 43, 0.16);
+
+    /* Negative offset keeps the ring inside the pill edge without affecting its size */
+    outline: 2px solid rgba(11, 27, 43, 0.06);
+    outline-offset: -2px;
+
+    /* The component's block-start padding is part of its height; keep the pill inside it */
+    height: min(var(--closed-underlay-height, 100%), calc(100% - var(--floating-header-inset)));
+  }
+
+  .header--floating .header__underlay-open {
+    border-radius: var(--style-border-radius-lg);
+    height: max(0px, calc(var(--full-open-header-height) - var(--floating-header-inset)));
+  }
+
+  /* In transparent mode the pill stays visible and the regular (non-inverse) logo shows;
+     the ID bumps specificity above .header[transparent] */
+  #header-component.header--floating[transparent] {
+    --closed-underlay-height: 100%;
+    --header-logo-display: unset;
+    --header-logo-inverse-display: unset;
   }
 
   /* When top row has transparent background, make it inherit colors from header component */
@@ -922,6 +990,31 @@
     }
   }
 
+  /* Floating header: the customizer pill padding (see the spacing-style vars
+     rendered on .header__columns) wins over the hardcoded mobile paddings
+     above. Fallbacks mirror those hardcoded values. */
+  @media screen and (max-width: 749px) {
+    .header--floating .header__columns {
+      padding-block: var(--padding-block-start-mobile, 0) var(--padding-block-end-mobile, 0);
+      padding-inline: var(--padding-inline-start-mobile, var(--padding-sm)) var(--padding-inline-end-mobile, var(--padding-3xs));
+    }
+  }
+
+  #header-component.header--floating[data-menu-style='drawer'] .header__columns {
+    padding-block: var(--padding-block-start-mobile, 0) var(--padding-block-end-mobile, 0);
+    padding-inline: var(--padding-inline-start-mobile, var(--padding-sm)) var(--padding-inline-end-mobile, var(--padding-3xs));
+  }
+
+  /* Floating header: the pill is already constrained to the page column, so
+     the row content spans the full pill instead of being re-inset by the
+     page-width grid; horizontal spacing is owned by the pill padding settings. */
+  @media screen and (min-width: 750px) {
+    .header--floating .header__columns {
+      grid-column: 1 / -1;
+      padding-inline: var(--padding-inline-start, 0) var(--padding-inline-end, 0);
+    }
+  }
+
   /* Single column layout if there are no columns within */
   .header__columns:not(:has(.header__column)) {
     grid-template-columns: 1fr;
@@ -969,14 +1062,9 @@
   }
 
   .header-actions__action svg {
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
   }
-
-   .header-actions__action.account-button svg {
-    padding: 2px;
-  }
-
 
   .header:has(#Details-menu-drawer-container[open]) {
     contain: style;
@@ -1390,6 +1478,10 @@
         {
           "value": "1.125rem",
           "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
         }
       ],
       "default": "1rem"
@@ -1484,6 +1576,113 @@
       "default": "always"
     },
     {
+      "type": "checkbox",
+      "id": "floating_header",
+      "label": "Floating header",
+      "default": false,
+      "info": "Displays the header as a detached, rounded bar. Combine with a transparent header to float it over page content."
+    },
+    {
+      "type": "header",
+      "content": "Pill padding",
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 11,
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 11,
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": true,
+      "visible_if": "{{ section.settings.floating_header }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start-mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.floating_header and section.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end-mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.floating_header and section.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start-mobile",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 11,
+      "visible_if": "{{ section.settings.floating_header and section.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end-mobile",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "visible_if": "{{ section.settings.floating_header and section.settings.use_mobile_padding }}"
+    },
+    {
       "type": "range",
       "id": "divider_width",
       "label": "t:settings.divider_thickness",
@@ -1575,6 +1774,10 @@
         {
           "value": "1.125rem",
           "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
         }
       ],
       "default": "0.875rem",

@@ -362,7 +362,7 @@ p:empty {
 .page-width-normal,
 .page-width-narrow,
 .page-width-content {
-  --page-margin: 12px;
+  --page-margin: 1.25rem;
 }
 
 @media screen and (min-width: 750px) {
@@ -371,7 +371,7 @@ p:empty {
   .page-width-normal,
   .page-width-narrow,
   .page-width-content {
-    --page-margin: 50px;
+    --page-margin: 6.25rem;
   }
 }
 

@@ -1,0 +1,217 @@
+{% liquid
+  assign block_settings = block.settings
+  assign size_px = block_settings.size | remove: 'rem' | times: 16.0 | round
+  assign image_width = size_px | times: 3 | at_most: 1400
+  assign sizes_attribute = size_px | append: 'px'
+%}
+
+<div
+  class="falling-image{% if request.design_mode %} falling-image--design-mode{% endif %}"
+  style="
+    --falling-x: {{ block_settings.x_position }}%;
+    --falling-y: {{ block_settings.y_position }}%;
+    --falling-size: {{ block_settings.size }};
+    --falling-duration: {{ block_settings.duration }}s;
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.image != blank %}
+    {{
+      block_settings.image
+      | image_url: width: image_width
+      | image_tag: loading: 'lazy', class: 'falling-image__media', sizes: sizes_attribute
+    }}
+  {% else %}
+    {{ 'image' | placeholder_svg_tag: 'falling-image__media falling-image__media--placeholder' }}
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .falling-image {
+    position: absolute;
+    top: var(--falling-y, 50%);
+    left: var(--falling-x, 50%);
+
+    /* Own-size compensation maps 0% -> flush with the start edge and 100% -> flush with the end edge */
+    translate: calc(-1 * var(--falling-x, 50%)) calc(-1 * var(--falling-y, 50%));
+    width: var(--falling-size, 7.5rem);
+    z-index: var(--layer-flat);
+    pointer-events: none;
+  }
+
+  /* Keep the block clickable in the theme editor so it can be selected on canvas */
+  .falling-image--design-mode {
+    pointer-events: auto;
+  }
+
+  .falling-image__media {
+    display: block;
+    width: 100%;
+    height: auto;
+    animation:
+      falling-image-fall var(--falling-duration, 2s) var(--animation-timing-bounce) both,
+      falling-image-float 3.5s ease-in-out var(--falling-duration, 2s) infinite;
+  }
+
+  .falling-image__media--placeholder {
+    aspect-ratio: 1;
+  }
+
+  @keyframes falling-image-fall {
+    from {
+      transform: translateY(-100vh);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes falling-image-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-6%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .falling-image__media {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Falling image",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.5rem",
+          "label": "56px"
+        },
+        {
+          "value": "4rem",
+          "label": "64px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        },
+        {
+          "value": "5.5rem",
+          "label": "88px"
+        },
+        {
+          "value": "6.5rem",
+          "label": "104px"
+        },
+        {
+          "value": "7.5rem",
+          "label": "120px"
+        },
+        {
+          "value": "9.5rem",
+          "label": "152px"
+        },
+        {
+          "value": "11.5rem",
+          "label": "184px"
+        },
+        {
+          "value": "13.5rem",
+          "label": "216px"
+        },
+        {
+          "value": "15.5rem",
+          "label": "248px"
+        },
+        {
+          "value": "17.5rem",
+          "label": "280px"
+        },
+        {
+          "value": "20rem",
+          "label": "320px"
+        }
+      ],
+      "default": "7.5rem"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.position"
+    },
+    {
+      "type": "range",
+      "id": "x_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y_position",
+      "label": "Vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "info": "Where the image lands after falling, relative to the section content area."
+    },
+    {
+      "type": "header",
+      "content": "t:settings.animation"
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "label": "Duration",
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "unit": "s",
+      "default": 2
+    }
+  ],
+  "presets": [
+    {
+      "name": "Falling image",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

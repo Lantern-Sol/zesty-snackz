@@ -126,7 +126,7 @@
             {% endif %}
             ref="menuitem"
           >
-            <span class="menu-list__link-title">{{- link.title -}}</span>
+            <span>{{- link.title -}}</span>
             {%- if link.links != blank -%}
               {% render 'icon-chevron-down' %}
             {%- endif -%}
@@ -322,8 +322,9 @@
     flex-direction: column;
     justify-content: center;
     cursor: pointer;
-    height: 100%;
+    height: auto;
     margin-block: 0;
+    padding: 0.8125rem 0.875rem 0.3125rem;
 
     &::after {
       content: '';
@@ -873,6 +874,10 @@
         {
           "value": "1.125rem",
           "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
         }
       ],
       "default": "1rem"

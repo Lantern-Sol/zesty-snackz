@@ -41,18 +41,20 @@
 {% capture account_icon %}
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="15"
-    height="17"
-    viewBox="0 0 15 17"
+    viewBox="0 0 42 42"
     fill="none"
     slot="signed-out-avatar"
     class="account-button__icon"
   >
     <path
       stroke="currentColor"
-      stroke-linejoin="round"
-      stroke-width="var(--icon-stroke-width)"
-      d="M10.375 3.813a3.063 3.063 0 1 1-6.125 0 3.063 3.063 0 0 1 6.125 0ZM7.313 9.5c-3.667 0-6.24 2.691-6.563 6.125h13.125C13.552 12.191 10.979 9.5 7.312 9.5Z"
+      stroke-width="2.3"
+      d="M21 18.8C23.7062 18.8 25.9 16.6062 25.9 13.9C25.9 11.1938 23.7062 9 21 9C18.2938 9 16.1 11.1938 16.1 13.9C16.1 16.6062 18.2938 18.8 21 18.8Z"
+    />
+    <path
+      stroke="currentColor"
+      stroke-width="2.3"
+      d="M30.8 27.9875C30.8 31.0316 30.8 33.5 21 33.5C11.2 33.5 11.2 31.0316 11.2 27.9875C11.2 24.9434 15.5879 22.475 21 22.475C26.412 22.475 30.8 24.9434 30.8 27.9875Z"
     />
   </svg>
 {% endcapture %}
@@ -190,8 +192,8 @@
     --shopify-account-dialog-position-top: var(--account-offset-top);
 
     &:not(:defined) {
-      min-width: 44px;
-      height: 44px;
+      min-width: 42px;
+      height: 42px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -250,9 +252,9 @@
   }
 
   .header-actions__cart-icon {
-    --cart-bubble-size: 20px;
-    --cart-bubble-top: 4.5px;
-    --cart-bubble-right: 2.5px;
+    --cart-bubble-size: 14px;
+    --cart-bubble-top: 0px;
+    --cart-bubble-right: 4.15px;
 
     position: relative;
   }

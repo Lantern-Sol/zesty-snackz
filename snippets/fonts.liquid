@@ -1,12 +1,19 @@
-{%- unless settings.type_body_font.system? -%}
-  {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_subheading_font.system? -%}
-  {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_heading_font.system? -%}
-  {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
-{%- unless settings.type_accent_font.system? -%}
-  {{ settings.type_accent_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
-{%- endunless -%}
+{%- if settings.use_shopify_fonts -%}
+  {%- unless settings.type_body_font.system? -%}
+    {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_subheading_font.system? -%}
+    {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_heading_font.system? -%}
+    {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+  {%- unless settings.type_accent_font.system? -%}
+    {{ settings.type_accent_font | font_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {%- endunless -%}
+{%- else -%}
+  {%- comment -%} Custom downloaded fonts — italics load on demand {%- endcomment -%}
+  {{ 'american-captain.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {{ 'product-sans-regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+  {{ 'product-sans-bold.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', fetchpriority: 'low' }}
+{%- endif -%}

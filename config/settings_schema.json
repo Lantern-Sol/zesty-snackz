@@ -92,28 +92,43 @@
         "content": "t:content.fonts"
       },
       {
+        "type": "paragraph",
+        "content": "This theme uses custom downloaded fonts: American Captain for headlines (H1–H6), buttons, captions, and disclaimers, and Product Sans for body copy and alternative headings."
+      },
+      {
+        "type": "checkbox",
+        "id": "use_shopify_fonts",
+        "label": "Use Shopify fonts instead?",
+        "default": false,
+        "info": "Replaces the custom downloaded fonts with the Shopify font pickers below."
+      },
+      {
         "type": "font_picker",
         "id": "type_body_font",
         "default": "work_sans_n4",
-        "label": "t:options.body"
+        "label": "t:options.body",
+        "visible_if": "{{ settings.use_shopify_fonts }}"
       },
       {
         "type": "font_picker",
         "id": "type_subheading_font",
         "default": "work_sans_n5",
-        "label": "t:options.subheading"
+        "label": "t:options.subheading",
+        "visible_if": "{{ settings.use_shopify_fonts }}"
       },
       {
         "type": "font_picker",
         "id": "type_heading_font",
         "default": "anonymous_pro_n4",
-        "label": "t:options.heading"
+        "label": "t:options.heading",
+        "visible_if": "{{ settings.use_shopify_fonts }}"
       },
       {
         "type": "font_picker",
         "id": "type_accent_font",
         "default": "anonymous_pro_n4",
-        "label": "t:options.accent"
+        "label": "t:options.accent",
+        "visible_if": "{{ settings.use_shopify_fonts }}"
       },
       {
         "type": "header",
@@ -261,8 +276,8 @@
             "label": "120px"
           },
           {
-            "value": "152",
-            "label": "152px"
+            "value": "150",
+            "label": "150px"
           },
           {
             "value": "184",
@@ -405,8 +420,8 @@
             "label": "72px"
           },
           {
-            "value": "88",
-            "label": "88px"
+            "value": "80",
+            "label": "80px"
           },
           {
             "value": "120",
@@ -557,8 +572,8 @@
             "label": "48px"
           },
           {
-            "value": "56",
-            "label": "56px"
+            "value": "60",
+            "label": "60px"
           },
           {
             "value": "72",
@@ -1574,11 +1589,15 @@
             "label": "t:options.body"
           },
           {
+            "value": "heading",
+            "label": "t:options.heading"
+          },
+          {
             "value": "accent",
             "label": "t:options.accent"
           }
         ],
-        "default": "body"
+        "default": "heading"
       },
       {
         "type": "select",
@@ -1925,11 +1944,15 @@
             "label": "t:options.body"
           },
           {
+            "value": "heading",
+            "label": "t:options.heading"
+          },
+          {
             "value": "accent",
             "label": "t:options.accent"
           }
         ],
-        "default": "body"
+        "default": "heading"
       },
       {
         "type": "select",
