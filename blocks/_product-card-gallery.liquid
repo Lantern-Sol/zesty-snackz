@@ -141,6 +141,11 @@
     background-color: var(--card-media-background, var(--color-background, transparent));
   }
 
+  /* Inset the featured image from the tile edges; hover/secondary slides stay full-bleed */
+  .card-gallery slideshow-slide:first-of-type {
+    padding: 1.125rem;
+  }
+
   .sour-meter {
     position: absolute;
     top: var(--padding-sm);
