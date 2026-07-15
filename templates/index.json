@@ -1777,7 +1777,7 @@
           "type": "scroll-highlight-text",
           "name": "Scroll highlight text",
           "settings": {
-            "text": "<p>Sour [sticker1] candy, sliced paper-thin. It [sticker2] crunches. It melts. It never takes a molar hostage. [sticker3] AND FOR THE [sticker4] HEALTH-CONSCIOUS: WE DRIED YOU SOME [sticker5] FRUIT</p>",
+            "text": "<p>Sour [sticker1] candy, sliced paper-<br/>thin. It [sticker2] crunches. It melts. <br/>It never takes a molar hostage. [sticker3] <br/>AND FOR THE [sticker4] HEALTH-CONSCIOUS: <br/>WE DRIED YOU SOME [sticker5] FRUIT</p>",
             "split": "characters",
             "start_position": 85,
             "end_position": 45,
