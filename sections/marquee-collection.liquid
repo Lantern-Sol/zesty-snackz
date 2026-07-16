@@ -64,16 +64,35 @@
           --row-accent: {{ accent }};
           {% if light != blank %}--row-light: {{ light }};{% endif %}
         "
-        data-speed-factor="{{ section.settings.speed }}"
+        {%- comment -%}
+          x3 compensates for the 10x server-rendered copies: marquee.js sets
+          duration = sqrt(copies) * factor and now always sees 1 copy.
+        {%- endcomment -%}
+        data-speed-factor="{{ section.settings.speed | times: 3 }}"
         data-movement-direction="{{ direction }}"
       >
         <div class="marquee__wrapper" ref="wrapper">
           <div class="marquee__content" ref="content">
+            {%- comment -%}
+              The item is repeated 10x server-side so one content half always
+              exceeds the viewport. marquee.js measures width before custom
+              fonts load; relying on its copy count leaves the loop short and
+              makes the restart jump.
+            {%- endcomment -%}
             <div class="marquee__repeated-items" ref="marqueeItems[]">
-              <a class="marquee-collection__item" href="{{ product.url }}">
-                <span class="marquee-collection__title">{{ product.title }}</span>
-                {% render 'marquee-collection-separator', product: product %}
-              </a>
+              {%- for copy in (1..10) -%}
+                <a
+                  class="marquee-collection__item"
+                  href="{{ product.url }}"
+                  {% unless forloop.first %}
+                    aria-hidden="true"
+                    tabindex="-1"
+                  {% endunless %}
+                >
+                  <span class="marquee-collection__title">{{ product.title }}</span>
+                  {% render 'marquee-collection-separator', product: product %}
+                </a>
+              {%- endfor -%}
             </div>
           </div>
         </div>
@@ -96,16 +115,27 @@
           --marquee-direction: {{ direction }};
           --row-accent: var(--color-foreground);
         "
-        data-speed-factor="{{ section.settings.speed }}"
+        {%- comment -%}
+          x3 compensates for the 10x server-rendered copies: marquee.js sets
+          duration = sqrt(copies) * factor and now always sees 1 copy.
+        {%- endcomment -%}
+        data-speed-factor="{{ section.settings.speed | times: 3 }}"
         data-movement-direction="{{ direction }}"
       >
         <div class="marquee__wrapper" ref="wrapper">
           <div class="marquee__content" ref="content">
             <div class="marquee__repeated-items" ref="marqueeItems[]">
-              <span class="marquee-collection__item">
-                <span class="marquee-collection__title">Product name</span>
-                {% render 'marquee-collection-separator' %}
-              </span>
+              {%- for copy in (1..10) -%}
+                <span
+                  class="marquee-collection__item"
+                  {% unless forloop.first %}
+                    aria-hidden="true"
+                  {% endunless %}
+                >
+                  <span class="marquee-collection__title">Product name</span>
+                  {% render 'marquee-collection-separator' %}
+                </span>
+              {%- endfor -%}
             </div>
           </div>
         </div>

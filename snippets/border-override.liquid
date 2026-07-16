@@ -7,7 +7,7 @@
 %}
 --border-width: {{ settings.border_width }}px; --border-style: {{ settings.border }}; --border-color:
 {% if settings.border_color != blank -%}
-  rgb({{ settings.border_color.rgba }})
+  rgb({{ settings.border_color.rgb }} / {{ settings.border_opacity | divided_by: 100.0 }})
 {%- else -%}
   rgb(var(--color-border-rgb) / {{ settings.border_opacity | divided_by: 100.0 }})
 {%- endif -%}
@@ -24,7 +24,12 @@
   {% endif %}
 {%  else %}
   --border-width-mobile: {{ settings.border_width }}px; --border-style-mobile: {{ settings.border }}; --border-color-mobile:
-  rgb(var(--color-border-rgb) / {{ settings.border_opacity | divided_by: 100.0 }}); --border-radius-mobile:
+  {% if settings.border_color != blank -%}
+    rgb({{ settings.border_color.rgb }} / {{ settings.border_opacity | divided_by: 100.0 }})
+  {%- else -%}
+    rgb(var(--color-border-rgb) / {{ settings.border_opacity | divided_by: 100.0 }})
+  {%- endif -%}
+  ; --border-radius-mobile:
   {{ settings.border_radius }}px; {% if settings.border_radius > 0 %} overflow: hidden; {% endif %}
   {% if settings.border == 'shadow' %}
     box-shadow: 0px 0px {{ settings.shadow_blur }}px {{ settings.shadow_spread }}px {{ settings.shadow_color }};
