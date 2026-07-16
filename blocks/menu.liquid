@@ -47,7 +47,7 @@
       {{ block.shopify_attributes }}
     >
       <summary
-        class="menu__heading{% if heading == blank and menu.title == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}"
+        class="menu__heading{% if heading == blank %} menu__heading--empty{% endif %} {{ block_settings.heading_preset }}"
         {%- if block_settings.heading_preset == 'custom' -%}
           style="
             font-family: {{ block_settings.heading_font }};

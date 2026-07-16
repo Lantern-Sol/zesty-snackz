@@ -1,11 +1,24 @@
+{% liquid
+  assign boxed = false
+  if block.settings.icon_background != blank
+    assign boxed = true
+  endif
+%}
 <div
-  class="social-icons__wrapper social-icons__wrapper--{{ block.id }}"
+  class="social-icons__wrapper social-icons__wrapper--{{ block.id }}{% if boxed %} social-icons__wrapper--boxed{% endif %}"
   {{ block.shopify_attributes }}
 >
-  {% if block.settings.icon_color != blank %}
+  {% if block.settings.icon_color != blank or boxed %}
     {% style %}
       .social-icons__wrapper--{{ block.id }} {
-        --color-utilities: {{ block.settings.icon_color }};
+        {% if block.settings.icon_color != blank %}
+          --color-utilities: {{ block.settings.icon_color }};
+        {% endif %}
+        {% if boxed %}
+          --social-icon-box-background: {{ block.settings.icon_background }};
+          --social-icon-box-radius: {{ block.settings.icon_corner_radius }}px;
+          --social-icon-box-padding: {{ block.settings.icon_box_padding }}px;
+        {% endif %}
       }
     {% endstyle %}
   {% endif %}
@@ -115,7 +128,7 @@
 {% stylesheet %}
   .social-icons__wrapper {
     display: flex;
-    gap: var(--gap-sm);
+    gap: var(--gap-xl);
     flex-wrap: wrap;
     justify-content: center;
 
@@ -129,7 +142,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--icon-size-lg);
+    height: var(--icon-size-md);
+  }
+
+  /* The icon color setting sets --color-utilities, which upstream only maps
+     to color inside the footer-utilities section; apply it here so the
+     setting works wherever the block is placed */
+  .social-icons__icon-wrapper a {
+    color: var(--color-utilities, currentColor);
   }
 
   .social-icons__icon {
@@ -144,7 +164,7 @@
   }
 
   .social-icons__icon-wrapper:has(.social-icons__icon path) {
-    width: var(--icon-size-lg);
+    width: var(--icon-size-md);
 
     .social-icons__icon {
       display: block;
@@ -153,6 +173,18 @@
     .social-icons__icon-label {
       display: none;
     }
+  }
+
+  /* Boxed icons: background plate around each icon, glyph shrinks by the
+     padding so the overall box keeps the standard icon footprint */
+  .social-icons__wrapper--boxed .social-icons__icon-wrapper {
+    background-color: var(--social-icon-box-background);
+    border-radius: var(--social-icon-box-radius);
+  }
+
+  .social-icons__wrapper--boxed .social-icons__icon {
+    width: calc(var(--icon-size-lg) - 2 * var(--social-icon-box-padding));
+    height: calc(var(--icon-size-lg) - 2 * var(--social-icon-box-padding));
   }
 
   /* Disabled state for editor */
@@ -180,6 +212,31 @@
       "id": "icon_color",
       "label": "t:settings.color",
       "placeholder": "t:settings.default"
+    },
+    {
+      "type": "color",
+      "id": "icon_background",
+      "label": "t:settings.icon_background"
+    },
+    {
+      "type": "range",
+      "id": "icon_corner_radius",
+      "label": "t:settings.corner_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "icon_box_padding",
+      "label": "Icon padding",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 11
     },
     {
       "type": "header",
