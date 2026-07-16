@@ -449,6 +449,18 @@ p:empty {
   background-color: var(--color-background);
 }
 
+/* Rounded footer card overlapping the section above. The wrapper needs its
+   own stacking context: section backgrounds sit at z-index -2, so without
+   one they would paint behind the overlapped section's content. */
+.layout-footer {
+  position: relative;
+  z-index: 1;
+  margin-block-start: -60px;
+  border-start-start-radius: 48px;
+  border-start-end-radius: 48px;
+  overflow: clip;
+}
+
 /* For page-width sections, all content goes in the center column */
 .section--page-width>* {
   grid-column: 2;
