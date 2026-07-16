@@ -1,0 +1,403 @@
+{%- doc -%}
+  A line of text that scrolls horizontally while its glyphs ride a sine wave.
+  A positioned sibling of the floating sticker: it lives inside the Floating
+  stickers overlay and anchors to an x/y point, tiltable via rotation.
+
+  The wave shape and the scroll are both driven by whole CSS animations; the
+  companion wave-marquee.js only measures the strip and bakes a per-glyph
+  vertical offset (see that file for the seamless-loop reasoning).
+{%- enddoc -%}
+
+{%- liquid
+  assign s = block.settings
+  assign text = s.text | default: 'Zesty Snackz'
+
+  assign amplitude = s.amplitude | default: 24
+  assign frequency = s.frequency | default: 3
+  assign speed = s.speed | default: 30
+  assign gap = s.gap | default: 40
+  assign width = s.width | default: 100
+  assign rotation = s.rotation | default: 0
+
+  assign direction = 'normal'
+  if s.direction == 'right'
+    assign direction = 'reverse'
+  endif
+
+  assign preset = s.type_preset
+  capture type_classes
+    if preset == 'custom'
+      echo 'custom-typography'
+      if s.font_size != ''
+        echo ' custom-font-size'
+      endif
+    else
+      echo preset
+    endif
+  endcapture
+-%}
+
+<script
+  src="{{ 'wave-marquee.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<wave-marquee
+  class="wave-marquee {{ type_classes }}{% if s.shadow %} wave-marquee--shadow{% endif %}{% if request.design_mode %} wave-marquee--design-mode{% endif %}"
+  role="marquee"
+  aria-label="{{ text | escape }}"
+  data-text="{{ text | escape }}"
+  data-freq="{{ frequency }}"
+  data-amp="{{ amplitude }}"
+  style="
+    --wm-amp: {{ amplitude }}px;
+    --wm-speed: {{ speed }}s;
+    --wm-gap: {{ gap }}px;
+    --wm-dir: {{ direction }};
+    {% render 'typography-style', settings: s %}
+    {%- if s.text_color != blank -%}
+      --color: {{ s.text_color }};
+    {%- endif -%}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div
+    class="wave-marquee__band"
+    style="
+      --wm-x: {{ s.x_position }}%;
+      --wm-y: {{ s.y_position }}%;
+      --wm-width: {{ width }}%;
+      --wm-rotation: {{ rotation }}deg;
+    "
+  >
+    <div class="wave-marquee__viewport" data-wm-viewport>
+      <div class="wave-marquee__track" data-wm-track aria-hidden="true">
+        <span class="wave-marquee__unit">{{ text | escape }}</span>
+      </div>
+    </div>
+  </div>
+</wave-marquee>
+
+{% stylesheet %}
+  /* The whole animation: one angle swept from 0 to `frequency` turns. The strip
+     position and every glyph's offset + tangent rotation are derived from it in
+     calc(), so the wave stays fixed in space while the letters travel through it.
+     Registered + inheriting so the animated value reaches the glyphs. */
+  @property --wm-phase {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: true;
+  }
+
+  /* The host spans the whole floating-stickers overlay (the section content box)
+     and clips to it, so the marquee can never spill into the sections above or
+     below — while sibling floating stickers, which are separate boxes, keep
+     their intended overhang. */
+  .wave-marquee {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    z-index: var(--layer-flat);
+    color: var(--color, var(--color-foreground));
+    pointer-events: none;
+  }
+
+  /* Selectable on canvas in the theme editor. */
+  .wave-marquee--design-mode {
+    pointer-events: auto;
+  }
+
+  /* The positioned, tiltable band: anchored at its centre like a floating
+     sticker. Anything it pushes past the host edge is clipped above. */
+  .wave-marquee__band {
+    position: absolute;
+    top: var(--wm-y, 50%);
+    left: var(--wm-x, 50%);
+    width: var(--wm-width, 100%);
+    translate: -50% -50%;
+    rotate: var(--wm-rotation, 0deg);
+  }
+
+  /* drop-shadow (not box-shadow) so the shadow follows the letters' alpha
+     silhouette. On the band so it is a single pass over the whole strip. */
+  .wave-marquee--shadow .wave-marquee__band {
+    filter: drop-shadow(0 2.505px 2.505px #000);
+  }
+
+  /* Self-contained band: clips the scrolling strip so the block never overflows
+     its own box. Padding leaves the wave crests (± amplitude, plus a little for
+     the glyph height and tangent tilt) room so they are not cropped. */
+  .wave-marquee__viewport {
+    overflow: hidden;
+    padding-block: calc(var(--wm-amp, 24px) + 0.75em);
+  }
+
+  .wave-marquee__track {
+    position: relative;
+    display: flex;
+    width: max-content;
+    white-space: nowrap;
+    will-change: transform;
+
+    /* Slide left by exactly one seamless period (--wm-shift) over a full phase
+       sweep, so the strip lands back in register and the loop is seamless. */
+    transform: translateX(calc(-1 * var(--wm-shift, 0px) * (var(--wm-phase) / var(--wm-turns, 360deg))));
+  }
+
+  .wave-marquee__unit {
+    display: inline-flex;
+    padding-inline-end: var(--wm-gap, 40px);
+    white-space: nowrap;
+  }
+
+  /* Each glyph sits on the wave at `theta` and rides it as the shared phase
+     advances; the rotation tracks the curve's tangent. inline-block so the
+     transform offsets the box. */
+  .wave-marquee__glyph {
+    display: inline-block;
+    transform: translateY(calc(var(--wm-amp, 24px) * sin(var(--wm-theta, 0deg) - var(--wm-phase))))
+      rotate(atan(calc(var(--wm-slope, 0) * cos(var(--wm-theta, 0deg) - var(--wm-phase)))));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wave-marquee__track {
+      animation: wave-marquee-phase var(--wm-speed, 30s) linear infinite var(--wm-dir, normal);
+    }
+  }
+
+  @keyframes wave-marquee-phase {
+    from {
+      --wm-phase: 0deg;
+    }
+
+    to {
+      --wm-phase: var(--wm-turns, 360deg);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wave marquee",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Zesty Snackz"
+    },
+    {
+      "type": "header",
+      "content": "Wave"
+    },
+    {
+      "type": "range",
+      "id": "frequency",
+      "label": "Frequency",
+      "info": "Number of wave peaks across the marquee.",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "amplitude",
+      "label": "Amplitude",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Speed",
+      "info": "Seconds for one full loop. Lower is faster.",
+      "min": 5,
+      "max": 120,
+      "step": 5,
+      "unit": "s",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Direction",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between repeats",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -4
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        { "value": "rte", "label": "t:options.default" },
+        { "value": "paragraph", "label": "t:options.paragraph" },
+        { "value": "h1", "label": "t:options.h1" },
+        { "value": "h2", "label": "t:options.h2" },
+        { "value": "h3", "label": "t:options.h3" },
+        { "value": "h4", "label": "t:options.h4" },
+        { "value": "h5", "label": "t:options.h5" },
+        { "value": "h6", "label": "t:options.h6" },
+        { "value": "h7", "label": "t:options.h7" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": "h2",
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        { "value": "var(--font-body--family)", "label": "t:options.body" },
+        { "value": "var(--font-subheading--family)", "label": "t:options.subheading" },
+        { "value": "var(--font-heading--family)", "label": "t:options.heading" },
+        { "value": "var(--font-accent--family)", "label": "t:options.accent" }
+      ],
+      "default": "var(--font-heading--family)",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "2rem", "label": "32px" },
+        { "value": "2.5rem", "label": "40px" },
+        { "value": "3rem", "label": "48px" },
+        { "value": "3.5rem", "label": "56px" },
+        { "value": "4.5rem", "label": "72px" },
+        { "value": "5.5rem", "label": "88px" },
+        { "value": "7.5rem", "label": "120px" }
+      ],
+      "default": "2.5rem",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        { "value": "tight", "label": "t:options.tight" },
+        { "value": "normal", "label": "t:options.normal" },
+        { "value": "loose", "label": "t:options.loose" }
+      ],
+      "default": "tight",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "options": [
+        { "value": "tight", "label": "t:options.tight" },
+        { "value": "normal", "label": "t:options.normal" },
+        { "value": "loose", "label": "t:options.loose" }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        { "value": "none", "label": "t:options.default" },
+        { "value": "uppercase", "label": "t:options.uppercase" }
+      ],
+      "default": "uppercase",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "checkbox",
+      "id": "shadow",
+      "label": "Shadow",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:settings.position"
+    },
+    {
+      "type": "range",
+      "id": "x_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y_position",
+      "label": "Vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "label": "Width",
+      "info": "Width of the scrolling band, relative to the section.",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "Wave marquee",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

@@ -1,4 +1,7 @@
-<div class="floating-stickers" {{ block.shopify_attributes }}>
+<div
+  class="floating-stickers{% if block.settings.full_width %} floating-stickers--full-width{% endif %}{% if block.settings.behind %} floating-stickers--behind{% endif %}"
+  {{ block.shopify_attributes }}
+>
   {% content_for 'blocks' %}
 </div>
 
@@ -14,6 +17,14 @@
     /* The group is a pure positioning layer; the stickers inside re-enable
        pointer events in the theme editor for on-canvas selection */
     pointer-events: none;
+  }
+
+  /* Behind-content option: drop the overlay below the section's content
+     (--layer-lowest) instead of above it (--layer-flat). Still sits above the
+     section background (--layer-section-background), so the elements show
+     through the gaps between content rather than covering it. */
+  .floating-stickers--behind {
+    z-index: var(--layer-lowest);
   }
 
   /* Stickers near the edges intentionally overhang the group into the page
@@ -41,6 +52,20 @@
     }
   }
 
+  /* Full-width option: break the overlay out of the section's content column so
+     it spans the whole viewport, letting stickers be placed across the full
+     screen no matter how narrow the section is. `calc(-50vw + 50%)` puts the
+     left edge at the viewport edge for a centred wrapper. The compound selector
+     matches the page-width rules' specificity and comes later, so it wins for
+     full-width groups; the plainer selector covers non-page-width wrappers. */
+  .section-content-wrapper > .floating-stickers--full-width,
+  .section-content-wrapper.page-width > .floating-stickers--full-width,
+  .section-content-wrapper.page-width-mobile > .floating-stickers--full-width {
+    left: calc(-50vw + 50%);
+    right: auto;
+    width: 100vw;
+  }
+
   /* Sections apply their spacing on a container above the content wrapper, so
      the wrapper starts below the section's top padding — and, for the first
      section under a transparent header, below the header-height offset too.
@@ -63,22 +88,39 @@
 
 {% schema %}
 {
-  "name": "Floating stickers",
+  "name": "Floating elements",
   "tag": null,
   "blocks": [
     {
       "type": "_floating-sticker"
+    },
+    {
+      "type": "_wave-marquee"
     }
   ],
   "settings": [
     {
       "type": "paragraph",
-      "content": "Overlay layer that holds floating stickers. It spans the full section, and the stickers inside position relative to it."
+      "content": "Overlay layer that holds floating elements. It spans the full section, and the elements inside position relative to it."
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false,
+      "info": "Stretch the overlay to the full screen width instead of the section's content width, so elements can be placed edge to edge."
+    },
+    {
+      "type": "checkbox",
+      "id": "behind",
+      "label": "Behind content",
+      "default": false,
+      "info": "Place the overlay behind the section's content instead of in front of it."
     }
   ],
   "presets": [
     {
-      "name": "Floating stickers",
+      "name": "Floating elements",
       "category": "t:categories.basic",
       "blocks": {
         "floating-sticker-1": {
