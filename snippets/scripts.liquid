@@ -7,6 +7,10 @@
 <script type="importmap">
   {
     "imports": {
+      {%- if settings.three_enabled %}
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+      {%- endif %}
       "@theme/overflow-list": "{{ 'overflow-list.js' | asset_url }}",
       "@theme/component": "{{ 'component.js' | asset_url }}",
       "@theme/dialog": "{{ 'dialog.js' | asset_url }}",

@@ -1,0 +1,1155 @@
+{% comment %}
+  Gravity Fall Section
+
+  A physics playground: bubble stickers, images, text chips and buttons drop
+  from the top of the section, bounce off each other and settle into a pile.
+  Items are real DOM elements (buttons stay clickable, text stays selectable
+  and crawlable) driven by the lightweight engine in assets/gravity-section.js.
+
+  - Items drop when the section scrolls into view, staggered
+  - Optional drag & throw interaction (pointer)
+  - Respects prefers-reduced-motion: the pile renders pre-settled, no animation
+  - In the theme editor, selecting a block pops that item so it's easy to find
+
+  Section settings:
+  - height / height_mobile: section height in px
+  - mobile_scale: item size multiplier on mobile (%)
+  - gravity_strength: gravity multiplier
+  - bounciness: restitution (0 = thud, 0.9 = super bouncy)
+  - drop_stagger: delay between item drops (ms)
+  - enable_drag: allow visitors to grab and throw items
+  - background_gradient / background_color
+
+  Blocks: sticker (bubble with image), image, text (circle or pill chip), button.
+  Each block has an optional "Horizontal position" (0-100%); left empty, items
+  spread evenly with a deterministic jitter.
+{% endcomment %}
+
+<script
+  src="{{ 'gravity-section.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  if section.settings.background_color != blank
+    render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
+  endif
+
+  assign item_scale_mobile = section.settings.mobile_scale | divided_by: 100.0
+%}
+
+<div
+  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+></div>
+<gravity-section
+  class="gravity-fall section section--full-width spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+  style="
+    {%- render 'spacing-style', settings: section.settings %};
+    --gravity-height: {{ section.settings.height }}px;
+    --gravity-height-mobile: {{ section.settings.height_mobile }}px;
+    --gravity-item-scale-mobile: {{ item_scale_mobile }};
+    {% if section.settings.background_gradient != blank %}background-image: {{ section.settings.background_gradient }};{% endif %}
+  "
+  data-gravity="{{ section.settings.gravity_strength }}"
+  data-restitution="{{ section.settings.bounciness }}"
+  data-stagger="{{ section.settings.drop_stagger }}"
+  data-floor-offset="{{ section.settings.bottom_overflow }}"
+  {% if section.settings.enable_drag %}
+    data-drag
+  {% endif %}
+  {% unless section.settings.impact_squash %}
+    data-no-squash
+  {% endunless %}
+>
+  {%- if section.settings.background_image != blank -%}
+    <div
+      class="gravity-fall__bg"
+      aria-hidden="true"
+      style="
+        --bg-size: {{ section.settings.background_image_size }};
+        --bg-position: {{ section.settings.background_image_position }};
+        --bg-opacity: {{ section.settings.background_image_opacity | divided_by: 100.0 }};
+      "
+    >
+      {{
+        section.settings.background_image
+        | image_url: width: 3840
+        | image_tag: loading: 'lazy', class: 'gravity-fall__bg-media', sizes: '100vw', widths: '750, 1100, 1500, 1780, 2000, 3000, 3840'
+      }}
+    </div>
+  {%- endif -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'sticker' -%}
+        <div
+          class="gravity-item gravity-item--circle"
+          data-gravity-item
+          data-shape="circle"
+          {% if block.settings.position != blank %}
+            data-x="{{ block.settings.position }}"
+          {% endif %}
+          {% if block.settings.pinned %}
+            data-pinned
+            data-y="{{ block.settings.position_y | default: 50 }}"
+            data-rotation="{{ block.settings.rotation | default: 0 }}"
+          {% endif %}
+          style="--item-size: {{ block.settings.size }}px;"
+          {{ block.shopify_attributes }}
+        >
+          <div class="gravity-bubble{% if block.settings.style == 'bare' %} gravity-bubble--bare{% endif %}">
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 660
+                | image_tag: loading: 'lazy', class: 'gravity-bubble__media', sizes: '220px'
+              }}
+            {%- else -%}
+              {{ 'image' | placeholder_svg_tag: 'gravity-bubble__media gravity-bubble__media--placeholder' }}
+            {%- endif -%}
+          </div>
+        </div>
+
+      {%- when 'image' -%}
+        {%- liquid
+          assign image_ratio = 1
+          if block.settings.image != blank
+            assign image_ratio = block.settings.image.aspect_ratio
+          endif
+        -%}
+        <div
+          class="gravity-item gravity-item--image{% if block.settings.round %} gravity-item--circle{% endif %}"
+          data-gravity-item
+          data-shape="{% if block.settings.round %}circle{% else %}pill{% endif %}"
+          {% if block.settings.position != blank %}
+            data-x="{{ block.settings.position }}"
+          {% endif %}
+          {% if block.settings.pinned %}
+            data-pinned
+            data-y="{{ block.settings.position_y | default: 50 }}"
+            data-rotation="{{ block.settings.rotation | default: 0 }}"
+          {% endif %}
+          style="--item-size: {{ block.settings.size }}px; --item-ratio: {{ image_ratio }};"
+          {{ block.shopify_attributes }}
+        >
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 900
+              | image_tag: loading: 'lazy', class: 'gravity-image__media', sizes: '300px'
+            }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'gravity-image__media gravity-image__media--placeholder' }}
+          {%- endif -%}
+        </div>
+
+      {%- when 'text' -%}
+        <div
+          class="gravity-item gravity-item--text"
+          data-gravity-item
+          data-keep-upright
+          data-shape="{% if block.settings.shape == 'circle' %}circle{% else %}pill{% endif %}"
+          {% if block.settings.position != blank %}
+            data-x="{{ block.settings.position }}"
+          {% endif %}
+          {% if block.settings.pinned %}
+            data-pinned
+            data-y="{{ block.settings.position_y | default: 50 }}"
+            data-rotation="{{ block.settings.rotation | default: 0 }}"
+          {% endif %}
+          style="
+            {% if block.settings.text_color != blank %}--item-text-color: {{ block.settings.text_color }};{% endif %}
+            {% if block.settings.chip_color != blank %}--item-chip-color: {{ block.settings.chip_color }};{% endif %}
+          "
+          {{ block.shopify_attributes }}
+        >
+          <div class="gravity-chip gravity-chip--{{ block.settings.shape }}">
+            <div class="gravity-chip__text rte">{{ block.settings.text }}</div>
+          </div>
+        </div>
+
+      {%- when 'button' -%}
+        <div
+          class="gravity-item gravity-item--button"
+          data-gravity-item
+          data-shape="pill"
+          {% if block.settings.position != blank %}
+            data-x="{{ block.settings.position }}"
+          {% endif %}
+          {% if block.settings.pinned %}
+            data-pinned
+            data-y="{{ block.settings.position_y | default: 50 }}"
+            data-rotation="{{ block.settings.rotation | default: 0 }}"
+          {% endif %}
+          {{ block.shopify_attributes }}
+        >
+          {% render 'button-custom-styles', block_settings: block.settings, block_id: block.id %}
+          <a
+            class="{{ block.settings.style_class }} {{ block.settings.style_class }}--{{ block.id }}"
+            {% if block.settings.link != blank %}
+              href="{{ block.settings.link }}"
+            {% else %}
+              role="link"
+              aria-disabled="true"
+            {% endif %}
+            {% if block.settings.open_in_new_tab %}
+              target="_blank"
+              rel="noopener"
+            {% endif %}
+          >
+            {{ block.settings.label | escape }}
+          </a>
+        </div>
+    {%- endcase -%}
+  {%- endfor -%}
+</gravity-section>
+
+{% stylesheet %}
+  gravity-section {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: var(--gravity-height, 600px);
+    overflow: clip;
+    background-size: cover;
+    background-position: center;
+    --item-scale: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    gravity-section {
+      height: var(--gravity-height-mobile, 480px);
+      --item-scale: var(--gravity-item-scale-mobile, 0.7);
+    }
+  }
+
+  .gravity-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: fit-content;
+    will-change: transform;
+    /* parked above the section (clipped) until the engine positions it */
+    transform: translate3d(0, -150%, 0);
+  }
+
+  .gravity-fall__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .gravity-fall__bg-media {
+    width: 100%;
+    height: 100%;
+    object-fit: var(--bg-size, cover);
+    object-position: var(--bg-position, center);
+    opacity: var(--bg-opacity, 1);
+  }
+
+  gravity-section[data-drag] .gravity-item {
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  gravity-section[data-drag] .gravity-item:active {
+    cursor: grabbing;
+  }
+
+  /* Pinned items: the engine owns the wrapper transform, so the entrance
+     wobble and hover tilt live on the inner element where they compose
+     with the pinned rotation */
+  .gravity-item[data-pinned] > * {
+    transition: transform 0.25s ease;
+  }
+
+  .gravity-item[data-pinned]:hover > * {
+    transform: rotate(3deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    gravity-section.is-started .gravity-item[data-pinned] > * {
+      animation: gravity-pin-tilt 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+
+  @keyframes gravity-pin-tilt {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(-4deg);
+    }
+
+    55% {
+      transform: rotate(2.5deg);
+    }
+
+    80% {
+      transform: rotate(-1deg);
+    }
+
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  .gravity-item--circle {
+    width: calc(var(--item-size, 120px) * var(--item-scale));
+    height: calc(var(--item-size, 120px) * var(--item-scale));
+  }
+
+  .gravity-item--image:not(.gravity-item--circle) {
+    width: calc(var(--item-size, 140px) * var(--item-scale));
+    aspect-ratio: var(--item-ratio, 1);
+  }
+
+  .gravity-bubble {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 30% 25%,
+        rgb(255 255 255 / 55%),
+        rgb(255 255 255 / 12%) 45%,
+        rgb(255 255 255 / 4%) 70%
+      ),
+      rgb(255 255 255 / 14%);
+    border: 1.5px solid rgb(255 255 255 / 70%);
+    box-shadow:
+      inset 0 -8px 18px rgb(255 255 255 / 18%),
+      0 6px 18px rgb(0 0 0 / 8%);
+  }
+
+  .gravity-bubble--bare {
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .gravity-bubble__media {
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .gravity-bubble__media--placeholder,
+  .gravity-image__media--placeholder {
+    opacity: 0.5;
+  }
+
+  .gravity-image__media {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .gravity-item--circle .gravity-image__media {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .gravity-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: fit-content;
+    font-size: calc(var(--font-paragraph--size, 1rem) * var(--item-scale));
+    color: var(--item-text-color, var(--color-foreground));
+    background:
+      radial-gradient(
+        circle at 30% 25%,
+        rgb(255 255 255 / 45%),
+        rgb(255 255 255 / 0%) 60%
+      ),
+      var(--item-chip-color, rgb(255 255 255 / 20%));
+    border: 1.5px solid rgb(255 255 255 / 70%);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
+  }
+
+  /* circle and square size themselves from the text content */
+  .gravity-chip--circle {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    padding: 1.6em;
+  }
+
+  /* square is bare text: no chip styling at all */
+  .gravity-chip--square {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .gravity-chip--pill {
+    border-radius: 999px;
+    padding: 0.6em 1.4em;
+  }
+
+  .gravity-chip__text > * {
+    margin: 0;
+  }
+
+  .gravity-item--button .button {
+    white-space: nowrap;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Gravity fall",
+  "tag": "div",
+  "class": "gravity-fall-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 30,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "Height",
+      "min": 300,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "label": "Height (mobile)",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "mobile_scale",
+      "label": "Item size on mobile",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "bottom_overflow",
+      "label": "Bottom overflow",
+      "info": "Sinks the pile's floor below the section edge, so the lowest items look cut off.",
+      "min": 0,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Physics"
+    },
+    {
+      "type": "range",
+      "id": "gravity_strength",
+      "label": "Gravity",
+      "min": 0.2,
+      "max": 3,
+      "step": 0.1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "bounciness",
+      "label": "Bounciness",
+      "min": 0,
+      "max": 0.9,
+      "step": 0.1,
+      "default": 0.4
+    },
+    {
+      "type": "range",
+      "id": "drop_stagger",
+      "label": "Delay between drops",
+      "min": 0,
+      "max": 500,
+      "step": 20,
+      "unit": "ms",
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_drag",
+      "label": "Let visitors drag and throw items",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "impact_squash",
+      "label": "Squash and stretch on impact",
+      "info": "Items stretch slightly while falling and flatten when they land, like a bouncing ball.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "select",
+      "id": "background_image_size",
+      "label": "Image size",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "contain",
+          "label": "Contain"
+        }
+      ],
+      "default": "cover",
+      "visible_if": "{{ section.settings.background_image != blank }}"
+    },
+    {
+      "type": "select",
+      "id": "background_image_position",
+      "label": "Image position",
+      "options": [
+        {
+          "value": "left top",
+          "label": "Top left"
+        },
+        {
+          "value": "center top",
+          "label": "Top"
+        },
+        {
+          "value": "right top",
+          "label": "Top right"
+        },
+        {
+          "value": "left center",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right center",
+          "label": "Right"
+        },
+        {
+          "value": "left bottom",
+          "label": "Bottom left"
+        },
+        {
+          "value": "center bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "right bottom",
+          "label": "Bottom right"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ section.settings.background_image != blank }}"
+    },
+    {
+      "type": "range",
+      "id": "background_image_opacity",
+      "label": "Image opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ section.settings.background_image != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "sticker",
+      "name": "Bubble sticker",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "size",
+          "label": "Size",
+          "min": 60,
+          "max": 330,
+          "step": 10,
+          "unit": "px",
+          "default": 120
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Style",
+          "options": [
+            {
+              "value": "bubble",
+              "label": "Bubble"
+            },
+            {
+              "value": "bare",
+              "label": "Image only"
+            }
+          ],
+          "default": "bubble"
+        },
+        {
+          "type": "number",
+          "id": "position",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right. Leave empty to spread automatically."
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned",
+          "label": "Pin in place (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_y",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom. Leave empty for center.",
+          "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned }}"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "size",
+          "label": "Width",
+          "min": 60,
+          "max": 300,
+          "step": 10,
+          "unit": "px",
+          "default": 140
+        },
+        {
+          "type": "checkbox",
+          "id": "round",
+          "label": "Crop to circle",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right. Leave empty to spread automatically."
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned",
+          "label": "Pin in place (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_y",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom. Leave empty for center.",
+          "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned }}"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text chip",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>One ingredient.<br>Zero nonsense.</p>"
+        },
+        {
+          "type": "select",
+          "id": "shape",
+          "label": "Shape",
+          "options": [
+            {
+              "value": "circle",
+              "label": "Circle"
+            },
+            {
+              "value": "square",
+              "label": "Square"
+            },
+            {
+              "value": "pill",
+              "label": "Pill"
+            }
+          ],
+          "default": "circle"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color"
+        },
+        {
+          "type": "color",
+          "id": "chip_color",
+          "label": "Chip color",
+          "info": "Leave empty for a translucent bubble look."
+        },
+        {
+          "type": "number",
+          "id": "position",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right. Leave empty to spread automatically."
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned",
+          "label": "Pin in place (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_y",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom. Leave empty for center.",
+          "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned }}"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "style_class",
+          "label": "Style",
+          "options": [
+            {
+              "value": "button",
+              "label": "Primary"
+            },
+            {
+              "value": "button-secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "button-custom",
+              "label": "Custom"
+            }
+          ],
+          "default": "button"
+        },
+        {
+          "type": "header",
+          "content": "t:content.button_colors",
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "color",
+          "id": "custom_button_background",
+          "label": "t:settings.background",
+          "default": "{{ settings.color_palette.foreground }}",
+          "alpha": true,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "color",
+          "id": "custom_button_text",
+          "label": "t:settings.text",
+          "default": "{{ settings.color_palette.background }}",
+          "alpha": true,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "color",
+          "id": "custom_button_border",
+          "label": "t:settings.borders",
+          "default": "{{ settings.color_palette.background }}",
+          "alpha": true,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "custom_button_shadow_enabled",
+          "label": "Enable shadow",
+          "default": false,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_shadow_horizontal_offset",
+          "label": "Horizontal offset",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_shadow_vertical_offset",
+          "label": "Vertical offset",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_shadow_blur_radius",
+          "label": "Blur radius",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_shadow_spread_radius",
+          "label": "Spread radius",
+          "min": -20,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "default": 0,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+        },
+        {
+          "type": "color",
+          "id": "custom_button_shadow_color",
+          "label": "Shadow color",
+          "info": "Leave empty for the default shadow color",
+          "alpha": true,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "custom_button_padding_enabled",
+          "label": "Override padding",
+          "default": false,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_block_start",
+          "label": "t:settings.top",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 16,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_block_end",
+          "label": "t:settings.bottom",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 16,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_inline_start",
+          "label": "t:settings.left",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 24,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_inline_end",
+          "label": "t:settings.right",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 24,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "custom_button_use_mobile_padding",
+          "label": "Use mobile padding",
+          "default": false,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_block_start_mobile",
+          "label": "t:settings.top",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 16,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_block_end_mobile",
+          "label": "t:settings.bottom",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 16,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_inline_start_mobile",
+          "label": "t:settings.left",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 24,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+        },
+        {
+          "type": "range",
+          "id": "custom_button_padding_inline_end_mobile",
+          "label": "t:settings.right",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 24,
+          "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_padding_enabled and block.settings.custom_button_use_mobile_padding }}"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open in new tab",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right. Leave empty to spread automatically."
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned",
+          "label": "Pin in place (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_y",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom. Leave empty for center.",
+          "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gravity fall",
+      "settings": {
+        "background_gradient": "linear-gradient(135deg, #6db3d9 0%, #d9d94a 100%)"
+      },
+      "blocks": [
+        {
+          "type": "sticker"
+        },
+        {
+          "type": "sticker",
+          "settings": {
+            "size": 90
+          }
+        },
+        {
+          "type": "sticker",
+          "settings": {
+            "size": 160
+          }
+        },
+        {
+          "type": "sticker",
+          "settings": {
+            "size": 110
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "size": 300,
+            "pinned": true,
+            "position": 50,
+            "position_y": 55
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "text": "<p>One ingredient.<br>Zero nonsense.</p>",
+            "shape": "square",
+            "pinned": true,
+            "position": 55,
+            "position_y": 15,
+            "rotation": -8
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "label": "Shop dried fruit",
+            "pinned": true,
+            "position": 65,
+            "position_y": 30,
+            "rotation": -6
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

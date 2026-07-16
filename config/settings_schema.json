@@ -1382,6 +1382,17 @@
         "id": "gsap_enabled",
         "label": "Enable GSAP animations",
         "default": false
+      },
+      {
+        "type": "header",
+        "content": "Three.js"
+      },
+      {
+        "type": "checkbox",
+        "id": "three_enabled",
+        "label": "Enable three.js (3D engine)",
+        "default": false,
+        "info": "Adds three.js to the theme's import map so any section or block can use `import * as THREE from 'three'`. Nothing is downloaded until a section actually imports it."
       }
     ]
   },
