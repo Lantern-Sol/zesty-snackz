@@ -1,0 +1,294 @@
+{%- liquid
+  # Initials fall back from the name when no avatar image is set, e.g. "Kayla D." -> "KD"
+  assign initials = ''
+  assign name_words = block.settings.name | split: ' '
+  for word in name_words limit: 2
+    assign letter = word | slice: 0 | upcase
+    assign initials = initials | append: letter
+  endfor
+
+  assign source_label = ''
+  case block.settings.source
+    when 'tiktok'
+      assign source_label = 'TikTok'
+    when 'instagram'
+      assign source_label = 'Instagram'
+    when 'youtube'
+      assign source_label = 'YouTube'
+    when 'facebook'
+      assign source_label = 'Facebook'
+    when 'x'
+      assign source_label = 'X'
+    when 'custom'
+      assign source_label = block.settings.custom_source_label
+  endcase
+-%}
+
+<div
+  class="profile-block"
+  style="--profile-avatar-size: {{ block.settings.avatar_size | default: 44 }}px; --profile-avatar-background: {{ block.settings.avatar_background | default: '#4a72d8' }};"
+  {{ block.shopify_attributes }}
+>
+  <span class="profile-block__avatar">
+    {%- if block.settings.avatar_image != blank -%}
+      {{
+        block.settings.avatar_image
+        | image_url: width: 192
+        | image_tag: widths: '96, 192', class: 'profile-block__avatar-image', alt: block.settings.name
+      }}
+    {%- else -%}
+      <span class="profile-block__initials">{{ initials }}</span>
+    {%- endif -%}
+  </span>
+
+  <span class="profile-block__info">
+    <span class="profile-block__name">
+      {{ block.settings.name }}
+      {%- if block.settings.show_verified %}
+        <svg
+          class="profile-block__verified"
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M2 7.5L5.5 11L12 3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="visually-hidden">Verified</span>
+      {% endif -%}
+    </span>
+    {%- if block.settings.meta_text != blank -%}
+      <span class="profile-block__meta">{{ block.settings.meta_text }}</span>
+    {%- endif -%}
+  </span>
+
+  {%- if source_label != blank -%}
+    <span
+      class="profile-block__source profile-block__source--{{ block.settings.source }}"
+      {% if block.settings.source == 'custom' %}
+        style="--profile-source-background: {{ block.settings.custom_source_background }}; --profile-source-color: {{ block.settings.custom_source_color }};"
+      {% endif %}
+    >
+      {{- source_label -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .profile-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .profile-block__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--profile-avatar-size, 44px);
+    height: var(--profile-avatar-size, 44px);
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--profile-avatar-background);
+  }
+
+  .profile-block__avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-block__initials {
+    color: #fff;
+    font-family: var(--font-body--family);
+    font-weight: 700;
+    font-size: calc(var(--profile-avatar-size, 44px) * 0.36);
+    letter-spacing: 0.02em;
+    user-select: none;
+  }
+
+  .profile-block__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .profile-block__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-weight: var(--font-heading--weight);
+    font-size: 1rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .profile-block__verified {
+    color: #2e9e4f;
+    flex-shrink: 0;
+  }
+
+  .profile-block__meta {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    opacity: 0.55;
+  }
+
+  .profile-block__source {
+    margin-inline-start: auto;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-family: var(--font-body--family);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: var(--profile-source-background, #0b1b2b12);
+    color: var(--profile-source-color, #0b1b2b);
+  }
+
+  .profile-block__source--instagram {
+    --profile-source-background: #e1306c14;
+    --profile-source-color: #e1306c;
+  }
+
+  .profile-block__source--youtube {
+    --profile-source-background: #cc000014;
+    --profile-source-color: #cc0000;
+  }
+
+  .profile-block__source--facebook {
+    --profile-source-background: #1877f214;
+    --profile-source-color: #1877f2;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Profile",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Name",
+      "default": "Kayla D."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified",
+      "label": "Show verified checkmark",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "meta_text",
+      "label": "Meta text",
+      "info": "Shown below the name, e.g. \"2 days ago\".",
+      "default": "2 days ago"
+    },
+    {
+      "type": "header",
+      "content": "Avatar"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_image",
+      "label": "t:settings.image",
+      "info": "Initials from the name are shown when no image is set."
+    },
+    {
+      "type": "color",
+      "id": "avatar_background",
+      "label": "t:settings.background_color",
+      "default": "#4a72d8",
+      "visible_if": "{{ block.settings.avatar_image == blank }}"
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "label": "t:settings.size",
+      "min": 24,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "header",
+      "content": "Source"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Platform",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "tiktok",
+          "label": "TikTok"
+        },
+        {
+          "value": "instagram",
+          "label": "Instagram"
+        },
+        {
+          "value": "youtube",
+          "label": "YouTube"
+        },
+        {
+          "value": "facebook",
+          "label": "Facebook"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "tiktok"
+    },
+    {
+      "type": "text",
+      "id": "custom_source_label",
+      "label": "Custom label",
+      "visible_if": "{{ block.settings.source == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_source_background",
+      "label": "t:settings.background_color",
+      "alpha": true,
+      "default": "#0B1B2B12",
+      "visible_if": "{{ block.settings.source == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_source_color",
+      "label": "t:settings.text_color",
+      "default": "#0B1B2B",
+      "visible_if": "{{ block.settings.source == 'custom' }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Profile",
+      "category": "t:categories.storytelling"
+    }
+  ]
+}
+{% endschema %}

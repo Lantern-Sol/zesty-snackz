@@ -21,7 +21,14 @@ export class AutoSlideshow extends Slideshow {
     const scroller = this.querySelector(':scope > slideshow-container > slideshow-slides');
     if (!scroller) return;
 
-    const children = Array.from(scroller.children);
+    // Blocks with a custom background color render an inline <style> tag
+    // (contrast-override) as a sibling of their visible element — non-visual
+    // tags must not become slides, or empty phantom slides appear between
+    // the real ones.
+    const nonSlideTags = ['style', 'script', 'link', 'template'];
+    const children = Array.from(scroller.children).filter(
+      (child) => !nonSlideTags.includes(child.tagName.toLowerCase())
+    );
     children.forEach((child, index) => {
       if (child.tagName.toLowerCase() === 'slideshow-slide') return;
 

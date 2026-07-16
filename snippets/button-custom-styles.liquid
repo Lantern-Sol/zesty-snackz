@@ -60,6 +60,12 @@
       --button-color: rgb({{ effective_text_color.rgba }});
       --button-border-color: rgb({{ effective_border_color.rgba }});
       --button-focus-outline-color: rgb({{ effective_focus_outline_color.rgb }});
+      {%- if block_settings.custom_button_border_enabled %}
+        --button-border-width: {{ block_settings.custom_button_border_width | default: 1 }}px;
+        /* base.css paints .button-custom's resting outline in the focus color
+           (which matches the background), hiding the border */
+        outline-color: var(--button-border-color);
+      {%- endif %}
       {%- if block_settings.custom_button_shadow_enabled %}
         box-shadow: {{ block_settings.custom_button_shadow_horizontal_offset | default: 0 }}px {{ block_settings.custom_button_shadow_vertical_offset | default: 0 }}px {{ block_settings.custom_button_shadow_blur_radius | default: 0 }}px {{ block_settings.custom_button_shadow_spread_radius | default: 0 }}px {{ custom_shadow_color }};
       {%- else %}
@@ -95,5 +101,10 @@
       --button-color: {{ effective_hover_text }};
       --button-border-color: {{ effective_hover_border }};
     }
+    {%- if block_settings.custom_button_border_enabled %}
+    .button-custom--{{ block_id }}:focus-visible {
+      outline-color: var(--button-focus-outline-color, var(--button-background-color));
+    }
+    {%- endif %}
   {% endstyle %}
 {% endif %}

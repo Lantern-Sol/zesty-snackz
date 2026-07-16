@@ -50,6 +50,7 @@
     "cards_layout": "Cards layout",
     "button_colors": "Button colors",
     "carousel": "Carousel",
+    "content": "Content",
     "carousel_navigation": "Carousel navigation",
     "carousel_pagination": "Carousel pagination",
     "cart_bubble": "Cart bubble",
@@ -719,6 +720,8 @@
     "social_youtube": "Social: YouTube",
     // Uniform style option for borders and overlays
     "solid": "Solid",
+    // Dashed style option for borders
+    "dashed": "Dashed",
     "space_between": "Space between",
     "spotify": "Spotify",
     "spotlight": "Spotlight",

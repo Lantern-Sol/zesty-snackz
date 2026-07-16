@@ -9,6 +9,7 @@
 {%- enddoc -%}
 
 {% assign block_settings = block.settings %}
+{% assign button_rotation = block_settings.rotation | default: 0 %}
 {% render 'button-custom-styles', block_settings: block_settings, block_id: block.id %}
 
 <a
@@ -23,7 +24,7 @@
     {{ block_settings.style_class }}
     {{ block_settings.style_class }}--{{ block.id }}
   "
-  style="{% render 'size-style', settings: block_settings %}"
+  style="{% render 'size-style', settings: block_settings %}{% if button_rotation != 0 %} rotate: {{ button_rotation }}deg;{% endif %}"
   {%- if block_settings.open_in_new_tab -%}
     target="_blank"
     rel="noopener noreferrer"

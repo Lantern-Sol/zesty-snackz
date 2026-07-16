@@ -6,9 +6,9 @@
 
   Navigation lives in a single controls row underneath the slides: the
   previous arrow, the pagination dots, then the next arrow. Dots are rendered
-  by <group-slider-dots>, which shows `slide_count - slides_per_view` dots so
-  the dot count matches the number of arrow presses between the first and last
-  slide (see assets/group-slider-dots.js).
+  by <group-slider-dots>, which shows one dot per scroll stop (stepping by the
+  slides-to-scroll setting) and also toggles the arrows' disabled state at the
+  first/last stop (see assets/group-slider-dots.js).
 
   @param {string} children - The DOM content of the group block.
   @param {number} slide_count - The number of child slides.
@@ -103,12 +103,9 @@
       --slideshow-disabled-gap: {{ gap }}px;
       --slideshow-disabled-slide-width: var(--group-slider-cell-width, auto);
     "
-    {% if desktop_scroll > 1 or mobile_scroll > 1 %}
-      slides-to-scroll="{{ desktop_scroll }}"
-      mobile-slides-to-scroll="{{ mobile_scroll }}"
-    {% endif %}
+    slides-to-scroll="{{ desktop_scroll }}"
+    mobile-slides-to-scroll="{{ mobile_scroll }}"
     initial-slide="0"
-    infinite
   >
     <slideshow-container ref="slideshowContainer">
       <slideshow-slides
@@ -138,7 +135,12 @@
           </button>
         {% endif %}
 
-        {% if has_dots %}
+        {% if show_controls and slide_count > 1 %}
+          {%- comment -%}
+            Rendered whenever there are controls (not only when dots are shown):
+            it also owns the arrows' disabled state, so it must exist on
+            breakpoints where the dots themselves are hidden.
+          {%- endcomment -%}
           <group-slider-dots
             class="group-slider__pagination
               {% unless show_dots_desktop %} group-slider__hide-desktop{% endunless %}
@@ -146,6 +148,8 @@
             slide-count="{{ slide_count }}"
             visible-desktop="{{ desktop_slides }}"
             visible-mobile="{{ mobile_slides }}"
+            scroll-desktop="{{ desktop_scroll }}"
+            scroll-mobile="{{ mobile_scroll }}"
           ></group-slider-dots>
         {% endif %}
 
@@ -172,6 +176,15 @@
 {% stylesheet %}
   .group-slider {
     position: relative;
+
+    /*
+      True gutter from the content column to the screen edge. Expressed in
+      viewport units + the fixed content width so it does NOT collapse to the
+      page margin the way --util-page-margin-offset does (that variable's 100%
+      resolves against the content column, not the viewport). Clamps to the
+      page margin on narrow viewports where the content already fills the row.
+    */
+    --gs-gutter: max(var(--page-margin, 0px), calc((100vw - var(--page-content-width, 100vw)) / 2));
     --gs-bleed-start: 0px;
     --gs-bleed-end: 0px;
   }
@@ -180,39 +193,36 @@
     width: 100%;
   }
 
-  .group-slider__slides {
-    width: 100%;
-  }
-
   /*
-    Bleed: push the slide track out to the section edge so a sliver of the
-    next slide peeks in. Only the track bleeds — the controls row keeps the
-    section's normal inline padding. `--util-page-margin-offset` is the
-    distance from the content column to the section edge in any width mode.
+    Bleed: stretch the scroll track out to the screen edge so a sliver of the
+    next slide peeks in. The scroller itself is the overflow-x boundary, so we
+    widen it and pull it out with negative margins; its ancestors don't clip.
+    Matching inline padding + scroll-padding keeps the first slide aligned to
+    the content column. Only the track bleeds — the controls row stays put.
   */
   @media screen and (min-width: 750px) {
     .group-slider--bleed-start-desktop {
-      --gs-bleed-start: var(--util-page-margin-offset, 0px);
+      --gs-bleed-start: var(--gs-gutter);
     }
     .group-slider--bleed-end-desktop {
-      --gs-bleed-end: var(--util-page-margin-offset, 0px);
+      --gs-bleed-end: var(--gs-gutter);
     }
   }
   @media screen and (max-width: 749px) {
     .group-slider--bleed-start-mobile {
-      --gs-bleed-start: var(--util-page-margin-offset, 0px);
+      --gs-bleed-start: var(--gs-gutter);
     }
     .group-slider--bleed-end-mobile {
-      --gs-bleed-end: var(--util-page-margin-offset, 0px);
+      --gs-bleed-end: var(--gs-gutter);
     }
-  }
-
-  .group-slider__slideshow > slideshow-container {
-    margin-inline-start: calc(-1 * var(--gs-bleed-start));
-    margin-inline-end: calc(-1 * var(--gs-bleed-end));
   }
 
   .group-slider__slides {
+    /* border-box: this width includes the inline padding below, so the inner
+       content box stays exactly the content-column width and slides size to it. */
+    width: calc(100% + var(--gs-bleed-start) + var(--gs-bleed-end));
+    margin-inline-start: calc(-1 * var(--gs-bleed-start));
+    margin-inline-end: calc(-1 * var(--gs-bleed-end));
     padding-inline-start: var(--gs-bleed-start);
     padding-inline-end: var(--gs-bleed-end);
     scroll-padding-inline-start: var(--gs-bleed-start);
@@ -220,28 +230,24 @@
   }
 
   /*
-    Each slide takes 1/N of the row minus its share of the gap and the bleed.
-    Subtracting the bleed keeps the fully-visible slides sized to the content
-    width, so the leftover bleed space reveals the peeking neighbours instead
-    of stretching every slide. Same calc applies whether the slider is active
-    or disabled at this breakpoint — only the scroll/snap behavior changes.
+    Each slide takes 1/N of the row minus its share of the gap. The bleed is
+    handled by the scroller's padding (border-box), so the inner content box is
+    already the content-column width — no need to subtract the bleed here. The
+    leftover bleed/padding space is what reveals the peeking neighbours. Same
+    calc applies whether the slider is active or disabled at this breakpoint.
   */
   .group-slider__slideshow > slideshow-container > slideshow-slides > slideshow-slide {
     @media screen and (min-width: 750px) {
       flex: 0 0 calc(
-        (
-            100% - var(--gs-bleed-start) - var(--gs-bleed-end) -
-              (var(--slideshow-gap, 0px) * (var(--slides-per-view-desktop, 1) - 1))
-          ) / var(--slides-per-view-desktop, 1)
+        (100% - (var(--slideshow-gap, 0px) * (var(--slides-per-view-desktop, 1) - 1))) /
+          var(--slides-per-view-desktop, 1)
       );
     }
 
     @media screen and (max-width: 749px) {
       flex: 0 0 calc(
-        (
-            100% - var(--gs-bleed-start) - var(--gs-bleed-end) -
-              (var(--slideshow-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))
-          ) / var(--slides-per-view-mobile, 1)
+        (100% - (var(--slideshow-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))) /
+          var(--slides-per-view-mobile, 1)
       );
     }
   }
@@ -273,8 +279,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    margin-block-start: 1.25rem;
+    gap: 1.125rem;
+    margin-block-start: 2rem;
   }
 
   .group-slider__arrow {
@@ -292,7 +298,7 @@
   }
 
   .group-slider__arrow[disabled] {
-    opacity: 0.35;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 

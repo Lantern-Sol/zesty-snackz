@@ -13,66 +13,162 @@
 -%}
 
 {% capture video_style %}
-  {%  render 'spacing-style', settings: block_settings %}
-  {% render 'border-override', settings: block_settings %}
-   --size-style-width: {{ block_settings.custom_width }}%; --size-style-width-mobile: {{ block_settings.custom_width_mobile }}%; --size-style-height: 100%;
+   --size-style-width: 100%; --size-style-height: 100%;
    --size-style-aspect-ratio: {{ resolved_aspect_ratio }};
    {% if block_settings.aspect_ratio_mobile != blank %}--size-style-aspect-ratio-mobile: {{ block_settings.aspect_ratio_mobile }};{% endif %}
 {% endcapture %}
 
-{% if block_settings.source == 'uploaded' %}
-  {% render 'video',
-    video: block_settings.video,
-    video_class: 'spacing-style size-style border-style',
-    video_loop: block_settings.video_loop,
-    video_style: video_style,
-    video_preview_image: block_settings.video.preview_image,
-    additional_attributes: block.shopify_attributes
-  %}
-{% else %}
-  {% render 'video',
-    video_from_url: true,
-    video: block_settings.video_url.id,
-    video_class: 'spacing-style size-style border-style',
-    video_type: block_settings.video_url.type,
-    video_style: video_style,
-    video_alt: block_settings.alt,
-    video_preview_image: block_settings.cover_image,
-    additional_attributes: block.shopify_attributes
-  %}
-{% endif %}
+{% capture card_style %}
+  {% render 'spacing-style', settings: block_settings %}
+  {% render 'border-override', settings: block_settings %}
+  --size-style-width: {{ block_settings.custom_width }}%; --size-style-width-mobile: {{ block_settings.custom_width_mobile }}%;
+{% endcapture %}
+
+<div
+  class="social-video-card spacing-style size-style border-style"
+  style="{{ card_style }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="social-video-card__media">
+    {% if block_settings.account != blank %}
+      <span class="social-video-card__account">{{ block_settings.account }}</span>
+    {% endif %}
+
+    {% if block_settings.source == 'uploaded' %}
+      {% render 'video',
+        video: block_settings.video,
+        video_class: 'social-video-card__player size-style',
+        video_loop: block_settings.video_loop,
+        video_style: video_style,
+        video_preview_image: block_settings.video.preview_image
+      %}
+    {% else %}
+      {% render 'video',
+        video_from_url: true,
+        video: block_settings.video_url.id,
+        video_class: 'social-video-card__player size-style',
+        video_type: block_settings.video_url.type,
+        video_style: video_style,
+        video_alt: block_settings.alt,
+        video_preview_image: block_settings.cover_image
+      %}
+    {% endif %}
+
+    {% if block_settings.heading != blank or block_settings.description != blank %}
+      <div class="social-video-card__content">
+        {% if block_settings.heading != blank %}
+          <h6 class="social-video-card__heading">{{ block_settings.heading }}</h6>
+        {% endif %}
+        {% if block_settings.description != blank %}
+          <div class="social-video-card__description">{{ block_settings.description }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
 
 {% stylesheet %}
   .placeholder-video {
     aspect-ratio: 5 / 3;
   }
 
-  /*
-    Apply the aspect ratio to the <deferred-media> container itself, not
-    only the inner img/video. base.css's .size-style sets height: 100%,
-    which would otherwise win over aspect-ratio — height: auto lets the
-    ratio drive the container height.
-  */
-  deferred-media[style*='--size-style-aspect-ratio'] {
+  .social-video-card {
+    display: flex;
+    flex-direction: column;
+    width: var(--size-style-width, 100%);
+  }
+
+  @media screen and (max-width: 749px) {
+    .social-video-card {
+      width: var(--size-style-width-mobile, var(--size-style-width, 100%));
+    }
+  }
+
+  /* Media wrapper is the positioning context for the account chip. */
+  .social-video-card__media {
+    position: relative;
+  }
+
+  /* Apply the aspect ratio to the <deferred-media> container itself, not
+     only the inner img/video. base.css's .size-style sets height: 100%,
+     which would otherwise win over aspect-ratio. */
+  .social-video-card__media deferred-media[style*='--size-style-aspect-ratio'] {
     aspect-ratio: var(--size-style-aspect-ratio, auto);
     height: auto;
   }
 
-  /* Cover-fit any video/image content inside the block so a forced
-     aspect ratio fills the box without letterboxing. */
-  deferred-media video,
-  deferred-media img {
+  /* Cover-fit any video/image content so a forced aspect ratio fills the box
+     without letterboxing. */
+  .social-video-card__media deferred-media video,
+  .social-video-card__media deferred-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  /* Mobile aspect-ratio override. Inline style on <deferred-media> sets
-     --size-style-aspect-ratio, so we need !important to rebind it for
-     mobile — every existing rule reading the var then picks up the
-     mobile value automatically. */
+  /* Account chip: brand blue over a translucent navy background, pinned to the
+     top-left of the media. */
+  .social-video-card__account {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+    color: #009eed;
+    background: rgba(11, 27, 43, 0.78);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: var(--font-body--family);
+    font-size: var(--font-paragraph--size);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Heading + description block: overlaid on the bottom of the video, inset
+     14px from the edges, no gap between the two lines. */
+  .social-video-card__content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 40px 14px 14px;
+    background: linear-gradient(180deg, rgba(11, 27, 43, 0.00) 0%, rgba(11, 27, 43, 0.85) 100%);
+  }
+
+  /* Heading uses the theme's H6 preset. */
+  .social-video-card__heading {
+    margin: 0;
+    font-family: var(--font-h6--family);
+    font-style: var(--font-h6--style);
+    font-weight: var(--font-h6--weight);
+    font-size: var(--font-h6--size);
+    line-height: var(--font-h6--line-height);
+    letter-spacing: var(--font-h6--letter-spacing);
+    text-transform: var(--font-h6--case);
+  }
+
+  /* Description uses standard body typography in brand light-blue. */
+  .social-video-card__description {
+    margin: 0;
+    color: #9fcbe4;
+    font-family: var(--font-body--family);
+    font-style: var(--font-body--style);
+    font-weight: var(--font-body--weight);
+    font-size: var(--font-paragraph--size);
+    line-height: var(--font-paragraph--line-height);
+    text-transform: var(--font-body--case);
+  }
+
+  .social-video-card__description > * {
+    margin: 0;
+  }
+
+  /* Mobile aspect-ratio override. */
   @media screen and (max-width: 749px) {
-    deferred-media[style*='--size-style-aspect-ratio-mobile'] {
+    .social-video-card__media deferred-media[style*='--size-style-aspect-ratio-mobile'] {
       --size-style-aspect-ratio: var(--size-style-aspect-ratio-mobile) !important;
     }
   }
@@ -80,9 +176,35 @@
 
 {% schema %}
 {
-  "name": "t:names.video",
+  "name": "Social media video",
   "tag": null,
   "settings": [
+    {
+      "type": "header",
+      "content": "t:content.content"
+    },
+    {
+      "type": "text",
+      "id": "account",
+      "label": "Account",
+      "default": "@Account"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Video title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>0 views</p>"
+    },
+    {
+      "type": "header",
+      "content": "t:names.video"
+    },
     {
       "type": "select",
       "id": "source",
@@ -177,7 +299,7 @@
         { "value": "6.9/5", "label": "Landscape 6.9:5" },
         { "value": "16/9", "label": "Landscape 16:9" }
       ],
-      "default": "auto"
+      "default": "9/16"
     },
     {
       "type": "select",
@@ -219,7 +341,7 @@
           "label": "t:options.dashed"
         }
       ],
-      "default": "none"
+      "default": "dashed"
     },
     {
       "type": "range",
@@ -229,7 +351,7 @@
       "step": 1,
       "unit": "px",
       "label": "t:settings.thickness",
-      "default": 1,
+      "default": 2,
       "visible_if": "{{ block.settings.border != 'none' }}"
     },
     {
@@ -258,7 +380,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 16
     },
     {
       "type": "header",
@@ -269,7 +391,7 @@
       "id": "padding-block-start",
       "label": "t:settings.top",
       "min": 0,
-      "max": 32,
+      "max": 100,
       "step": 1,
       "unit": "px",
       "default": 0
@@ -279,7 +401,7 @@
       "id": "padding-block-end",
       "label": "t:settings.bottom",
       "min": 0,
-      "max": 32,
+      "max": 100,
       "step": 1,
       "unit": "px",
       "default": 0
@@ -289,7 +411,7 @@
       "id": "padding-inline-start",
       "label": "t:settings.left",
       "min": 0,
-      "max": 32,
+      "max": 100,
       "step": 1,
       "unit": "px",
       "default": 0
@@ -299,7 +421,7 @@
       "id": "padding-inline-end",
       "label": "t:settings.right",
       "min": 0,
-      "max": 32,
+      "max": 100,
       "step": 1,
       "unit": "px",
       "default": 0
@@ -307,7 +429,7 @@
   ],
   "presets": [
     {
-      "name": "t:names.video",
+      "name": "Social media video",
       "category": "t:categories.basic"
     }
   ]

@@ -69,14 +69,6 @@
       "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
     },
     {
-      "type": "color",
-      "id": "custom_button_border",
-      "label": "t:settings.borders",
-      "default": "{{ settings.color_palette.background }}",
-      "alpha": true,
-      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
-    },
-    {
       "type": "checkbox",
       "id": "custom_button_shadow_enabled",
       "label": "Enable shadow",
@@ -134,6 +126,32 @@
       "info": "Leave empty for the default shadow color",
       "alpha": true,
       "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_shadow_enabled }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_button_border_enabled",
+      "label": "Override border",
+      "default": false,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_border",
+      "label": "t:settings.borders",
+      "default": "{{ settings.color_palette.background }}",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_border_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_button_border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' and block.settings.custom_button_border_enabled }}"
     },
     {
       "type": "checkbox",
@@ -243,6 +261,16 @@
       "label": "t:settings.link_text_color",
       "placeholder": "t:settings.default",
       "visible_if": "{{ block.settings.style_class == 'button-unstyled' }}"
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": 0
     },
     {
       "type": "header",

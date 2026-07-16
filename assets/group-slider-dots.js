@@ -32,6 +32,12 @@ class GroupSliderDots extends HTMLElement {
     this.list.className = 'group-slider__dots';
     this.appendChild(this.list);
 
+    // Arrows live alongside the dots in the controls row. We toggle their
+    // disabled state from here so it tracks the first/last dot (i.e. the scroll
+    // step), which is finer-grained than the component's own end detection.
+    this.prevArrow = this.parentElement?.querySelector('.group-slider__arrow--prev');
+    this.nextArrow = this.parentElement?.querySelector('.group-slider__arrow--next');
+
     this.mediaQuery = matchMedia('(min-width: 750px)');
     this.mediaQuery.addEventListener('change', this.build);
     this.slideshow?.addEventListener('slideshow:select', this.handleSelect);
@@ -81,15 +87,12 @@ class GroupSliderDots extends HTMLElement {
   build = () => {
     const { pageCount } = this;
 
-    // Nothing to paginate — hide the whole control on this breakpoint.
+    // Nothing to paginate — hide the dots on this breakpoint, but still run
+    // syncActive below so the arrows get disabled (both ends are the same stop).
     this.hidden = pageCount <= 1;
-    if (this.hidden) {
-      this.list.replaceChildren();
-      return;
-    }
 
     const dots = [];
-    for (let i = 0; i < pageCount; i++) {
+    for (let i = 0; i < pageCount && pageCount > 1; i++) {
       const li = document.createElement('li');
       const button = document.createElement('button');
       button.type = 'button';
@@ -113,6 +116,11 @@ class GroupSliderDots extends HTMLElement {
     Array.from(this.list.children).forEach((li, i) => {
       li.firstElementChild?.setAttribute('aria-selected', String(i === active));
     });
+
+    // Disable the previous arrow on the first stop, the next arrow on the last.
+    const last = this.pageCount - 1;
+    if (this.prevArrow) this.prevArrow.disabled = active <= 0;
+    if (this.nextArrow) this.nextArrow.disabled = active >= last;
   }
 }
 
