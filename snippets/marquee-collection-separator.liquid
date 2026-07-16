@@ -1,0 +1,48 @@
+{%- doc -%}
+  Renders the marquee-collection row separator: a gear framing the product's
+  main image (rest state) that swaps to an arrow on row hover. Both shapes are
+  tinted with the row accent via the `--row-accent` custom property set on the
+  parent row; the gear fill derives a light tint from it.
+
+  @param {object} [product] - The product whose main image sits inside the gear.
+{%- enddoc -%}
+
+{%- liquid
+  assign featured_image = product.featured_media.preview_image
+  if featured_image == blank
+    assign featured_image = product.featured_image
+  endif
+-%}
+
+<span class="marquee-collection__sep" aria-hidden="true">
+  <span class="marquee-collection__sep-gear">
+    <svg viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <path d="M63.9434 5.50781C65.2215 -1.16917 74.7785 -1.16917 76.0566 5.50781C77.2661 11.8292 85.547 13.4748 89.084 8.09863C92.8202 2.41855 101.651 6.07679 100.276 12.7344C98.9746 19.0374 105.996 23.7283 111.32 20.1143C116.945 16.2967 123.703 23.0552 119.886 28.6797C116.272 34.0042 120.963 41.0254 127.266 39.7236C133.924 38.3499 137.581 47.1814 131.901 50.916C126.525 54.4531 128.172 62.734 134.492 63.9434C141.169 65.2215 141.169 74.7785 134.492 76.0566C128.171 77.2661 126.525 85.547 131.901 89.084C137.581 92.8202 133.923 101.651 127.266 100.276C120.963 98.9746 116.272 105.996 119.886 111.32C123.703 116.945 116.945 123.703 111.32 119.886C106.079 116.328 99.1932 120.817 100.221 126.971L100.276 127.266C101.65 133.924 92.8186 137.581 89.084 131.901C85.5469 126.525 77.266 128.172 76.0566 134.492C74.7785 141.169 65.2215 141.169 63.9434 134.492C62.7339 128.171 54.453 126.525 50.916 131.901C47.1798 137.581 38.3487 133.923 39.7236 127.266V127.265C41.0236 120.962 34.0043 116.272 28.6797 119.886C23.0552 123.703 16.2967 116.945 20.1143 111.32C23.7283 105.996 19.0374 98.9746 12.7344 100.276C6.07628 101.65 2.41902 92.8186 8.09863 89.084C13.4749 85.5469 11.8278 77.266 5.50781 76.0566C-1.16917 74.7785 -1.16917 65.2215 5.50781 63.9434C11.8278 62.734 13.4749 54.4531 8.09863 50.916C2.41855 47.1798 6.07679 38.3487 12.7344 39.7236H12.7354C19.038 41.0236 23.7284 34.0043 20.1143 28.6797C16.2967 23.0552 23.0552 16.2967 28.6797 20.1143C34.0043 23.7284 41.0236 19.038 39.7236 12.7354V12.7344C38.3499 6.07628 47.1814 2.41901 50.916 8.09863C54.4531 13.4749 62.734 11.8278 63.9434 5.50781Z" fill="color-mix(in srgb, var(--row-accent) 14%, white)" stroke="var(--row-accent)"/>
+    </svg>
+    {%- if featured_image != blank -%}
+      {{
+        featured_image
+        | image_url: width: 400
+        | image_tag:
+          loading: 'lazy',
+          width: 200,
+          height: 200,
+          class: 'marquee-collection__sep-img',
+          alt: ''
+      }}
+    {%- endif -%}
+  </span>
+  <span class="marquee-collection__sep-arrow">
+    <svg viewBox="0 0 141 141" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <g clip-path="url(#mq-arrow-clip)">
+        <path d="M87.067 115.964L86.8674 115.946L92.2485 53.596L29.9084 48.065L29.9259 47.8655L46.9034 33.6197L109.456 39.1515L104.039 101.711L87.067 115.964Z" fill="var(--row-accent)"/>
+        <path d="M28.0952 97.7614L87.6743 47.7686L97.1956 59.1156L37.6165 109.108L28.0952 97.7614Z" fill="var(--row-accent)"/>
+      </g>
+      <defs>
+        <clipPath id="mq-arrow-clip">
+          <rect width="100" height="100" fill="white" transform="translate(76.6044) rotate(50)"/>
+        </clipPath>
+      </defs>
+    </svg>
+  </span>
+</span>

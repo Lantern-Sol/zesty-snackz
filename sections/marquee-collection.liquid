@@ -1,0 +1,395 @@
+{% comment %}
+  Marquee collection
+  ------------------
+  Renders one horizontal marquee row per product in the chosen collection.
+  Each row scrolls the product title (in the product's accent colour) separated
+  by a gear that frames the product's main image. Hovering a row swaps the gear
+  for an arrow. Colours come from the same metafields as the product cards:
+    - product.metafields.custom.color        -> accent (title + separator)
+    - product.metafields.custom.color_light  -> light backing behind the image
+{% endcomment %}
+
+<script
+  src="{{ 'marquee.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  assign products = section.settings.collection.products
+  assign max_rows = section.settings.max_products
+  assign gap = section.settings.gap_between_elements
+  assign base_direction = section.settings.movement_direction
+
+  if section.settings.background_color != blank
+    render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
+  endif
+%}
+
+<div
+  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+></div>
+
+<div
+  class="marquee-collection section spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+  style="
+    {%- render 'spacing-style', settings: section.settings %};
+    --mq-title-size: {{ section.settings.title_size }}px;
+    --mq-sep-size: {{ section.settings.separator_size }}px;
+    --mq-row-gap: {{ section.settings.gap_between_rows }}px;
+  "
+>
+  {%- if products.size > 0 -%}
+    {%- for product in products limit: max_rows -%}
+      {%- liquid
+        assign accent = product.metafields.custom.color.value | default: 'var(--color-foreground)'
+        assign light = product.metafields.custom.color_light.value
+
+        # Alternate the scroll direction row-to-row when enabled.
+        assign direction = base_direction
+        assign row_is_odd = forloop.index0 | modulo: 2
+        if section.settings.alternate_direction and row_is_odd == 1
+          if base_direction == 'normal'
+            assign direction = 'reverse'
+          else
+            assign direction = 'normal'
+          endif
+        endif
+      -%}
+      <marquee-component
+        class="marquee-collection__row gap-style"
+        style="
+          {% render 'gap-style', value: gap, name: 'marquee-gap' %}
+          --marquee-direction: {{ direction }};
+          --row-accent: {{ accent }};
+          {% if light != blank %}--row-light: {{ light }};{% endif %}
+        "
+        data-speed-factor="{{ section.settings.speed }}"
+        data-movement-direction="{{ direction }}"
+      >
+        <div class="marquee__wrapper" ref="wrapper">
+          <div class="marquee__content" ref="content">
+            <div class="marquee__repeated-items" ref="marqueeItems[]">
+              <a class="marquee-collection__item" href="{{ product.url }}">
+                <span class="marquee-collection__title">{{ product.title }}</span>
+                {% render 'marquee-collection-separator', product: product %}
+              </a>
+            </div>
+          </div>
+        </div>
+      </marquee-component>
+    {%- endfor -%}
+  {%- else -%}
+    {%- comment -%} Editor onboarding: no collection selected yet. {%- endcomment -%}
+    {%- for i in (1..3) -%}
+      {%- liquid
+        assign direction = base_direction
+        assign row_is_odd = forloop.index0 | modulo: 2
+        if section.settings.alternate_direction and row_is_odd == 1
+          assign direction = 'reverse'
+        endif
+      -%}
+      <marquee-component
+        class="marquee-collection__row gap-style"
+        style="
+          {% render 'gap-style', value: gap, name: 'marquee-gap' %}
+          --marquee-direction: {{ direction }};
+          --row-accent: var(--color-foreground);
+        "
+        data-speed-factor="{{ section.settings.speed }}"
+        data-movement-direction="{{ direction }}"
+      >
+        <div class="marquee__wrapper" ref="wrapper">
+          <div class="marquee__content" ref="content">
+            <div class="marquee__repeated-items" ref="marqueeItems[]">
+              <span class="marquee-collection__item">
+                <span class="marquee-collection__title">Product name</span>
+                {% render 'marquee-collection-separator' %}
+              </span>
+            </div>
+          </div>
+        </div>
+      </marquee-component>
+    {%- endfor -%}
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .marquee-collection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mq-row-gap, 0px);
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* --- marquee mechanics (shared with marquee.js) --- */
+  .marquee-collection__row {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .marquee-collection__row .marquee__wrapper {
+    display: flex;
+    gap: var(--marquee-gap);
+    width: fit-content;
+    white-space: nowrap;
+  }
+
+  .marquee-collection__row .marquee__content {
+    min-width: max-content;
+    display: flex;
+    gap: var(--marquee-gap);
+  }
+
+  .marquee-collection__row .marquee__repeated-items {
+    min-width: max-content;
+    display: flex;
+    gap: var(--marquee-gap);
+    align-items: center;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    marquee-component.marquee-collection__row:not([data-disabled]) .marquee__wrapper {
+      animation: marquee-motion var(--marquee-speed) linear infinite var(--marquee-direction);
+    }
+  }
+
+  @keyframes marquee-motion {
+    to {
+      transform: translate3d(calc(-50% - (var(--marquee-gap) / 2)), 0, 0);
+    }
+  }
+
+  /* --- row content --- */
+  .marquee-collection__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--marquee-gap);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .marquee-collection__title {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 700);
+    font-size: var(--mq-title-size);
+    line-height: 1;
+    /* Trim ascent/descent so the element's height equals the cap height and
+       the text centers truly against the separator (same approach as h1 in
+       theme-styles-variables). */
+    text-box: trim-both cap alphabetic;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--row-accent);
+  }
+
+  /* --- separator: gear (rest) <-> arrow (hover) --- */
+  .marquee-collection__sep {
+    position: relative;
+    flex: none;
+    width: var(--mq-sep-size);
+    height: var(--mq-sep-size);
+    display: inline-flex;
+    color: var(--row-accent);
+  }
+
+  .marquee-collection__sep-gear,
+  .marquee-collection__sep-arrow {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .marquee-collection__sep-gear svg,
+  .marquee-collection__sep-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .marquee-collection__sep-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 70%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+  }
+
+  /* rest state: arrow */
+  .marquee-collection__sep-gear {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+
+  /* hover: swap arrow for gear across the whole row */
+  .marquee-collection__row:hover .marquee-collection__sep-gear {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .marquee-collection__row:hover .marquee-collection__sep-arrow {
+    opacity: 0;
+    transform: scale(0.55) rotate(-18deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-collection__sep-gear,
+    .marquee-collection__sep-arrow {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Marquee collection",
+  "class": "ui-test-marquee-collection",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Maximum rows",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 40,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "separator_size",
+      "label": "Separator size",
+      "min": 40,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 112
+    },
+    {
+      "type": "range",
+      "id": "gap_between_elements",
+      "label": "Gap between title and separator",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "gap_between_rows",
+      "label": "Gap between rows",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "select",
+      "id": "movement_direction",
+      "label": "Direction",
+      "options": [
+        {
+          "value": "reverse",
+          "label": "Forward"
+        },
+        {
+          "value": "normal",
+          "label": "Reverse"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "checkbox",
+      "id": "alternate_direction",
+      "label": "Alternate direction per row",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Speed",
+      "info": "Lower is faster.",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}
