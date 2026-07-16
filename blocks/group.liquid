@@ -107,6 +107,13 @@
       "visible_if": "{{ block.settings.vertical_alignment == 'flex-end' }}"
     },
     {
+      "type": "checkbox",
+      "id": "wrap",
+      "label": "t:settings.wrap",
+      "default": false,
+      "visible_if": "{{ block.settings.content_direction == 'row' }}"
+    },
+    {
       "type": "select",
       "id": "horizontal_alignment_flex_direction_column",
       "label": "t:settings.alignment",

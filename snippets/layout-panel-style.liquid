@@ -35,9 +35,14 @@
       assign vertical_alignment_mobile = settings.mobile_vertical_alignment | default: vertical_alignment_mobile
     endif
   endif
+
+  assign flex_wrap = 'nowrap'
+  if settings.content_direction == 'row' and settings.wrap
+    assign flex_wrap = 'wrap'
+  endif
 -%}
 
---flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-wrap: nowrap; --flex-wrap-mobile: wrap;
+--flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-wrap: {{ flex_wrap }}; --flex-wrap-mobile: wrap;
 
 {% render 'gap-style', value: settings.gap %}
 {% if settings.use_mobile_gap %}
