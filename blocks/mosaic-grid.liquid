@@ -1,0 +1,452 @@
+{%- liquid
+  assign s = block.settings
+  assign row_class = 'mosaic-grid--rows-' | append: s.row_height_mode
+
+  assign skip_contrast = false
+  if s.background_media != blank and s.background_media != 'none'
+    assign skip_contrast = true
+  endif
+%}
+
+{% render 'contrast-override', background_color: s.background_color, section_id: block.id, skip_contrast: skip_contrast %}
+
+<div
+  class="
+    mosaic-grid
+    {{ row_class }}
+    {% if s.compact_packing %}mosaic-grid--dense{% endif %}
+    spacing-style
+    border-style
+    {% if s.background_color != blank %}color-custom-{{ block.id }}{% endif %}
+  "
+  style="
+    --mosaic-columns: {{ s.columns }};
+    --mosaic-columns-mobile: {{ s.columns_mobile }};
+    --mosaic-row-height: {{ s.row_height }}px;
+    --mosaic-row-height-mobile: {{ s.row_height_mobile }}px;
+    --mosaic-gap: {{ s.gap }}px;
+    --mosaic-gap-mobile: {% if s.use_mobile_gap %}{{ s.mobile_gap }}{% else %}{{ s.gap }}{% endif %}px;
+    {% render 'spacing-style', settings: s %}
+    {% render 'border-override', settings: s %}
+  "
+  {{ block.shopify_attributes }}
+  data-testid="mosaic-grid"
+>
+  {% content_for 'blocks' %}
+</div>
+
+{% stylesheet %}
+  .mosaic-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--mosaic-columns, 3), minmax(0, 1fr));
+    gap: var(--mosaic-gap, 12px);
+    width: 100%;
+  }
+
+  /* Fixed rows keep the mosaic proportions predictable when cells span rows;
+     minmax lets a row grow rather than clip if its content is taller. */
+  .mosaic-grid--rows-fixed {
+    grid-auto-rows: minmax(var(--mosaic-row-height, 220px), auto);
+  }
+
+  /* Rows sized to their content. Spanning still works, but heights are uneven. */
+  .mosaic-grid--rows-auto {
+    grid-auto-rows: min-content;
+  }
+
+  /* Backfill empty tracks left by explicitly-placed cells. */
+  .mosaic-grid--dense {
+    grid-auto-flow: row dense;
+  }
+
+  @media screen and (max-width: 749px) {
+    .mosaic-grid {
+      grid-template-columns: repeat(var(--mosaic-columns-mobile, 1), minmax(0, 1fr));
+      gap: var(--mosaic-gap-mobile, var(--mosaic-gap, 12px));
+    }
+
+    .mosaic-grid--rows-fixed {
+      grid-auto-rows: minmax(var(--mosaic-row-height-mobile, var(--mosaic-row-height, 220px)), auto);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Mosaic grid",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_mosaic-cell"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "paragraph",
+      "content": "Add Mosaic cell blocks inside this grid. Each cell sets its own column/row span, and can hold any blocks (a group is the default starting point)."
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns (mobile)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "row_height_mode",
+      "label": "Row height",
+      "options": [
+        {
+          "value": "fixed",
+          "label": "Fixed"
+        },
+        {
+          "value": "auto",
+          "label": "Fit content"
+        }
+      ],
+      "default": "fixed"
+    },
+    {
+      "type": "range",
+      "id": "row_height",
+      "label": "Row height",
+      "min": 40,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 220,
+      "visible_if": "{{ block.settings.row_height_mode == 'fixed' }}"
+    },
+    {
+      "type": "range",
+      "id": "row_height_mobile",
+      "label": "Row height (mobile)",
+      "min": 40,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 160,
+      "visible_if": "{{ block.settings.row_height_mode == 'fixed' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "compact_packing",
+      "label": "Fill gaps",
+      "info": "Lets later cells backfill empty tracks left by pinned cells.",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_gap",
+      "label": "Use mobile gap",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "mobile_gap",
+      "label": "Mobile gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.use_mobile_gap }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "header",
+      "content": "t:content.borders"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.thickness",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:settings.color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start-mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end-mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start-mobile",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end-mobile",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_mobile_padding }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mosaic grid",
+      "category": "t:categories.layout",
+      "settings": {
+        "columns": 3,
+        "columns_mobile": 2,
+        "row_height_mode": "fixed",
+        "row_height": 220,
+        "row_height_mobile": 160,
+        "gap": 12
+      },
+      "blocks": {
+        "cell_1": {
+          "type": "_mosaic-cell",
+          "settings": {
+            "col_span": 1,
+            "row_span": 1,
+            "background_color": "#1a9bd7",
+            "padding-block-start": 24,
+            "padding-block-end": 24,
+            "padding-inline-start": 24,
+            "padding-inline-end": 24,
+            "border_radius": 16
+          },
+          "blocks": {
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "<h4>One</h4>"
+              }
+            }
+          },
+          "block_order": ["text"]
+        },
+        "cell_2": {
+          "type": "_mosaic-cell",
+          "settings": {
+            "col_span": 1,
+            "row_span": 1,
+            "background_color": "#f4c430",
+            "padding-block-start": 24,
+            "padding-block-end": 24,
+            "padding-inline-start": 24,
+            "padding-inline-end": 24,
+            "border_radius": 16
+          },
+          "blocks": {
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "<h4>Two</h4>"
+              }
+            }
+          },
+          "block_order": ["text"]
+        },
+        "cell_3": {
+          "type": "_mosaic-cell",
+          "settings": {
+            "col_span": 1,
+            "row_span": 2,
+            "background_color": "#12233b",
+            "padding-block-start": 24,
+            "padding-block-end": 24,
+            "padding-inline-start": 24,
+            "padding-inline-end": 24,
+            "border_radius": 16
+          },
+          "blocks": {
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "<h4>Three — tall</h4>"
+              }
+            }
+          },
+          "block_order": ["text"]
+        },
+        "cell_4": {
+          "type": "_mosaic-cell",
+          "settings": {
+            "col_span": 2,
+            "row_span": 1,
+            "background_color": "#f4a6c0",
+            "padding-block-start": 24,
+            "padding-block-end": 24,
+            "padding-inline-start": 24,
+            "padding-inline-end": 24,
+            "border_radius": 16
+          },
+          "blocks": {
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "<h4>Four — wide</h4>"
+              }
+            }
+          },
+          "block_order": ["text"]
+        }
+      },
+      "block_order": ["cell_1", "cell_2", "cell_3", "cell_4"]
+    }
+  ]
+}
+{% endschema %}
