@@ -7,6 +7,7 @@
   @param {object} [background_image] - The background image
   @param {object} [background_image_mobile] - Optional mobile-specific background image. Overrides background_image on viewports <= 749px.
   @param {string} [background_image_position] - The background image position
+  @param {number} [background_image_position_y] - The vertical object position (0-100%) of the background image
   @param {string} [placeholder] - The placeholder
   @param {object} [block] - The block object
   @param {object} [section] - The section object
@@ -75,8 +76,12 @@
     </div>
   {%- endif -%}
 {% elsif background_media == 'image' %}
+  {%- liquid
+    assign bg_image_position_y = background_image_position_y | default: 50
+  -%}
   <div
     class="background-image-container{% if background_image_position == 'fit' %} background-image-fit{% endif %}"
+    style="--background-image-position-y: {{ bg_image_position_y }}%;"
   >
     {% liquid
       # Define sizes based on page width setting whether this is called from a section or block

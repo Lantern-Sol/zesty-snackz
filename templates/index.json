@@ -569,7 +569,7 @@
             "text": "<p>Sour candy re-engineered by two guys with a boat, a camera, and millions of witnesses. Sliced paper-thin so it hits hard and never gets stuck in your teeth.</p>",
             "mobile_text": "",
             "width": "100%",
-            "max_width": "none",
+            "max_width": "normal",
             "alignment": "center",
             "height_mode": "auto",
             "desktop_height": "",
@@ -953,124 +953,10 @@
         "padding-block-end-mobile": 0
       }
     },
-    "section_ebRMEK": {
+    "section_VPfUrc": {
       "type": "section",
       "blocks": {
-        "floating_stickers_bJB3iz": {
-          "type": "floating-stickers",
-          "name": "Floating stickers",
-          "settings": {
-            "full_width": false,
-            "behind": false
-          },
-          "blocks": {
-            "floating_sticker_cVpcGp": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_13_hd-red-strawberies_large_83a59602-645d-4311-84f3-99729de75f5f.webp",
-                "size": 293,
-                "rotation": -15,
-                "shadow": true,
-                "x_position": 3,
-                "y_position": 43,
-                "motion_offset": 0,
-                "peel_enabled": true,
-                "peel_code": "SECRET DISCOUNT"
-              },
-              "blocks": {}
-            },
-            "floating_sticker_4TR9e3": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_39_zesty_bitez_raspberry_12.2.25-1_1.webp",
-                "size": 200,
-                "rotation": -40,
-                "shadow": true,
-                "x_position": 3,
-                "y_position": 91,
-                "motion_offset": 1.2,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_YGwVW4": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_37_wfwe_1.webp",
-                "size": 220,
-                "rotation": 20,
-                "shadow": true,
-                "x_position": 15,
-                "y_position": 67,
-                "motion_offset": 0.6,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_hHcicM": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_38_hd-banana_1_19556e64-adac-4e1a-952c-e5f2b7c74969.webp",
-                "size": 188,
-                "rotation": -5,
-                "shadow": true,
-                "x_position": 81,
-                "y_position": 67,
-                "motion_offset": 1.8,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_fFdXUM": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_40_zesty_bitez_strawberry_12.2.25-3_1.webp",
-                "size": 188,
-                "rotation": -80,
-                "shadow": true,
-                "x_position": 100,
-                "y_position": 38,
-                "motion_offset": 0.9,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_Mb7khV": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/imgi_15_hd-blue-strawberries_large_c2273648-a914-48ed-a10e-88472d1e1aa7.webp",
-                "size": 306,
-                "rotation": -10,
-                "shadow": true,
-                "x_position": 98,
-                "y_position": 93,
-                "motion_offset": 2.4,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "floating_sticker_cVpcGp",
-            "floating_sticker_4TR9e3",
-            "floating_sticker_YGwVW4",
-            "floating_sticker_hHcicM",
-            "floating_sticker_fFdXUM",
-            "floating_sticker_Mb7khV"
-          ]
-        },
-        "text_BDgHCP": {
+        "text_zwJewA": {
           "type": "text",
           "name": "t:names.heading",
           "settings": {
@@ -1112,7 +998,7 @@
           },
           "blocks": {}
         },
-        "infinite_slider_KnxMWM": {
+        "infinite_slider_Wk3NaN": {
           "type": "infinite-slider",
           "name": "Infinite slider",
           "settings": {
@@ -1130,7 +1016,7 @@
             "show_arrows_mobile": false,
             "background_color": "",
             "padding-block-start": 0,
-            "padding-block-end": 30,
+            "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0,
             "use_mobile_padding": false,
@@ -1449,6 +1335,186 @@
             "image_igzxDF",
             "image_hTKmq9"
           ]
+        }
+      },
+      "block_order": [
+        "text_zwJewA",
+        "infinite_slider_Wk3NaN"
+      ],
+      "name": "Store list",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 30,
+        "use_mobile_gap": false,
+        "mobile_gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "{{ settings.color_palette.foreground }}",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "background_image_position_y": 50,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "floating_media_type": "image",
+        "floating_media_text": "",
+        "floating_media_text_preset": "paragraph",
+        "floating_media_text_preset_mobile": "",
+        "floating_media_text_alignment": "center",
+        "floating_media_text_padding_y": 8,
+        "floating_media_text_padding_x": 16,
+        "floating_media_width": 120,
+        "floating_media_anchor": "top-right",
+        "floating_media_offset_x": 0,
+        "floating_media_offset_y": 0,
+        "floating_media_rotation": 0,
+        "floating_media_hide_mobile": false,
+        "use_floating_media_mobile_settings": false,
+        "floating_media_width_mobile": 120,
+        "floating_media_anchor_mobile": "",
+        "floating_media_offset_x_mobile": 0,
+        "floating_media_offset_y_mobile": 0,
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 30,
+        "padding-block-end": 30,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0,
+        "use_mobile_padding": false,
+        "padding-block-start-mobile": 0,
+        "padding-block-end-mobile": 0,
+        "padding-inline-start-mobile": 0,
+        "padding-inline-end-mobile": 0
+      }
+    },
+    "section_ebRMEK": {
+      "type": "section",
+      "blocks": {
+        "floating_stickers_bJB3iz": {
+          "type": "floating-stickers",
+          "name": "Floating stickers",
+          "settings": {
+            "full_width": false,
+            "behind": false
+          },
+          "blocks": {
+            "floating_sticker_cVpcGp": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_13_hd-red-strawberies_large_83a59602-645d-4311-84f3-99729de75f5f.webp",
+                "size": 293,
+                "rotation": -15,
+                "shadow": true,
+                "x_position": 3,
+                "y_position": 43,
+                "motion_offset": 0,
+                "peel_enabled": true,
+                "peel_code": "SECRET DISCOUNT"
+              },
+              "blocks": {}
+            },
+            "floating_sticker_4TR9e3": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_39_zesty_bitez_raspberry_12.2.25-1_1.webp",
+                "size": 200,
+                "rotation": -40,
+                "shadow": true,
+                "x_position": 3,
+                "y_position": 91,
+                "motion_offset": 1.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_YGwVW4": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_37_wfwe_1.webp",
+                "size": 220,
+                "rotation": 20,
+                "shadow": true,
+                "x_position": 15,
+                "y_position": 67,
+                "motion_offset": 0.6,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_hHcicM": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_38_hd-banana_1_19556e64-adac-4e1a-952c-e5f2b7c74969.webp",
+                "size": 188,
+                "rotation": -5,
+                "shadow": true,
+                "x_position": 81,
+                "y_position": 67,
+                "motion_offset": 1.8,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fFdXUM": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_40_zesty_bitez_strawberry_12.2.25-3_1.webp",
+                "size": 188,
+                "rotation": -80,
+                "shadow": true,
+                "x_position": 100,
+                "y_position": 38,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Mb7khV": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/imgi_15_hd-blue-strawberries_large_c2273648-a914-48ed-a10e-88472d1e1aa7.webp",
+                "size": 306,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 98,
+                "y_position": 93,
+                "motion_offset": 2.4,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "floating_sticker_cVpcGp",
+            "floating_sticker_4TR9e3",
+            "floating_sticker_YGwVW4",
+            "floating_sticker_hHcicM",
+            "floating_sticker_fFdXUM",
+            "floating_sticker_Mb7khV"
+          ]
         },
         "group_ynGwm8": {
           "type": "group",
@@ -1681,8 +1747,6 @@
       },
       "block_order": [
         "floating_stickers_bJB3iz",
-        "text_BDgHCP",
-        "infinite_slider_KnxMWM",
         "group_ynGwm8"
       ],
       "name": "Bitez count",
@@ -1694,7 +1758,7 @@
         "align_baseline": false,
         "horizontal_alignment_flex_direction_column": "flex-start",
         "vertical_alignment_flex_direction_column": "center",
-        "gap": 30,
+        "gap": 0,
         "use_mobile_gap": false,
         "mobile_gap": 12,
         "section_width": "page-width",
@@ -1703,8 +1767,9 @@
         "background_media": "image",
         "background_color": "{{ settings.color_palette.foreground }}",
         "video_position": "cover",
-        "background_image": "shopify://shop_images/Group_1597884176.webp",
+        "background_image": "shopify://shop_images/numbers.webp",
         "background_image_position": "cover",
+        "background_image_position_y": 0,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -1732,7 +1797,7 @@
         "border_opacity": 100,
         "border_color": "",
         "border_radius": 0,
-        "padding-block-start": 30,
+        "padding-block-start": 0,
         "padding-block-end": 0,
         "padding-inline-start": 0,
         "padding-inline-end": 0,
@@ -2005,6 +2070,7 @@
         "video_position": "cover",
         "background_image": "shopify://shop_images/Section.webp",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -3336,6 +3402,10 @@
             "show_dots_mobile": true,
             "show_arrows_desktop": true,
             "show_arrows_mobile": false,
+            "bleed_left_desktop": false,
+            "bleed_right_desktop": false,
+            "bleed_left_mobile": false,
+            "bleed_right_mobile": false,
             "content_direction": "row",
             "vertical_on_mobile": true,
             "horizontal_alignment": "flex-start",
@@ -3554,6 +3624,7 @@
         "background_color": "{{ settings.color_palette.foreground }}",
         "video_position": "cover",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -3839,6 +3910,7 @@
         "background_color": "",
         "video_position": "cover",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -4460,7 +4532,7 @@
                 "line_height": "tight",
                 "letter_spacing": "normal",
                 "case": "uppercase",
-                "text_color": "#F96CB1",
+                "text_color": "#f96cb1",
                 "shadow": true,
                 "x_position": 50,
                 "y_position": 35,
@@ -5706,6 +5778,7 @@
         "video_position": "cover",
         "background_image": "shopify://shop_images/Sectionbg2.png",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -5917,6 +5990,10 @@
             "show_dots_mobile": true,
             "show_arrows_desktop": false,
             "show_arrows_mobile": false,
+            "bleed_left_desktop": false,
+            "bleed_right_desktop": false,
+            "bleed_left_mobile": false,
+            "bleed_right_mobile": false,
             "content_direction": "row",
             "vertical_on_mobile": true,
             "horizontal_alignment": "flex-start",
@@ -5966,6 +6043,7 @@
         "background_color": "{{ settings.color_palette.foreground }}",
         "video_position": "cover",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -6467,6 +6545,7 @@
         "video_position": "cover",
         "background_image": "shopify://shop_images/Frame.webp",
         "background_image_position": "cover",
+        "background_image_position_y": 50,
         "toggle_overlay": false,
         "overlay_color": "#00000026",
         "overlay_style": "solid",
@@ -6508,6 +6587,7 @@
   },
   "order": [
     "hero_jVaWmY",
+    "section_VPfUrc",
     "section_ebRMEK",
     "section_b4KPwG",
     "product_list_fa6P9H",

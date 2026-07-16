@@ -4,7 +4,14 @@
   wrapped in a <slideshow-auto-component> so they can be presented as a
   slider on either breakpoint (or both).
 
+  Navigation lives in a single controls row underneath the slides: the
+  previous arrow, the pagination dots, then the next arrow. Dots are rendered
+  by <group-slider-dots>, which shows `slide_count - slides_per_view` dots so
+  the dot count matches the number of arrow presses between the first and last
+  slide (see assets/group-slider-dots.js).
+
   @param {string} children - The DOM content of the group block.
+  @param {number} slide_count - The number of child slides.
   @param {object} settings - The settings of the group block.
   @param {string} shopify_attributes - String with Shopify attributes for the editor.
   @param {string} [class] - Custom classes for the group block.
@@ -34,7 +41,33 @@
     assign show_any_arrows = true
   endif
 
+  assign has_dots = false
+  if show_any_dots and slide_count > 1
+    assign has_dots = true
+  endif
+
+  assign show_controls = false
+  if show_any_arrows or has_dots
+    assign show_controls = true
+  endif
+
   assign gap = settings.gap | default: 0
+
+  # Bleed classes — only meaningful when the slider is enabled on that
+  # breakpoint, so gate on enable_* here and keep the CSS itself dumb.
+  assign bleed_classes = ''
+  if enable_desktop and settings.bleed_left_desktop
+    assign bleed_classes = bleed_classes | append: ' group-slider--bleed-start-desktop'
+  endif
+  if enable_desktop and settings.bleed_right_desktop
+    assign bleed_classes = bleed_classes | append: ' group-slider--bleed-end-desktop'
+  endif
+  if enable_mobile and settings.bleed_left_mobile
+    assign bleed_classes = bleed_classes | append: ' group-slider--bleed-start-mobile'
+  endif
+  if enable_mobile and settings.bleed_right_mobile
+    assign bleed_classes = bleed_classes | append: ' group-slider--bleed-end-mobile'
+  endif
 -%}
 
 <div
@@ -43,6 +76,7 @@
     group-slider
     group-block--height-{{ settings.height }}
     group-block--width-{{ settings.width }}
+    {{ bleed_classes }}
 
     border-style
     spacing-style
@@ -77,15 +111,6 @@
     infinite
   >
     <slideshow-container ref="slideshowContainer">
-      {% if show_any_arrows %}
-        {% render 'slideshow-arrows',
-          icon_style: 'arrows_large',
-          arrows_position: 'center',
-          mobile_arrows_position: 'center',
-          show_arrows_desktop: show_arrows_desktop,
-          show_arrows_mobile: show_arrows_mobile
-        %}
-      {% endif %}
       <slideshow-slides
         tabindex="-1"
         ref="scroller"
@@ -94,21 +119,51 @@
         {{- children -}}
       </slideshow-slides>
     </slideshow-container>
-    {% if show_any_dots and slide_count > 1 %}
-      <div
-        class="group-slider__controls-wrap
-          {% unless show_dots_desktop %}group-slider__controls--no-desktop{% endunless %}
-          {% unless show_dots_mobile %}group-slider__controls--no-mobile{% endunless %}"
-      >
-        {%- render 'slideshow-controls',
-          style: 'dots',
-          item_count: slide_count,
-          show_arrows: false,
-          arrows_on_media: false,
-          controls_on_media: false,
-          pagination_position: 'center',
-          icon_style: 'none'
-        -%}
+
+    {% if show_controls %}
+      <div class="group-slider__controls">
+        {% if show_any_arrows %}
+          <button
+            type="button"
+            class="group-slider__arrow group-slider__arrow--prev button button-unstyled
+              {% unless show_arrows_desktop %} group-slider__hide-desktop{% endunless %}
+              {% unless show_arrows_mobile %} group-slider__hide-mobile{% endunless %}"
+            aria-label="{{ 'accessibility.slideshow_previous' | t }}"
+            on:click="/previous"
+            ref="previous"
+          >
+            <span class="svg-wrapper">
+              {{- 'icon-slider-arrow.svg' | inline_asset_content -}}
+            </span>
+          </button>
+        {% endif %}
+
+        {% if has_dots %}
+          <group-slider-dots
+            class="group-slider__pagination
+              {% unless show_dots_desktop %} group-slider__hide-desktop{% endunless %}
+              {% unless show_dots_mobile %} group-slider__hide-mobile{% endunless %}"
+            slide-count="{{ slide_count }}"
+            visible-desktop="{{ desktop_slides }}"
+            visible-mobile="{{ mobile_slides }}"
+          ></group-slider-dots>
+        {% endif %}
+
+        {% if show_any_arrows %}
+          <button
+            type="button"
+            class="group-slider__arrow group-slider__arrow--next button button-unstyled
+              {% unless show_arrows_desktop %} group-slider__hide-desktop{% endunless %}
+              {% unless show_arrows_mobile %} group-slider__hide-mobile{% endunless %}"
+            aria-label="{{ 'accessibility.slideshow_next' | t }}"
+            on:click="/next"
+            ref="next"
+          >
+            <span class="svg-wrapper">
+              {{- 'icon-slider-arrow.svg' | inline_asset_content -}}
+            </span>
+          </button>
+        {% endif %}
       </div>
     {% endif %}
   </slideshow-auto-component>
@@ -117,6 +172,8 @@
 {% stylesheet %}
   .group-slider {
     position: relative;
+    --gs-bleed-start: 0px;
+    --gs-bleed-end: 0px;
   }
 
   .group-slider__slideshow {
@@ -128,37 +185,63 @@
   }
 
   /*
-    Arrows/dots stay hidden on the breakpoints the merchant didn't enable
-    them for, even when the slider IS active on that breakpoint.
+    Bleed: push the slide track out to the section edge so a sliver of the
+    next slide peeks in. Only the track bleeds — the controls row keeps the
+    section's normal inline padding. `--util-page-margin-offset` is the
+    distance from the content column to the section edge in any width mode.
   */
   @media screen and (min-width: 750px) {
-    .group-slider__controls--no-desktop {
-      display: none;
+    .group-slider--bleed-start-desktop {
+      --gs-bleed-start: var(--util-page-margin-offset, 0px);
+    }
+    .group-slider--bleed-end-desktop {
+      --gs-bleed-end: var(--util-page-margin-offset, 0px);
     }
   }
   @media screen and (max-width: 749px) {
-    .group-slider__controls--no-mobile {
-      display: none;
+    .group-slider--bleed-start-mobile {
+      --gs-bleed-start: var(--util-page-margin-offset, 0px);
+    }
+    .group-slider--bleed-end-mobile {
+      --gs-bleed-end: var(--util-page-margin-offset, 0px);
     }
   }
 
+  .group-slider__slideshow > slideshow-container {
+    margin-inline-start: calc(-1 * var(--gs-bleed-start));
+    margin-inline-end: calc(-1 * var(--gs-bleed-end));
+  }
+
+  .group-slider__slides {
+    padding-inline-start: var(--gs-bleed-start);
+    padding-inline-end: var(--gs-bleed-end);
+    scroll-padding-inline-start: var(--gs-bleed-start);
+    scroll-padding-inline-end: var(--gs-bleed-end);
+  }
+
   /*
-    Each slide takes 1/N of the row minus its share of the gap. Same calc
-    applies whether the slider is active or disabled at this breakpoint —
-    only the scroll/snap behavior changes between the two.
+    Each slide takes 1/N of the row minus its share of the gap and the bleed.
+    Subtracting the bleed keeps the fully-visible slides sized to the content
+    width, so the leftover bleed space reveals the peeking neighbours instead
+    of stretching every slide. Same calc applies whether the slider is active
+    or disabled at this breakpoint — only the scroll/snap behavior changes.
   */
   .group-slider__slideshow > slideshow-container > slideshow-slides > slideshow-slide {
     @media screen and (min-width: 750px) {
       flex: 0 0 calc(
-        (100% - (var(--slideshow-gap, 0px) * (var(--slides-per-view-desktop, 1) - 1))) /
-          var(--slides-per-view-desktop, 1)
+        (
+            100% - var(--gs-bleed-start) - var(--gs-bleed-end) -
+              (var(--slideshow-gap, 0px) * (var(--slides-per-view-desktop, 1) - 1))
+          ) / var(--slides-per-view-desktop, 1)
       );
     }
 
     @media screen and (max-width: 749px) {
       flex: 0 0 calc(
-        (100% - (var(--slideshow-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))) /
-          var(--slides-per-view-mobile, 1)
+        (
+            100% - var(--gs-bleed-start) - var(--gs-bleed-end) -
+              (var(--slideshow-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))
+          ) / var(--slides-per-view-mobile, 1)
       );
     }
   }
@@ -182,6 +265,111 @@
         (100% - (var(--slideshow-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))) /
           var(--slides-per-view-mobile, 1)
       );
+    }
+  }
+
+  /* Controls row: [prev arrow] [dots] [next arrow], centered under the slides. */
+  .group-slider__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-block-start: 1.25rem;
+  }
+
+  .group-slider__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--minimum-touch-target, 44px);
+    min-height: var(--minimum-touch-target, 44px);
+    padding: 0;
+    color: var(--color-foreground);
+    background: none;
+    border: 2px solid rgba(126, 211, 255, 0.5);
+    border-radius: 24px;
+    cursor: pointer;
+  }
+
+  .group-slider__arrow[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .group-slider__arrow .svg-wrapper {
+    display: inline-flex;
+  }
+
+  .group-slider__arrow svg {
+    display: block;
+    width: auto;
+    height: 0.875rem;
+  }
+
+  .group-slider__arrow--prev svg {
+    transform: scaleX(-1);
+  }
+
+  group-slider-dots {
+    display: inline-flex;
+  }
+
+  group-slider-dots[hidden] {
+    display: none;
+  }
+
+  .group-slider__dots {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .group-slider__dots li {
+    display: inline-flex;
+  }
+
+  .group-slider__dot {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .group-slider__dot::before {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background: var(--color-foreground);
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+  }
+
+  .group-slider__dot[aria-selected='true']::before {
+    opacity: 1;
+  }
+
+  /*
+    Per-breakpoint control visibility — arrows/dots stay hidden on the
+    breakpoints the merchant didn't enable them for.
+  */
+  @media screen and (min-width: 750px) {
+    .group-slider__hide-desktop {
+      display: none !important;
+    }
+  }
+  @media screen and (max-width: 749px) {
+    .group-slider__hide-mobile {
+      display: none !important;
     }
   }
 {% endstylesheet %}

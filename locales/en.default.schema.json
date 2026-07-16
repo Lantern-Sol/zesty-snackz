@@ -944,6 +944,7 @@
     "image_icon": "Image icon",
     "image_opacity": "Image opacity",
     "image_position": "Image position",
+    "image_position_y": "Vertical image position",
     "image_ratio": "Image ratio",
     "inventory_threshold": "Low stock threshold",
     "inverse": "Inverse",

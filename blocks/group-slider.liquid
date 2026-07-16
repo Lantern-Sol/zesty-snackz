@@ -124,6 +124,39 @@
     },
     {
       "type": "header",
+      "content": "Bleed",
+      "info": "Extends the slide track to the section edge so a sliver of the next slide peeks in."
+    },
+    {
+      "type": "checkbox",
+      "id": "bleed_left_desktop",
+      "label": "Bleed left on desktop",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_slider_desktop }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "bleed_right_desktop",
+      "label": "Bleed right on desktop",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_slider_desktop }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "bleed_left_mobile",
+      "label": "Bleed left on mobile",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_slider_mobile }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "bleed_right_mobile",
+      "label": "Bleed right on mobile",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_slider_mobile }}"
+    },
+    {
+      "type": "header",
       "content": "t:content.layout"
     },
     {

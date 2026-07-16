@@ -333,6 +333,17 @@
       "visible_if": "{{ section.settings.background_media == 'image' }}"
     },
     {
+      "type": "range",
+      "id": "background_image_position_y",
+      "label": "t:settings.image_position_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ section.settings.background_media == 'image' }}"
+    },
+    {
       "type": "checkbox",
       "id": "toggle_overlay",
       "label": "t:settings.background_overlay"

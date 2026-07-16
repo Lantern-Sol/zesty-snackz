@@ -712,6 +712,7 @@ p:empty {
 .background-image-container img,
 .background-image-container svg {
   object-fit: cover;
+  object-position: center var(--background-image-position-y, 50%);
   width: 100%;
   height: 100%;
 }
