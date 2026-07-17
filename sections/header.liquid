@@ -752,24 +752,26 @@
 
   /* ================================
      * Floating header slide (scroll-up reveal + first load)
-     * The opacity fade above still runs for everyone; these add the vertical
-     * slide for users who haven't opted out of motion.
+     * The slide + fade are driven by the keyframes below (not the shared
+     * --animation-speed, which at 0.125s is too fast to read as a slide).
      * ================================ */
   @media (prefers-reduced-motion: no-preference) {
     /* First load: slide the floating header down from the top */
     .header--floating[sticky='scroll-up'] {
-      animation: header-slide-intro var(--animation-speed) var(--animation-easing) both;
+      --header-slide-speed: 0.42s;
+      will-change: transform;
+      animation: header-slide-intro var(--header-slide-speed) var(--ease-out-cubic) both;
     }
 
     /* Scroll-up reveal: slide the pinned header down into view */
     .header--floating[sticky='scroll-up'][data-sticky-state='active'] {
-      animation: header-slide-down var(--animation-speed) var(--animation-easing) both;
+      animation: header-slide-down var(--header-slide-speed) var(--ease-out-cubic) both;
     }
 
     /* Hide on scroll down: slide the pinned header back up out of view */
     .header--floating[sticky='scroll-up'][data-sticky-state='idle'] {
       transform: translateY(-100%);
-      animation: header-slide-up var(--animation-speed) var(--animation-easing) both;
+      animation: header-slide-up var(--header-slide-speed) var(--animation-easing) both;
     }
 
     /* Rejoined the natural flow at the top: no slide, which also avoids a flash
@@ -795,20 +797,24 @@
   @keyframes header-slide-down {
     from {
       transform: translateY(-100%);
+      opacity: 0;
     }
 
     to {
       transform: translateY(0);
+      opacity: 1;
     }
   }
 
   @keyframes header-slide-up {
     from {
       transform: translateY(0);
+      opacity: 1;
     }
 
     to {
       transform: translateY(-100%);
+      opacity: 0;
     }
   }
 
