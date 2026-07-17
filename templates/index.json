@@ -917,7 +917,6 @@
         "spacer_6ybkHA",
         "rotating_arc_fhn6UT"
       ],
-      "disabled": true,
       "name": "t:names.hero",
       "settings": {
         "media_type_1": "image",
@@ -1347,7 +1346,6 @@
         "text_zwJewA",
         "infinite_slider_Wk3NaN"
       ],
-      "disabled": true,
       "name": "Store list",
       "settings": {
         "content_direction": "column",
@@ -1757,7 +1755,6 @@
         "floating_stickers_bJB3iz",
         "group_ynGwm8"
       ],
-      "disabled": true,
       "name": "Bitez count",
       "settings": {
         "content_direction": "column",
@@ -2063,7 +2060,6 @@
         "group_HKjR7z",
         "button_ehNTR4"
       ],
-      "disabled": true,
       "name": "Reveal on scroll",
       "settings": {
         "content_direction": "column",
@@ -2594,7 +2590,7 @@
                         "type_preset_mobile": "rte",
                         "mobile_font_size": "1rem",
                         "mobile_custom_line_height": 1.5,
-                        "text_color": "#5E7B93",
+                        "text_color": "#5e7b93",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -3656,7 +3652,6 @@
         "group_N7KQQk",
         "group_slider_D9JDwU"
       ],
-      "disabled": true,
       "name": "Featured videos",
       "settings": {
         "content_direction": "column",
@@ -3947,7 +3942,6 @@
         "group_DdkE9U",
         "button_wE78z8"
       ],
-      "disabled": true,
       "name": "t:names.rich_text_section",
       "settings": {
         "content_direction": "row",
@@ -4008,7 +4002,6 @@
     },
     "marquee_collection_MhaaAE": {
       "type": "marquee-collection",
-      "disabled": true,
       "name": "Marquee collection",
       "settings": {
         "collection": "the-flavor-wall",
@@ -4329,7 +4322,6 @@
         "text_xx7n83",
         "button_B4JEaP"
       ],
-      "disabled": true,
       "name": "Gravity fall",
       "settings": {
         "height": 750,
@@ -5822,7 +5814,6 @@
         "floating_stickers_UwE9Dq",
         "mosaic_grid_feX8Qd"
       ],
-      "disabled": true,
       "name": "Mosaic videos",
       "settings": {
         "content_direction": "column",
@@ -7063,7 +7054,6 @@
         "text_B3hdJy",
         "group_slider_irAgKd"
       ],
-      "disabled": true,
       "name": "Reviews",
       "settings": {
         "content_direction": "column",
@@ -7622,7 +7612,6 @@
         "floating_stickers_rVQPJ4",
         "group_EcGkY9"
       ],
-      "disabled": true,
       "name": "Still scrolling",
       "settings": {
         "content_direction": "column",
