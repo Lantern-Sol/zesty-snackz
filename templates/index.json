@@ -7123,6 +7123,198 @@
             "behind": true
           },
           "blocks": {
+            "floating_sticker_KnTVLx": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 30,
+                "shadow": true,
+                "x_position": 50,
+                "y_position": 90,
+                "motion_offset": 0,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_d746HY": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -30,
+                "shadow": true,
+                "x_position": 15,
+                "y_position": 90,
+                "motion_offset": 0.3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_heUL44": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 90,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_R6gbmW": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 75,
+                "y_position": 93,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_xP4JBV": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 97,
+                "y_position": 93,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_QTby4i": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -15,
+                "shadow": true,
+                "x_position": 27,
+                "y_position": 93,
+                "motion_offset": 2.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fyem4z": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 5,
+                "y_position": 87,
+                "motion_offset": 1.6,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_idctpN": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 57,
+                "y_position": 92,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_q8rM9P": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 33,
+                "y_position": 96,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_KGTMKL": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 75,
+                "shadow": true,
+                "x_position": 65,
+                "y_position": 90,
+                "motion_offset": 1.7,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_mbqRFM": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -75,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 90,
+                "motion_offset": 2.8,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_aCtaUG": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 43,
+                "y_position": 94,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
             "wave_marquee_hQeY73": {
               "type": "_wave-marquee",
               "name": "Wave marquee",
@@ -7150,6 +7342,18 @@
             }
           },
           "block_order": [
+            "floating_sticker_KnTVLx",
+            "floating_sticker_d746HY",
+            "floating_sticker_heUL44",
+            "floating_sticker_R6gbmW",
+            "floating_sticker_xP4JBV",
+            "floating_sticker_QTby4i",
+            "floating_sticker_fyem4z",
+            "floating_sticker_idctpN",
+            "floating_sticker_q8rM9P",
+            "floating_sticker_KGTMKL",
+            "floating_sticker_mbqRFM",
+            "floating_sticker_aCtaUG",
             "wave_marquee_hQeY73"
           ]
         },
