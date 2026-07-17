@@ -7,10 +7,13 @@
   unless block.settings.effects_on_mobile
     assign effect_class = 'testimonial-block testimonial-block--static-mobile'
   endunless
+  unless block.settings.float_enabled
+    assign effect_class = effect_class | append: ' testimonial-block--no-float'
+  endunless
 -%}
 
 {%- capture effect_style -%}
-  --testimonial-offset: {{ block.settings.vertical_offset | default: 0 }}px; --testimonial-rotation: {{ block.settings.rotation | default: 0 }}deg;
+  --testimonial-offset: {{ block.settings.vertical_offset | default: 0 }}px; --testimonial-rotation: {{ block.settings.rotation | default: 0 }}deg; --testimonial-float-delay: {{ block.settings.float_delay | default: 0 }}s;
 {%- endcapture -%}
 
 {% render 'group',
@@ -29,22 +32,14 @@
   .testimonial-block {
     rotate: var(--testimonial-rotation, 0deg);
     translate: 0 var(--testimonial-offset, 0px);
-    /* float rides on transform so it stacks with the offset/rotation above */
+    /* float rides on transform so it stacks with the offset/rotation above;
+       negative delay starts the card mid-cycle at its phase offset */
     animation: testimonial-float 3s linear infinite;
+    animation-delay: calc(-1 * var(--testimonial-float-delay, 0s));
   }
 
-  /* negative delays start each card mid-cycle at a different phase,
-     so siblings drift out of sync instead of bobbing in unison */
-  .testimonial-block:nth-child(4n + 2 of .testimonial-block) {
-    animation-delay: -0.8s;
-  }
-
-  .testimonial-block:nth-child(4n + 3 of .testimonial-block) {
-    animation-delay: -1.9s;
-  }
-
-  .testimonial-block:nth-child(4n of .testimonial-block) {
-    animation-delay: -1.2s;
+  .testimonial-block--no-float {
+    animation: none;
   }
 
   @keyframes testimonial-float {
@@ -104,6 +99,24 @@
     {
       "type": "header",
       "content": "Tilt & offset"
+    },
+    {
+      "type": "checkbox",
+      "id": "float_enabled",
+      "label": "Floating animation",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "float_delay",
+      "label": "Float phase offset",
+      "info": "Give each card a different value so they don't bob in unison.",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "unit": "s",
+      "default": 0,
+      "visible_if": "{{ block.settings.float_enabled }}"
     },
     {
       "type": "range",
