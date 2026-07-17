@@ -51,24 +51,38 @@ class MarqueeComponent extends Component {
   #animation = null;
 
   /**
+   * Whether the marquee animation is frozen (paused) from a completed hover slow-down.
+   * @type {boolean}
+   */
+  #paused = false;
+
+  /**
    * @type {number | null}
    */
   #marqueeWidth = null;
 
   #slowDown = debounce(() => {
-    if (this.#animation) return;
-
     const animation = this.refs.wrapper.getAnimations()[0];
 
-    if (!animation) return;
+    if (!animation || this.#paused) return;
+
+    this.#animation?.cancel();
 
     this.#animation = animateValue({
       ...ANIMATION_OPTIONS,
-      from: 1,
+      from: animation.playbackRate,
       to: 0,
-      onUpdate: (value) => animation.updatePlaybackRate(value),
+      onUpdate: (value) => {
+        animation.playbackRate = value;
+      },
       onComplete: () => {
         this.#animation = null;
+        // Freeze with pause() instead of leaving the CSS animation at a 0
+        // playback rate. A rate-0 CSS animation can snap back to its first
+        // keyframe on the next style recalc (the hover gear/arrow swap triggers
+        // one), which is what made the marquee jump to the start on long hovers.
+        animation.pause();
+        this.#paused = true;
       },
     });
   }, ANIMATION_OPTIONS.duration);
@@ -78,16 +92,26 @@ class MarqueeComponent extends Component {
 
     const animation = this.refs.wrapper.getAnimations()[0];
 
-    if (!animation || animation.playbackRate === 1) return;
+    if (!animation) return;
 
-    const from = this.#animation?.current ?? 0;
     this.#animation?.cancel();
+    this.#animation = null;
+
+    if (this.#paused) {
+      // Resume from the exact frozen position before ramping the speed back up.
+      animation.play();
+      this.#paused = false;
+    }
+
+    if (animation.playbackRate === 1) return;
 
     this.#animation = animateValue({
       ...ANIMATION_OPTIONS,
-      from,
+      from: animation.playbackRate,
       to: 1,
-      onUpdate: (value) => animation.updatePlaybackRate(value),
+      onUpdate: (value) => {
+        animation.playbackRate = value;
+      },
       onComplete: () => {
         this.#animation = null;
       },

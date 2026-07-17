@@ -210,12 +210,15 @@ class HeaderComponent extends Component {
         this.dataset.scrollDirection = 'up';
       }
     } else if (this.dataset.stickyState === 'active') {
+      // Was revealed and pinned; scrolling down hides it with a slide up.
       this.dataset.scrollDirection = 'none';
 
       this.dataset.stickyState = 'idle';
     } else {
+      // Not currently revealed; stay in natural flow so it scrolls away without
+      // pinning (which would flash a slide-up while scrolling down).
       this.dataset.scrollDirection = 'none';
-      this.dataset.stickyState = 'idle';
+      this.dataset.stickyState = 'inactive';
     }
 
     this.#lastScrollTop = scrollTop;

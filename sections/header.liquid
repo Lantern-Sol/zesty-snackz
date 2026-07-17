@@ -721,7 +721,9 @@
   }
 
   .header-section:has(> #header-component[sticky='always']),
-  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
+  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']),
+  /* Keep the header pinned while it slides back up out of view on hide */
+  .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='idle']) {
     position: sticky;
 
     /* Use -1 instead of 0 so intersection observer can track sticky state */
@@ -746,6 +748,68 @@
 
   .header[data-sticky-state='idle'] {
     opacity: 0;
+  }
+
+  /* ================================
+     * Floating header slide (scroll-up reveal + first load)
+     * The opacity fade above still runs for everyone; these add the vertical
+     * slide for users who haven't opted out of motion.
+     * ================================ */
+  @media (prefers-reduced-motion: no-preference) {
+    /* First load: slide the floating header down from the top */
+    .header--floating[sticky='scroll-up'] {
+      animation: header-slide-intro var(--animation-speed) var(--animation-easing) both;
+    }
+
+    /* Scroll-up reveal: slide the pinned header down into view */
+    .header--floating[sticky='scroll-up'][data-sticky-state='active'] {
+      animation: header-slide-down var(--animation-speed) var(--animation-easing) both;
+    }
+
+    /* Hide on scroll down: slide the pinned header back up out of view */
+    .header--floating[sticky='scroll-up'][data-sticky-state='idle'] {
+      transform: translateY(-100%);
+      animation: header-slide-up var(--animation-speed) var(--animation-easing) both;
+    }
+
+    /* Rejoined the natural flow at the top: no slide, which also avoids a flash
+       on the first scroll-down (see #updateScrollState in header.js) */
+    .header--floating[sticky='scroll-up'][data-sticky-state='inactive'] {
+      transform: none;
+      animation: none;
+    }
+  }
+
+  @keyframes header-slide-intro {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes header-slide-down {
+    from {
+      transform: translateY(-100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes header-slide-up {
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(-100%);
+    }
   }
 
   /* ================================
