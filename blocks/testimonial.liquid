@@ -29,12 +29,57 @@
   .testimonial-block {
     rotate: var(--testimonial-rotation, 0deg);
     translate: 0 var(--testimonial-offset, 0px);
+    /* float rides on transform so it stacks with the offset/rotation above */
+    animation: testimonial-float 3s linear infinite;
+  }
+
+  /* negative delays start each card mid-cycle at a different phase,
+     so siblings drift out of sync instead of bobbing in unison */
+  .testimonial-block:nth-child(4n + 2 of .testimonial-block) {
+    animation-delay: -0.8s;
+  }
+
+  .testimonial-block:nth-child(4n + 3 of .testimonial-block) {
+    animation-delay: -1.9s;
+  }
+
+  .testimonial-block:nth-child(4n of .testimonial-block) {
+    animation-delay: -1.2s;
+  }
+
+  @keyframes testimonial-float {
+    0% {
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+      transform: translateY(14px);
+    }
+    33.333% {
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+      transform: translateY(0px);
+    }
+    58.333% {
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+      transform: translateY(-14px);
+    }
+    83.333% {
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+      transform: translateY(0px);
+    }
+    100% {
+      transform: translateY(14px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonial-block {
+      animation: none;
+    }
   }
 
   @media screen and (max-width: 749px) {
     .testimonial-block--static-mobile {
       rotate: none;
       translate: none;
+      animation: none;
     }
   }
 
