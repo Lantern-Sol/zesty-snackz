@@ -1578,7 +1578,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>AND COUNTING…</p>",
+                "text": "<p>AND COUNTING\u2026</p>",
                 "mobile_text": "",
                 "width": "fit-content",
                 "max_width": "normal",
@@ -1704,7 +1704,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>That's roughly four bites every second. We're not saying it's a<br/>problem — we're just saying it's a number.</p>",
+                "text": "<p>That's roughly four bites every second. We're not saying it's a<br/>problem \u2014 we're just saying it's a number.</p>",
                 "mobile_text": "",
                 "width": "100%",
                 "max_width": "none",
@@ -2179,7 +2179,7 @@
               "type": "button",
               "name": "t:names.button",
               "settings": {
-                "label": "MIX THEM ALL — BUILD A BUNDLE",
+                "label": "MIX THEM ALL \u2014 BUILD A BUNDLE",
                 "link": "shopify://collections/all",
                 "open_in_new_tab": false,
                 "style_class": "button",
@@ -4501,7 +4501,7 @@
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
-                "text": "REAL STORY ✦ NO AGENCY ✦",
+                "text": "REAL STORY \u2726 NO AGENCY \u2726",
                 "frequency": 2,
                 "amplitude": 70,
                 "speed": 30,
@@ -4571,7 +4571,7 @@
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
-                "text": "REAL STORY ✦ NO AGENCY ✦",
+                "text": "REAL STORY \u2726 NO AGENCY \u2726",
                 "frequency": 4,
                 "amplitude": 60,
                 "speed": 30,
@@ -4676,7 +4676,7 @@
                 "text_x67xJn": {
                   "type": "text",
                   "settings": {
-                    "text": "<h4>“We just wanted candy that doesn’t fight back.”</h4>",
+                    "text": "<h4>\u201cWe just wanted candy that doesn\u2019t fight back.\u201d</h4>",
                     "mobile_text": "",
                     "width": "fit-content",
                     "max_width": "normal",
@@ -4718,7 +4718,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>— FINATIC, PROBABLY ON A BOAT</p>",
+                    "text": "<p>\u2014 FINATIC, PROBABLY ON A BOAT</p>",
                     "mobile_text": "",
                     "width": "fit-content",
                     "max_width": "normal",
@@ -6180,7 +6180,8 @@
                     "padding-block-start-mobile": 0,
                     "padding-block-end-mobile": 0,
                     "padding-inline-start-mobile": 0,
-                    "padding-inline-end-mobile": 0
+                    "padding-inline-end-mobile": 0,
+                    "float_delay": 0
                   },
                   "blocks": {
                     "icon_YPJzXi": {
@@ -6201,7 +6202,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>Bought one bag to try. Ordered six more at 2am. This is a cry for help. 🫠</p>",
+                        "text": "<p>Bought one bag to try. Ordered six more at 2am. This is a cry for help. \ud83e\udee0</p>",
                         "mobile_text": "",
                         "width": "100%",
                         "max_width": "normal",
@@ -6373,7 +6374,8 @@
                     "padding-block-start-mobile": 0,
                     "padding-block-end-mobile": 0,
                     "padding-inline-start-mobile": 0,
-                    "padding-inline-end-mobile": 0
+                    "padding-inline-end-mobile": 0,
+                    "float_delay": 0.8
                   },
                   "blocks": {
                     "icon_7VfKJH": {
@@ -6394,7 +6396,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>Thin bites are a scam — a scam to make me finish the bag in four minutes.</p>",
+                        "text": "<p>Thin bites are a scam \u2014 a scam to make me finish the bag in four minutes.</p>",
                         "mobile_text": "",
                         "width": "100%",
                         "max_width": "normal",
@@ -6436,7 +6438,7 @@
                       "type": "profile",
                       "name": "Profile",
                       "settings": {
-                        "name": "Marcus B. ",
+                        "name": "Marcus B.\u00a0",
                         "show_verified": true,
                         "meta_text": "5 days ago",
                         "avatar_background": "{{ settings.color_palette.color10 }}",
@@ -6566,7 +6568,8 @@
                     "padding-block-start-mobile": 0,
                     "padding-block-end-mobile": 0,
                     "padding-inline-start-mobile": 0,
-                    "padding-inline-end-mobile": 0
+                    "padding-inline-end-mobile": 0,
+                    "float_delay": 1.9
                   },
                   "blocks": {
                     "icon_8NBU7e": {
@@ -6629,7 +6632,7 @@
                       "type": "profile",
                       "name": "Profile",
                       "settings": {
-                        "name": "Jake T. ",
+                        "name": "Jake T.\u00a0",
                         "show_verified": true,
                         "meta_text": "2 weeks ago",
                         "avatar_background": "{{ settings.color_palette.color3 }}",
@@ -6759,7 +6762,8 @@
                     "padding-block-start-mobile": 0,
                     "padding-block-end-mobile": 0,
                     "padding-inline-start-mobile": 0,
-                    "padding-inline-end-mobile": 0
+                    "padding-inline-end-mobile": 0,
+                    "float_delay": 1.2
                   },
                   "blocks": {
                     "icon_P8x3fG": {
@@ -6822,7 +6826,7 @@
                       "type": "profile",
                       "name": "Profile",
                       "settings": {
-                        "name": "Priya N. ",
+                        "name": "Priya N.\u00a0",
                         "show_verified": true,
                         "meta_text": "4 days ago",
                         "avatar_background": "{{ settings.color_palette.color4 }}",
@@ -6952,7 +6956,8 @@
                     "padding-block-start-mobile": 0,
                     "padding-block-end-mobile": 0,
                     "padding-inline-start-mobile": 0,
-                    "padding-inline-end-mobile": 0
+                    "padding-inline-end-mobile": 0,
+                    "float_delay": 2.4
                   },
                   "blocks": {
                     "icon_K6W6bY": {
@@ -6973,7 +6978,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>Bought one bag to try. Ordered six more at 2am. This is a cry for help. 🫠</p>",
+                        "text": "<p>Bought one bag to try. Ordered six more at 2am. This is a cry for help. \ud83e\udee0</p>",
                         "mobile_text": "",
                         "width": "100%",
                         "max_width": "normal",
@@ -7319,7 +7324,7 @@
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
-                "text": "Thin-cut bites ✦ Never sticks ✦ SOUR ✦ HITS HARDER ✦",
+                "text": "Thin-cut bites \u2726 Never sticks \u2726 SOUR \u2726 HITS HARDER \u2726",
                 "frequency": 4,
                 "amplitude": 20,
                 "speed": 30,
@@ -7467,7 +7472,7 @@
                   "type": "button",
                   "name": "t:names.button",
                   "settings": {
-                    "label": "★ 4.9 RATED",
+                    "label": "\u2605 4.9 RATED",
                     "link": "shopify://collections/all",
                     "open_in_new_tab": false,
                     "style_class": "button-custom",
@@ -7630,7 +7635,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>The candy’s right there. Fill your bag, grab free<br/>shipping, make the otter proud.</p>",
+                "text": "<p>The candy\u2019s right there. Fill your bag, grab free<br/>shipping, make the otter proud.</p>",
                 "mobile_text": "",
                 "width": "100%",
                 "max_width": "none",
