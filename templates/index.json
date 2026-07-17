@@ -4226,8 +4226,8 @@
           "settings": {
             "label": "THE HEALTHY-ISH AISLE",
             "link": "shopify://collections/all-products",
-            "style_class": "button-secondary",
-            "custom_button_background": "{{ settings.color_palette.foreground }}",
+            "style_class": "button-custom",
+            "custom_button_background": "rgba(0,0,0,0)",
             "custom_button_text": "{{ settings.color_palette.background }}",
             "custom_button_border": "{{ settings.color_palette.background }}",
             "custom_button_shadow_enabled": false,
@@ -4271,9 +4271,9 @@
           "settings": {
             "label": "SHOP DRIED FRUIT",
             "link": "shopify://collections/all-products",
-            "style_class": "button",
+            "style_class": "button-custom",
             "custom_button_background": "{{ settings.color_palette.foreground }}",
-            "custom_button_text": "{{ settings.color_palette.background }}",
+            "custom_button_text": "{{ settings.color_palette.color3 }}",
             "custom_button_border": "{{ settings.color_palette.background }}",
             "custom_button_shadow_enabled": false,
             "custom_button_shadow_horizontal_offset": 0,
