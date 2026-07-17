@@ -1424,7 +1424,7 @@
                 "rotation": -15,
                 "shadow": true,
                 "x_position": 3,
-                "y_position": 43,
+                "y_position": 23,
                 "motion_offset": 0,
                 "peel_enabled": true,
                 "peel_code": "SECRET DISCOUNT"
@@ -1456,7 +1456,7 @@
                 "rotation": 20,
                 "shadow": true,
                 "x_position": 15,
-                "y_position": 67,
+                "y_position": 55,
                 "motion_offset": 0.6,
                 "peel_enabled": false,
                 "peel_code": ""
@@ -1472,7 +1472,7 @@
                 "rotation": -5,
                 "shadow": true,
                 "x_position": 81,
-                "y_position": 67,
+                "y_position": 55,
                 "motion_offset": 1.8,
                 "peel_enabled": false,
                 "peel_code": ""
@@ -1488,7 +1488,7 @@
                 "rotation": -80,
                 "shadow": true,
                 "x_position": 100,
-                "y_position": 38,
+                "y_position": 16,
                 "motion_offset": 0.9,
                 "peel_enabled": false,
                 "peel_code": ""
