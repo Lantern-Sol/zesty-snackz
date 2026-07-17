@@ -94,9 +94,16 @@
     --text-transform: {{ settings.case }};
     --text-wrap: {{ settings.wrap | default: 'pretty' }};
     {% if settings.type_preset == 'custom' and settings.font_size == blank %}
-      --line-height--display: var(--line-height--display-{{ settings.line_height }});
-      --line-height--heading: var(--line-height--heading-{{ settings.line_height }});
-      --line-height--body: var(--line-height--body-{{ settings.line_height }});
+      {% if settings.line_height == 'custom' %}
+        --line-height: {{ settings.custom_line_height }};
+        --line-height--display: {{ settings.custom_line_height }};
+        --line-height--heading: {{ settings.custom_line_height }};
+        --line-height--body: {{ settings.custom_line_height }};
+      {% else %}
+        --line-height--display: var(--line-height--display-{{ settings.line_height }});
+        --line-height--heading: var(--line-height--heading-{{ settings.line_height }});
+        --line-height--body: var(--line-height--body-{{ settings.line_height }});
+      {% endif %}
     {% else %}
       --line-height: {% if settings.line_height == 'custom' %} {{ settings.custom_line_height }} {% else %}var(--line-height--{{ type }}-{{ settings.line_height }}){% endif %};
     {% endif %}

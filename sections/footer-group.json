@@ -497,7 +497,7 @@
                     "type_preset_mobile": "rte",
                     "mobile_font_size": "1rem",
                     "mobile_custom_line_height": 1.5,
-                    "text_color": "#B9D4E6",
+                    "text_color": "#b9d4e6",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",

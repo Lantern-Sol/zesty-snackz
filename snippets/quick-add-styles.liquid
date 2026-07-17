@@ -82,8 +82,11 @@
     }
   }
 
-  .quick-add__button.add-to-cart-button {
+  .button.add-to-cart-button.button-secondary {
     height: var(--button-size-md);
+    /* 20px — double class outranks the .button base rules on both breakpoints */
+    font-size: 1.25rem;
+    outline: none;
   }
 
   .quick-add__button .add-to-cart-text {
