@@ -1617,11 +1617,11 @@
               "blocks": {}
             },
             "text_MHxjej": {
-              "type": "text",
-              "name": "t:names.heading",
+              "type": "bites-sold-counter",
+              "name": "Bites sold counter",
               "settings": {
-                "text": "<h1>37,500,000</h1>",
-                "mobile_text": "",
+                "fallback_count": "37,500,000",
+                "heading_tag": "h1",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
