@@ -18,7 +18,7 @@
           "type": "_announcement",
           "name": "t:names.announcement",
           "settings": {
-            "text": "Free shipping on orders over $50 SHOP NOW ->",
+            "text": "FREE SHIPPING OVER $50 <a href=\"/collections/all-products\" title=\"All Products\">SHOP NOW -></a>",
             "link": "shopify://collections/all-products",
             "font": "var(--font-subheading--family)",
             "font_size": "1rem",
