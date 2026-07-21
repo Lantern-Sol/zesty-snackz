@@ -2042,7 +2042,7 @@
               "type": "scroll-highlight-text",
               "name": "Scroll highlight text",
               "settings": {
-                "text": "<p>Sour [sticker1] candy, sliced paper- thin. It crunches.[sticker2]It melts. It never takes a molar hostage. [sticker3]  AND FOR THE  [sticker4] HEALTH-CONSCIOUS: WE DRIED YOU SOME [sticker5] FRUIT</p>",
+                "text": "<p><strong>Why is everyone talking about Zesty?</strong> [Sticker 1] <strong>Because we're not a corporate giant.</strong> [Sticker 2] <strong>We're just a group of friends on a mission to make candy fun again—and build a brand worth supporting.</strong> [Sticker 3] </p>",
                 "mobile_text": "<p>Sour [sticker1] candy, sliced paper- thin. It crunches.[sticker2]It melts. It never takes a molar hostage. [sticker3]  AND FOR THE  HEALTH-CONSCIOUS:[sticker4] WE DRIED YOU SOME [sticker5] FRUIT</p>",
                 "split": "characters",
                 "start_position": 85,
@@ -5129,8 +5129,8 @@
                 "text_x67xJn": {
                   "type": "text",
                   "settings": {
-                    "text": "<h4>“We just wanted candy that doesn’t fight back.”</h4>",
-                    "mobile_text": "<h4>“We just wanted <br/>candy that doesn’t <br/>fight back.”</h4>",
+                    "text": "<h4>\"Please try chewy banana in your cereal...\"</h4>",
+                    "mobile_text": "<h4>\"Please try chewy banana in your cereal... please\"</h4>",
                     "width": "100%",
                     "max_width": "normal",
                     "alignment": "left",
@@ -5171,7 +5171,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>— FINATIC, PROBABLY ON A BOAT</p>",
+                    "text": "<p>— FINATIC, PROBABLY ON A RIVER</p>",
                     "mobile_text": "",
                     "width": "fit-content",
                     "max_width": "normal",
@@ -5315,7 +5315,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>Brenten & Paul went from catching fish and <br/>feeding a famous otter on camera to fixing <br/>the snack aisle.</p>",
+                    "text": "<p>We went from catching fish and <br/>feeding our animals on camera to fixing <br/>the snack aisle. (we are still doing the other stuff lol)</p>",
                     "mobile_text": "",
                     "width": "100%",
                     "max_width": "none",
@@ -5984,7 +5984,7 @@
                           "type": "text",
                           "name": "t:names.heading",
                           "settings": {
-                            "text": "<h2>4M+</h2>",
+                            "text": "<h2>11M+</h2>",
                             "mobile_text": "",
                             "width": "fit-content",
                             "max_width": "normal",
@@ -6130,7 +6130,7 @@
                           "type": "text",
                           "name": "t:names.heading",
                           "settings": {
-                            "text": "<h2>12M+</h2>",
+                            "text": "<h2>34M+</h2>",
                             "mobile_text": "",
                             "width": "fit-content",
                             "max_width": "normal",
@@ -8391,8 +8391,8 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>The candy’s right there. Fill your bag, grab free<br/>shipping, make the otter proud.</p>",
-                "mobile_text": "<p>The candy’s right there. Fill your bag, grab free shipping, make the otter proud.</p>",
+                "text": "<p>The candy’s right there. Fill your bag, grab free<br/>shipping, make the Lola proud.</p>",
+                "mobile_text": "<p>The candy’s right there. Fill your bag, grab free shipping, make the Lola proud.</p>",
                 "width": "100%",
                 "max_width": "none",
                 "alignment": "center",

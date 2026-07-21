@@ -710,7 +710,7 @@
                       "name": "Text",
                       "settings": {
                         "text": "<p>Viral for a reason. The internet's favorite snackz, shipped straight to your door.</p>",
-                        "mobile_text": "<p>Viral for a reason. The internet's favorite snackz, shipped straight to your door.</p>",
+                        "mobile_text": "",
                         "width": "fit-content",
                         "max_width": "normal",
                         "alignment": "left",
