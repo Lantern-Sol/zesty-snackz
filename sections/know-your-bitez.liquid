@@ -1,0 +1,1316 @@
+{% comment %}
+  Know Your Bitez
+  ---------------
+  Product-details section: wavy marquee divider on top of a dark panel with
+  three columns — video + flavor profile meters + tasting notes + dietary tags,
+  the first product image inside a gradient arch wrapped in curved ring text,
+  and "why it hits different" copy with Judge.me rating, avatars and a big
+  animated counter.
+
+  Dynamic (product) content:
+    - product.metafields.reviews.rating.value.rating  -> star rating (Judge.me)
+    - product.metafields.custom.kyb_video             -> video (file reference)
+    - product.metafields.custom.flavor_sourness       -> meter, 0-100 (integer)
+    - product.metafields.custom.flavor_sweetness      -> meter, 0-100 (integer)
+    - product.metafields.custom.flavor_fruitiness     -> meter, 0-100 (integer)
+    - product.metafields.custom.tasting_notes         -> multi-line text
+    - product.metafields.custom.why_different         -> rich text (heading + paragraph pairs)
+    - product.metafields.custom.color / color_light   -> arch gradient (same fields as product cards)
+    - first product image                             -> arch artwork
+
+  Every metafield has a section-setting fallback so the section renders fully
+  before the metafields exist.
+{% endcomment %}
+
+<script
+  src="{{ 'know-your-bitez.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  assign kyb_product = product
+  if request.visual_preview_mode and kyb_product == blank
+    assign kyb_product = collections.all.products.first
+  endif
+
+  assign rating = kyb_product.metafields.reviews.rating.value.rating | default: section.settings.rating_fallback
+  assign filled_stars = rating | round
+
+  assign kyb_video = kyb_product.metafields.custom.kyb_video.value | default: section.settings.fallback_video
+
+  assign sourness = kyb_product.metafields.custom.flavor_sourness.value | default: section.settings.bar_sourness_value
+  assign sweetness = kyb_product.metafields.custom.flavor_sweetness.value | default: section.settings.bar_sweetness_value
+  assign fruitiness = kyb_product.metafields.custom.flavor_fruitiness.value | default: section.settings.bar_fruitiness_value
+
+  assign tasting_notes = kyb_product.metafields.custom.tasting_notes.value | default: section.settings.fallback_notes
+  assign why_rich = kyb_product.metafields.custom.why_different
+
+  assign arch_from = section.settings.arch_gradient_start
+  if arch_from == blank
+    assign arch_from = kyb_product.metafields.custom.color_light.value | default: '#FFCFE5'
+  endif
+  assign arch_to = section.settings.arch_gradient_end
+  if arch_to == blank
+    assign arch_to = kyb_product.metafields.custom.color.value | default: '#F362A5'
+  endif
+
+  assign arch_image = kyb_product.featured_image
+%}
+
+<div
+  class="kyb"
+  style="
+    --kyb-bg: {{ section.settings.background_color }};
+    --kyb-accent: {{ section.settings.accent_color }};
+    --kyb-text: {{ section.settings.text_color }};
+    --kyb-text-rgb: {{ section.settings.text_color.rgb }};
+    --kyb-track: {{ section.settings.track_color }};
+    --kyb-arch-from: {{ arch_from }};
+    --kyb-arch-to: {{ arch_to }};
+    --kyb-bar-sourness: {{ section.settings.bar_sourness_color }};
+    --kyb-bar-sweetness: {{ section.settings.bar_sweetness_color }};
+    --kyb-bar-fruitiness: {{ section.settings.bar_fruitiness_color }};
+  "
+>
+  {%- if section.settings.show_wave -%}
+    <div class="kyb__wave">
+      <svg viewBox="0 0 1440 135" preserveAspectRatio="xMidYMid slice" role="presentation" aria-hidden="true">
+        <path
+          id="kyb-wave-path-{{ section.id }}"
+          d="M0 0L120.615 18.279C340.658 51.6262 564.031 57.0547 785.434 34.4356L802.905 32.6507C1015.1 10.9722 1229.2 16.4664 1440 49V135H0V0Z"
+          fill="var(--kyb-bg)"
+        />
+      </svg>
+      {% content_for 'block', type: '_wave-marquee', id: 'kyb-wave-marquee' %}
+    </div>
+  {%- endif -%}
+
+  <div class="kyb__body spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    <div class="kyb__inner">
+      <header class="kyb__header">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="kyb__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        {%- if section.settings.title != blank -%}
+          <h2 class="kyb__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+      </header>
+
+      <div class="kyb__grid">
+        {%- comment -%} ------------------------------ left column {%- endcomment -%}
+        <div class="kyb__col kyb__col--left">
+          {%- if kyb_video != blank -%}
+            <div
+              class="kyb__video{% unless section.settings.show_video_on_mobile %} kyb__video--desktop-only{% endunless %}"
+              data-kyb-video
+            >
+              {{
+                kyb_video
+                | video_tag:
+                  image_size: '580x',
+                  autoplay: false,
+                  loop: false,
+                  muted: false,
+                  controls: false,
+                  preload: 'metadata',
+                  class: 'kyb__video-el'
+              }}
+              {%- if section.settings.video_thumbnail != blank -%}
+                <img
+                  class="kyb__video-poster"
+                  src="{{ section.settings.video_thumbnail | image_url: width: 580 }}"
+                  srcset="{{ section.settings.video_thumbnail | image_url: width: 580 }} 1x, {{ section.settings.video_thumbnail | image_url: width: 1160 }} 2x"
+                  alt=""
+                  loading="lazy"
+                  width="290"
+                  height="174"
+                >
+              {%- endif -%}
+              {%- assign kyb_video_alt = kyb_video.alt | default: kyb_product.title -%}
+              {%- assign play_label = 'blocks.load_video' | t: description: kyb_video_alt -%}
+              <button class="kyb__play" type="button" aria-label="{{ play_label | escape }}">
+                <span class="kyb__play-circle">
+                  <svg viewBox="0 0 29 28" aria-hidden="true" focusable="false">
+                    <path d="M26.4965 13.6603C26.4972 13.9502 26.4203 14.2354 26.2733 14.488C26.1263 14.7407 25.9141 14.9522 25.6574 15.1022L9.75045 24.5088C9.48226 24.6675 9.1751 24.7542 8.86068 24.7598C8.54626 24.7655 8.23599 24.6898 7.96191 24.5408C7.69044 24.3941 7.46429 24.1801 7.30673 23.9209C7.14917 23.6617 7.06588 23.3665 7.06543 23.0659V4.25478C7.06588 3.95413 7.14917 3.65901 7.30673 3.39979C7.46429 3.14057 7.69044 2.92659 7.96191 2.77986C8.23599 2.63082 8.54626 2.55521 8.86068 2.56084C9.1751 2.56647 9.48226 2.65313 9.75045 2.81188L25.6574 12.2185C25.9141 12.3684 26.1263 12.58 26.2733 12.8326C26.4203 13.0853 26.4972 13.3704 26.4965 13.6603Z" fill="currentColor"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          {%- endif -%}
+
+          <div class="kyb__flavor">
+            {%- if section.settings.flavor_heading != blank -%}
+              <h3 class="kyb__h4">{{ section.settings.flavor_heading }}</h3>
+            {%- endif -%}
+            <div class="kyb__bars">
+              {%- if sourness != blank and sourness > 0 -%}
+                <div class="kyb__bar-group">
+                  <p class="kyb__h5">{{ section.settings.bar_sourness_label }}</p>
+                  <div
+                    class="kyb__bar"
+                    role="meter"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ sourness }}"
+                    aria-label="{{ section.settings.bar_sourness_label | escape }}"
+                  >
+                    <span class="kyb__bar-fill" style="--kyb-bar-value: {{ sourness }}%; --kyb-bar-color: var(--kyb-bar-sourness);"></span>
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if sweetness != blank and sweetness > 0 -%}
+                <div class="kyb__bar-group">
+                  <p class="kyb__h5">{{ section.settings.bar_sweetness_label }}</p>
+                  <div
+                    class="kyb__bar"
+                    role="meter"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ sweetness }}"
+                    aria-label="{{ section.settings.bar_sweetness_label | escape }}"
+                  >
+                    <span class="kyb__bar-fill" style="--kyb-bar-value: {{ sweetness }}%; --kyb-bar-color: var(--kyb-bar-sweetness);"></span>
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if fruitiness != blank and fruitiness > 0 -%}
+                <div class="kyb__bar-group">
+                  <p class="kyb__h5">{{ section.settings.bar_fruitiness_label }}</p>
+                  <div
+                    class="kyb__bar"
+                    role="meter"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ fruitiness }}"
+                    aria-label="{{ section.settings.bar_fruitiness_label | escape }}"
+                  >
+                    <span class="kyb__bar-fill" style="--kyb-bar-value: {{ fruitiness }}%; --kyb-bar-color: var(--kyb-bar-fruitiness);"></span>
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if tasting_notes != blank -%}
+            <div class="kyb__notes">
+              {%- if section.settings.notes_heading != blank -%}
+                <h3 class="kyb__h6">{{ section.settings.notes_heading }}</h3>
+              {%- endif -%}
+              <p class="kyb__body-text">{{ tasting_notes | newline_to_br }}</p>
+            </div>
+          {%- endif -%}
+
+          {%- liquid
+            assign has_tags = false
+            for i in (1..3)
+              assign tag_label_key = 'tag_' | append: i | append: '_label'
+              if section.settings[tag_label_key] != blank
+                assign has_tags = true
+              endif
+            endfor
+          -%}
+          {%- if has_tags -%}
+            <ul class="kyb__tags" role="list">
+              {%- for i in (1..3) -%}
+                {%- liquid
+                  assign tag_label_key = 'tag_' | append: i | append: '_label'
+                  assign tag_color_key = 'tag_' | append: i | append: '_text_color'
+                  assign tag_bg_key = 'tag_' | append: i | append: '_background_color'
+                -%}
+                {%- if section.settings[tag_label_key] != blank -%}
+                  <li
+                    class="kyb__tag"
+                    style="--kyb-tag-color: {{ section.settings[tag_color_key] }}; --kyb-tag-bg: {{ section.settings[tag_bg_key] }};"
+                  >
+                    <svg class="kyb__tag-check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M9.00004 20.4199L2.79004 14.2099L5.62004 11.3799L9.00004 14.7699L18.88 4.87988L21.71 7.70988L9.00004 20.4199Z" fill="currentColor"/>
+                    </svg>
+                    <span>{{ section.settings[tag_label_key] }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} ------------------------------ center column {%- endcomment -%}
+        <div class="kyb__col kyb__col--center">
+          <div class="kyb__arch-wrap">
+            <div class="kyb__arch">
+              {%- if arch_image != blank -%}
+                <img
+                  class="kyb__arch-image"
+                  src="{{ arch_image | image_url: width: 700 }}"
+                  srcset="{{ arch_image | image_url: width: 480 }} 480w, {{ arch_image | image_url: width: 700 }} 700w, {{ arch_image | image_url: width: 1000 }} 1000w"
+                  sizes="(min-width: 750px) 352px, 62vw"
+                  alt="{{ arch_image.alt | default: kyb_product.title | escape }}"
+                  loading="lazy"
+                  width="{{ arch_image.width }}"
+                  height="{{ arch_image.height }}"
+                >
+              {%- endif -%}
+            </div>
+            <div class="kyb__ring-host">
+              {% content_for 'block', type: '_wave-marquee', id: 'kyb-ring-marquee' %}
+            </div>
+          </div>
+        </div>
+
+        {%- comment -%} ------------------------------ right column {%- endcomment -%}
+        <div class="kyb__col kyb__col--right">
+          <div class="kyb__why">
+            {%- if section.settings.why_heading != blank -%}
+              <h3 class="kyb__h4">{{ section.settings.why_heading }}</h3>
+            {%- endif -%}
+            {%- if why_rich != blank -%}
+              <div class="kyb__why-content">{{ why_rich | metafield_tag }}</div>
+            {%- else -%}
+              <div class="kyb__why-content">
+                {%- for i in (1..3) -%}
+                  {%- liquid
+                    assign title_key = 'feature_' | append: i | append: '_title'
+                    assign text_key = 'feature_' | append: i | append: '_text'
+                  -%}
+                  {%- if section.settings[title_key] != blank or section.settings[text_key] != blank -%}
+                    <div class="kyb__feature">
+                      {%- if section.settings[title_key] != blank -%}
+                        <h4 class="kyb__h5">{{ section.settings[title_key] }}</h4>
+                      {%- endif -%}
+                      {%- if section.settings[text_key] != blank -%}
+                        <p class="kyb__body-text">{{ section.settings[text_key] }}</p>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="kyb__proof">
+            {%- if section.settings.show_rating and rating != blank -%}
+              <div class="kyb__rating" aria-label="{{ 'accessibility.rating' | t: rating: rating }}">
+                <svg class="kyb__stars" viewBox="0 0 143 26" role="presentation">
+                  <defs>
+                    <symbol id="kyb-star-{{ section.id }}" viewBox="0 0 26 24">
+                      <path d="M12.8672 0L15.7561 8.89103H25.1047L17.5415 14.386L20.4304 23.277L12.8672 17.7821L5.30406 23.277L8.19293 14.386L0.629766 8.89103H9.97835L12.8672 0Z"/>
+                    </symbol>
+                  </defs>
+                  {%- for star in (1..5) -%}
+                    <use
+                      href="#kyb-star-{{ section.id }}"
+                      x="{{ forloop.index0 | times: 29.166 }}"
+                      y="0"
+                      width="25.73"
+                      height="23.28"
+                      class="kyb__star{% if star <= filled_stars %} kyb__star--filled{% endif %}"
+                    ></use>
+                  {%- endfor -%}
+                </svg>
+                <span class="kyb__rating-number" aria-hidden="true">{{ rating | round: 1 }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.show_avatars -%}
+              <div class="kyb__avatars">
+                {%- for i in (1..5) -%}
+                  {%- liquid
+                    assign avatar_image_key = 'avatar_' | append: i | append: '_image'
+                    assign avatar_bg_key = 'avatar_' | append: i | append: '_background_color'
+                    assign avatar_image = section.settings[avatar_image_key]
+                    assign memoji_fallback = 'kyb-memoji-' | append: i | append: '.png'
+                  -%}
+                  <span
+                    class="kyb__avatar"
+                    style="--kyb-avatar-bg: {{ section.settings[avatar_bg_key] }};"
+                  >
+                    {%- if avatar_image != blank -%}
+                      <img
+                        src="{{ avatar_image | image_url: width: 96 }}"
+                        srcset="{{ avatar_image | image_url: width: 96 }} 1x, {{ avatar_image | image_url: width: 192 }} 2x"
+                        alt=""
+                        loading="lazy"
+                        width="48"
+                        height="48"
+                      >
+                    {%- else -%}
+                      <img src="{{ memoji_fallback | asset_url }}" alt="" loading="lazy" width="48" height="48">
+                    {%- endif -%}
+                  </span>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.counter_number != blank or section.settings.counter_label != blank -%}
+              <div class="kyb__counter" data-kyb-reveal>
+                {%- if section.settings.counter_number != blank -%}
+                  <span class="kyb__counter-number">{{ section.settings.counter_number }}</span>
+                {%- endif -%}
+                {%- if section.settings.counter_label != blank -%}
+                  <span class="kyb__counter-label">{{ section.settings.counter_label }}</span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .kyb {
+    position: relative;
+    overflow: clip;
+  }
+
+  .kyb__wave {
+    position: relative;
+    display: block;
+    line-height: 0;
+    margin-top: 12px;
+  }
+
+  .kyb__wave svg {
+    display: block;
+    width: 100%;
+    height: clamp(90px, 9.375vw, 135px);
+  }
+
+  .kyb__body {
+    background: var(--kyb-bg);
+    color: var(--kyb-text);
+    margin-top: -1px;
+  }
+
+  .kyb__inner {
+    max-width: 1274px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+
+  .kyb__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    padding-block-start: clamp(24px, 3vw, 44px);
+  }
+
+  .kyb__eyebrow {
+    margin: 0;
+    color: var(--kyb-accent);
+    font-family: var(--font-body--family);
+    font-size: clamp(14px, 1.1vw, 16px);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .kyb__title {
+    margin: 0;
+    color: var(--kyb-text);
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(48px, 5.5vw, 80px);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .kyb__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 388px) minmax(0, 417px) minmax(0, 351px);
+    justify-content: space-between;
+    column-gap: clamp(24px, 3vw, 48px);
+    padding-block-start: clamp(40px, 4.5vw, 66px);
+  }
+
+  .kyb__col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .kyb__col--left {
+    gap: 30px;
+  }
+
+  .kyb__col--right {
+    gap: 39px;
+  }
+
+  /* ---------------------------------------------------------------- video */
+  .kyb__video {
+    position: relative;
+    width: 290px;
+    max-width: 100%;
+    aspect-ratio: 290 / 174;
+    border-radius: 30px;
+    overflow: hidden;
+    background: var(--kyb-track);
+  }
+
+  .kyb__video-el,
+  .kyb__video-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .kyb__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .kyb__play-circle {
+    display: grid;
+    place-items: center;
+    width: 53px;
+    height: 53px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 35%);
+    backdrop-filter: blur(3px);
+    color: var(--kyb-text);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .kyb__play:hover .kyb__play-circle {
+    transform: scale(1.08);
+    background: rgb(255 255 255 / 50%);
+  }
+
+  .kyb__play-circle svg {
+    width: 28px;
+    height: 27px;
+    translate: 2px 0;
+  }
+
+  .kyb__video.is-playing .kyb__play,
+  .kyb__video.is-playing .kyb__video-poster {
+    display: none;
+  }
+
+  /* --------------------------------------------------------------- flavor */
+  .kyb__flavor {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: min(335px, 100%);
+  }
+
+  .kyb__h4 {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(24px, 2.2vw, 32px);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--kyb-text);
+  }
+
+  .kyb__h5 {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(20px, 1.7vw, 24px);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--kyb-text);
+    text-transform: uppercase;
+  }
+
+  .kyb__h6 {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(18px, 1.4vw, 20px);
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    color: var(--kyb-text);
+    text-transform: uppercase;
+  }
+
+  .kyb__body-text {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: clamp(14px, 1.1vw, 16px);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    color: var(--kyb-text);
+  }
+
+  .kyb__bars {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .kyb__bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .kyb__bar {
+    position: relative;
+    width: 100%;
+    height: 7px;
+    border-radius: 50px;
+    background: var(--kyb-track);
+  }
+
+  .kyb__bar-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--kyb-bar-value, 0%);
+    border-radius: 50px;
+    background: var(--kyb-bar-color);
+  }
+
+  .kyb__notes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(357px, 100%);
+  }
+
+  /* ----------------------------------------------------------------- tags */
+  .kyb__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kyb__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px 4px 7px;
+    border-radius: 28px;
+    background: var(--kyb-tag-bg);
+    color: var(--kyb-tag-color);
+    font-family: var(--font-body--family);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: normal;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .kyb__tag-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ----------------------------------------------------------------- arch */
+  .kyb__col--center {
+    align-items: center;
+  }
+
+  .kyb__arch-wrap {
+    position: relative;
+    width: min(352px, 100%);
+    aspect-ratio: 352 / 549;
+    margin-top: 31px;
+  }
+
+  .kyb__arch {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--kyb-arch-from) 0%, var(--kyb-arch-to) 108%);
+  }
+
+  .kyb__arch-image {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    translate: -50% -50%;
+    width: 92%;
+    height: 82%;
+    object-fit: contain;
+  }
+
+  /* Positions the round-loop wave marquee so its stadium path hugs the arch:
+     slightly wider than the arch and running past its bottom, like the design. */
+  .kyb__ring-host {
+    position: absolute;
+    left: 50%;
+    top: -1.1%;
+    translate: -50% 0;
+    width: 104.5%;
+    height: 114.8%;
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------------ why */
+  .kyb__why {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+  }
+
+  .kyb__why-content {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .kyb__why-content .metafield-rich_text_field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .kyb__why-content .metafield-rich_text_field :is(h1, h2, h3, h4, h5, h6) {
+    margin: 25px 0 0;
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(20px, 1.7vw, 24px);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--kyb-text);
+    text-transform: uppercase;
+  }
+
+  .kyb__why-content .metafield-rich_text_field :is(h1, h2, h3, h4, h5, h6):first-child {
+    margin-top: 0;
+  }
+
+  .kyb__why-content .metafield-rich_text_field p {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: clamp(14px, 1.1vw, 16px);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    color: var(--kyb-text);
+  }
+
+  .kyb__feature {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ---------------------------------------------------------- social proof */
+  .kyb__proof {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .kyb__rating {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+  }
+
+  .kyb__stars {
+    width: 142px;
+    height: 26px;
+  }
+
+  .kyb__star {
+    fill: rgb(var(--kyb-text-rgb) / 0.25);
+  }
+
+  .kyb__star--filled {
+    fill: #ffd23f;
+  }
+
+  .kyb__rating-number {
+    font-family: var(--font-body--family);
+    font-size: 20.7px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    color: var(--kyb-text);
+  }
+
+  .kyb__avatars {
+    display: flex;
+    align-items: center;
+  }
+
+  .kyb__avatar {
+    display: block;
+    width: 48.5px;
+    height: 48.5px;
+    border-radius: 50%;
+    border: 1px solid var(--kyb-text);
+    background: var(--kyb-avatar-bg, transparent);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .kyb__avatar + .kyb__avatar {
+    margin-inline-start: -13.45px;
+  }
+
+  .kyb__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .kyb__counter {
+    display: flex;
+    flex-direction: column;
+    color: var(--kyb-text);
+  }
+
+  .kyb__counter-number {
+    font-family: var(--font-heading--family);
+    font-size: clamp(56px, 16vw, 80px);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .kyb__counter-label {
+    font-family: var(--font-body--family);
+    font-size: clamp(24px, 7vw, 32px);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .kyb__counter[data-kyb-reveal] {
+      opacity: 0;
+    }
+
+    .kyb__counter[data-kyb-reveal].kyb-in {
+      animation: kyb-counter-pop 1.1s ease-out forwards;
+    }
+  }
+
+  @keyframes kyb-counter-pop {
+    0% {
+      opacity: 0;
+      scale: 0.85;
+    }
+
+    55% {
+      opacity: 1;
+      scale: 1.03;
+    }
+
+    75% {
+      scale: 1;
+    }
+
+    100% {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  /* --------------------------------------------------------------- mobile */
+  @media screen and (max-width: 749px) {
+    .kyb__grid {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 35px;
+      padding-block-start: 24px;
+    }
+
+    .kyb__col--center {
+      order: -1;
+    }
+
+    .kyb__arch-wrap {
+      width: clamp(200px, 55vw, 237px);
+      margin-top: 10px;
+      margin-bottom: 26px;
+    }
+
+    .kyb__video--desktop-only {
+      display: none;
+    }
+
+    .kyb__flavor,
+    .kyb__notes {
+      width: 100%;
+    }
+
+    .kyb__proof {
+      align-items: center;
+      text-align: center;
+    }
+
+    .kyb__why {
+      gap: 30px;
+    }
+
+    .kyb__col--right {
+      gap: 32px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Know Your Bitez",
+  "tag": "section",
+  "class": "section-know-your-bitez",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The Details"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Know Your Bitez"
+    },
+    {
+      "type": "header",
+      "content": "Wave divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wave",
+      "label": "Show wave divider",
+      "default": true,
+      "info": "The scrolling text on the wave is the Wave marquee block — select it on the canvas to edit."
+    },
+    {
+      "type": "header",
+      "content": "Video"
+    },
+    {
+      "type": "paragraph",
+      "content": "Uses the product metafield custom.kyb_video when set. The video below is the fallback."
+    },
+    {
+      "type": "video",
+      "id": "fallback_video",
+      "label": "Fallback video"
+    },
+    {
+      "type": "image_picker",
+      "id": "video_thumbnail",
+      "label": "Custom video thumbnail"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_video_on_mobile",
+      "label": "Show video on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Flavor profile"
+    },
+    {
+      "type": "paragraph",
+      "content": "Values come from product metafields custom.flavor_sourness, custom.flavor_sweetness and custom.flavor_fruitiness (0–100). Sliders below are fallbacks."
+    },
+    {
+      "type": "text",
+      "id": "flavor_heading",
+      "label": "Heading",
+      "default": "Flavor Profile"
+    },
+    {
+      "type": "text",
+      "id": "bar_sourness_label",
+      "label": "Bar 1 label",
+      "default": "Sourness"
+    },
+    {
+      "type": "color",
+      "id": "bar_sourness_color",
+      "label": "Bar 1 color",
+      "default": "#63B944"
+    },
+    {
+      "type": "range",
+      "id": "bar_sourness_value",
+      "label": "Bar 1 fallback value",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 78
+    },
+    {
+      "type": "text",
+      "id": "bar_sweetness_label",
+      "label": "Bar 2 label",
+      "default": "Sweetness"
+    },
+    {
+      "type": "color",
+      "id": "bar_sweetness_color",
+      "label": "Bar 2 color",
+      "default": "#FFA726"
+    },
+    {
+      "type": "range",
+      "id": "bar_sweetness_value",
+      "label": "Bar 2 fallback value",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 60
+    },
+    {
+      "type": "text",
+      "id": "bar_fruitiness_label",
+      "label": "Bar 3 label",
+      "default": "Fruitiness"
+    },
+    {
+      "type": "color",
+      "id": "bar_fruitiness_color",
+      "label": "Bar 3 color",
+      "default": "#FF7BAC"
+    },
+    {
+      "type": "range",
+      "id": "bar_fruitiness_value",
+      "label": "Bar 3 fallback value",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Tasting notes"
+    },
+    {
+      "type": "paragraph",
+      "content": "Uses the product metafield custom.tasting_notes when set."
+    },
+    {
+      "type": "text",
+      "id": "notes_heading",
+      "label": "Heading",
+      "default": "Tasting Notes"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_notes",
+      "label": "Fallback text",
+      "default": "Blueberry up front, black-raspberry in the middle, a bright sour crackle on the finish. Thin enough to dissolve, bold enough to remember."
+    },
+    {
+      "type": "header",
+      "content": "Dietary tags"
+    },
+    {
+      "type": "paragraph",
+      "content": "Leave a label empty to hide that tag."
+    },
+    {
+      "type": "text",
+      "id": "tag_1_label",
+      "label": "Tag 1 label",
+      "default": "Vegan"
+    },
+    {
+      "type": "color",
+      "id": "tag_1_text_color",
+      "label": "Tag 1 text color",
+      "default": "#3FA34D"
+    },
+    {
+      "type": "color",
+      "id": "tag_1_background_color",
+      "label": "Tag 1 background",
+      "default": "#DFF1D8"
+    },
+    {
+      "type": "text",
+      "id": "tag_2_label",
+      "label": "Tag 2 label",
+      "default": "Gluten-Free"
+    },
+    {
+      "type": "color",
+      "id": "tag_2_text_color",
+      "label": "Tag 2 text color",
+      "default": "#FF7BAC"
+    },
+    {
+      "type": "color",
+      "id": "tag_2_background_color",
+      "label": "Tag 2 background",
+      "default": "#FFDFEB"
+    },
+    {
+      "type": "text",
+      "id": "tag_3_label",
+      "label": "Tag 3 label",
+      "default": "No Gelatin"
+    },
+    {
+      "type": "color",
+      "id": "tag_3_text_color",
+      "label": "Tag 3 text color",
+      "default": "#9D5CE6"
+    },
+    {
+      "type": "color",
+      "id": "tag_3_background_color",
+      "label": "Tag 3 background",
+      "default": "#ECD7FF"
+    },
+    {
+      "type": "header",
+      "content": "Product arch"
+    },
+    {
+      "type": "paragraph",
+      "content": "Shows the product's first image. The gradient uses the product metafields custom.color_light and custom.color when the colors below are unset."
+    },
+    {
+      "type": "paragraph",
+      "content": "The ring text around the arch is a Wave marquee block (round loop) — select it on the canvas to edit."
+    },
+    {
+      "type": "color",
+      "id": "arch_gradient_start",
+      "label": "Arch gradient top"
+    },
+    {
+      "type": "color",
+      "id": "arch_gradient_end",
+      "label": "Arch gradient bottom"
+    },
+    {
+      "type": "header",
+      "content": "Why it hits different"
+    },
+    {
+      "type": "paragraph",
+      "content": "Uses the product metafield custom.why_different (rich text: heading + paragraph pairs) when set. The fields below are fallbacks."
+    },
+    {
+      "type": "text",
+      "id": "why_heading",
+      "label": "Heading",
+      "default": "Why It Hits Different"
+    },
+    {
+      "type": "text",
+      "id": "feature_1_title",
+      "label": "Feature 1 title",
+      "default": "Sliced Paper Thin"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_1_text",
+      "label": "Feature 1 text",
+      "default": "Crunches, then melts. Never gets stuck in your teeth."
+    },
+    {
+      "type": "text",
+      "id": "feature_2_title",
+      "label": "Feature 2 title",
+      "default": "Real Sour Crackle"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_2_text",
+      "label": "Feature 2 text",
+      "default": "A tangy coating that hits on the very first bite."
+    },
+    {
+      "type": "text",
+      "id": "feature_3_title",
+      "label": "Feature 3 title",
+      "default": "Bold Berry Blend"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_3_text",
+      "label": "Feature 3 text",
+      "default": "Blueberry + black raspberry, no artificial aftertaste."
+    },
+    {
+      "type": "header",
+      "content": "Social proof"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show star rating",
+      "default": true,
+      "info": "Rating comes from Judge.me (product metafield reviews.rating)."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_avatars",
+      "label": "Show reviewer avatars",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_1_image",
+      "label": "Avatar 1",
+      "info": "Avatars fall back to built-in memojis when empty."
+    },
+    {
+      "type": "color",
+      "id": "avatar_1_background_color",
+      "label": "Avatar 1 background",
+      "default": "#B4D1C4"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_2_image",
+      "label": "Avatar 2"
+    },
+    {
+      "type": "color",
+      "id": "avatar_2_background_color",
+      "label": "Avatar 2 background",
+      "default": "#ABC5DE"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_3_image",
+      "label": "Avatar 3"
+    },
+    {
+      "type": "color",
+      "id": "avatar_3_background_color",
+      "label": "Avatar 3 background",
+      "default": "#F6DE9D"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_4_image",
+      "label": "Avatar 4"
+    },
+    {
+      "type": "color",
+      "id": "avatar_4_background_color",
+      "label": "Avatar 4 background",
+      "default": "#ADA8D6"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_5_image",
+      "label": "Avatar 5"
+    },
+    {
+      "type": "color",
+      "id": "avatar_5_background_color",
+      "label": "Avatar 5 background",
+      "default": "#FABCA6"
+    },
+    {
+      "type": "range",
+      "id": "rating_fallback",
+      "label": "Fallback rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.9,
+      "info": "Shown when the product has no reviews yet."
+    },
+    {
+      "type": "text",
+      "id": "counter_number",
+      "label": "Counter number",
+      "default": "37,500,000+"
+    },
+    {
+      "type": "text",
+      "id": "counter_label",
+      "label": "Counter label",
+      "default": "Bitez Enjoyed"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#0B1B2B"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Eyebrow accent",
+      "default": "#009EED"
+    },
+    {
+      "type": "color",
+      "id": "track_color",
+      "label": "Meter track",
+      "default": "#EFF4F8"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [
+    {
+      "name": "Know Your Bitez",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

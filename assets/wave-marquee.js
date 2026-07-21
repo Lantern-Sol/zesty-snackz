@@ -18,11 +18,20 @@
  * A whole number of waves fits in one repeat, so after one loop every glyph has
  * advanced an exact number of turns and the frame is identical — seamless.
  *
+ * Round shape (data-shape="round"): instead of the sine line, the glyphs ride
+ * a closed stadium loop around the band box via CSS offset-path. JS measures
+ * the glyphs in normal flow, normalises each centre to a fraction of the loop
+ * (--wm-dist) so the repeats close the loop exactly, and bakes the stadium
+ * path (--wm-oval-path) at the band's pixel size. One animated percentage,
+ * --wm-progress, advances every glyph along the path; offset-rotate keeps
+ * them tangent to the curve.
+ *
  * All measurement uses offsetLeft / offsetWidth (layout coordinates), so it
  * stays correct even when the host is tilted via the `rotation` setting.
  *
  * Expected markup:
- * - host carries data-text, data-freq (waves per repeat) and data-amp (px)
+ * - host carries data-text, data-freq (waves per repeat), data-amp (px) and
+ *   optionally data-shape="round"
  * - `[data-wm-track]` - the strip; JS fills, duplicates and bakes each glyph
  */
 
@@ -53,6 +62,9 @@ class WaveMarquee extends HTMLElement {
   /** Width the strip was last built for; lets us ignore height-only resizes. */
   #builtWidth = 0;
 
+  /** Height the loop was last built for; only consulted for the round shape. */
+  #builtHeight = 0;
+
   /** @type {ResizeObserver | undefined} */
   #resizeObserver;
 
@@ -63,12 +75,20 @@ class WaveMarquee extends HTMLElement {
 
     this.#build();
 
+    // Glyph metrics change when the custom fonts finish loading; re-measure
+    // once they have so the baked positions match the real glyph widths.
+    document.fonts?.ready.then(() => this.#build());
+
     // Only the band's width changes what needs building. A page full of loading
     // media relayouts its height constantly; rebuilding then would clear and
     // reflow the strip for nothing, so rebuild only when the width really moves.
+    // The round loop is drawn from both dimensions, so it also watches height.
     this.#resizeObserver = new ResizeObserver(
       debounce(() => {
-        if (this.#viewport && this.#viewport.clientWidth !== this.#builtWidth) this.#build();
+        if (!this.#viewport) return;
+        const widthChanged = this.#viewport.clientWidth !== this.#builtWidth;
+        const heightChanged = this.#isRound && this.#viewport.clientHeight !== this.#builtHeight;
+        if (widthChanged || heightChanged) this.#build();
       }, 150)
     );
     this.#resizeObserver.observe(this.#viewport);
@@ -90,6 +110,10 @@ class WaveMarquee extends HTMLElement {
 
   get #text() {
     return this.dataset.text ?? '';
+  }
+
+  get #isRound() {
+    return this.dataset.shape === 'round';
   }
 
   get #frequency() {
@@ -127,6 +151,14 @@ class WaveMarquee extends HTMLElement {
   }
 
   #build() {
+    if (this.#isRound) {
+      this.#buildRound();
+    } else {
+      this.#buildWave();
+    }
+  }
+
+  #buildWave() {
     const track = this.#track;
     if (!track || !this.#viewport) return;
 
@@ -134,6 +166,7 @@ class WaveMarquee extends HTMLElement {
     if (!viewport || this.#text === '') return;
 
     this.#builtWidth = viewport;
+    this.#builtHeight = this.#viewport.clientHeight;
     track.textContent = '';
 
     // Measure one repeat.
@@ -194,6 +227,69 @@ class WaveMarquee extends HTMLElement {
     this.style.setProperty('--wm-shift', `${shift}px`);
     this.style.setProperty('--wm-turns', `${turns}deg`);
     this.style.setProperty('--wm-slope', slope.toFixed(4));
+  }
+
+  #buildRound() {
+    const track = this.#track;
+    if (!track || !this.#viewport) return;
+
+    const width = this.#viewport.clientWidth;
+    const height = this.#viewport.clientHeight;
+    if (!width || !height || this.#text === '') return;
+
+    this.#builtWidth = width;
+    this.#builtHeight = height;
+    track.textContent = '';
+
+    // Measure in normal flow: the modifier keeps the glyphs inline until the
+    // loop positions are baked, so offsetLeft/offsetWidth are meaningful.
+    track.classList.add('wave-marquee__track--measure');
+    track.appendChild(this.#makeUnit());
+    const firstUnit = track.firstElementChild;
+    if (!(firstUnit instanceof HTMLElement)) {
+      track.classList.remove('wave-marquee__track--measure');
+      return;
+    }
+    const unitWidth = firstUnit.offsetWidth;
+    if (!unitWidth) {
+      track.classList.remove('wave-marquee__track--measure');
+      return;
+    }
+
+    // Stadium loop drawn inside the band box: two straight sides joined by
+    // half-circle caps on the short axis.
+    const radius = Math.min(width, height) / 2;
+    const straight = Math.max(width, height) - 2 * radius;
+    const perimeter = 2 * straight + 2 * Math.PI * radius;
+
+    // Whole repeats around the loop; the tiny width difference is absorbed by
+    // distributing the glyphs evenly below, which is what closes the loop
+    // seamlessly.
+    const unitsNeeded = Math.min(
+      MAX_UNITS_PER_SEGMENT,
+      Math.max(1, Math.round(perimeter / unitWidth))
+    );
+    for (let i = 1; i < unitsNeeded; i += 1) {
+      track.appendChild(this.#makeUnit());
+    }
+
+    const totalWidth = unitsNeeded * unitWidth;
+    for (const glyph of track.querySelectorAll('.wave-marquee__glyph')) {
+      const center = glyph.offsetLeft + glyph.offsetWidth / 2;
+      glyph.style.setProperty('--wm-dist', `${((center / totalWidth) * 100).toFixed(3)}%`);
+    }
+
+    // Clockwise, starting on the trailing straight so the text reads upward on
+    // the left (portrait) or rightward across the top (landscape).
+    let d;
+    if (height >= width) {
+      d = `M 0 ${height - radius} L 0 ${radius} A ${radius} ${radius} 0 0 1 ${width} ${radius} L ${width} ${height - radius} A ${radius} ${radius} 0 0 1 0 ${height - radius} Z`;
+    } else {
+      d = `M ${radius} 0 L ${width - radius} 0 A ${radius} ${radius} 0 0 1 ${width - radius} ${height} L ${radius} ${height} A ${radius} ${radius} 0 0 1 ${radius} 0 Z`;
+    }
+    this.style.setProperty('--wm-oval-path', `path("${d}")`);
+
+    track.classList.remove('wave-marquee__track--measure');
   }
 }
 

@@ -12,11 +12,13 @@
   assign s = block.settings
   assign text = s.text | default: 'Zesty Snackz'
 
+  assign shape = s.shape | default: 'wave'
   assign amplitude = s.amplitude | default: 24
   assign frequency = s.frequency | default: 3
   assign speed = s.speed | default: 30
   assign gap = s.gap | default: 40
   assign width = s.width | default: 100
+  assign height = s.height | default: 100
   assign rotation = s.rotation | default: 0
 
   assign direction = 'normal'
@@ -44,10 +46,11 @@
 ></script>
 
 <wave-marquee
-  class="wave-marquee {{ type_classes }}{% if s.shadow %} wave-marquee--shadow{% endif %}{% if request.design_mode %} wave-marquee--design-mode{% endif %}{% if s.use_mobile_settings %} wave-marquee--mobile-settings{% endif %}{% if s.hide_on_mobile %} hidden--mobile{% endif %}{% if s.hide_on_desktop %} hidden--desktop{% endif %}"
+  class="wave-marquee {{ type_classes }}{% if shape == 'round' %} wave-marquee--round{% endif %}{% if s.shadow %} wave-marquee--shadow{% endif %}{% if request.design_mode %} wave-marquee--design-mode{% endif %}{% if s.use_mobile_settings %} wave-marquee--mobile-settings{% endif %}{% if s.hide_on_mobile %} hidden--mobile{% endif %}{% if s.hide_on_desktop %} hidden--desktop{% endif %}"
   role="marquee"
   aria-label="{{ text | escape }}"
   data-text="{{ text | escape }}"
+  data-shape="{{ shape }}"
   data-freq="{{ frequency }}"
   data-amp="{{ amplitude }}"
   {% if s.use_mobile_settings %}
@@ -73,11 +76,13 @@
       --wm-x: {{ s.x_position }}%;
       --wm-y: {{ s.y_position }}%;
       --wm-width: {{ width }}%;
+      --wm-height: {{ height }}%;
       --wm-rotation: {{ rotation }}deg;
       {% if s.use_mobile_settings %}
         --wm-x-mobile: {{ s.x_position_mobile }}%;
         --wm-y-mobile: {{ s.y_position_mobile }}%;
         --wm-width-mobile: {{ s.width_mobile }}%;
+        --wm-height-mobile: {{ s.height_mobile | default: 100 }}%;
         --wm-rotation-mobile: {{ s.rotation_mobile }}deg;
       {% endif %}
     "
@@ -98,6 +103,15 @@
   @property --wm-phase {
     syntax: '<angle>';
     initial-value: 0deg;
+    inherits: true;
+  }
+
+  /* Round shape: one percentage swept 0 → 100% per loop; each glyph adds its
+     baked offset (--wm-dist) and rides the closed stadium path. Registered +
+     inheriting for the same reason as --wm-phase. */
+  @property --wm-progress {
+    syntax: '<percentage>';
+    initial-value: 0%;
     inherits: true;
   }
 
@@ -151,6 +165,10 @@
       width: var(--wm-width-mobile, 100%);
       rotate: var(--wm-rotation-mobile, 0deg);
     }
+
+    .wave-marquee--mobile-settings.wave-marquee--round .wave-marquee__band {
+      height: var(--wm-height-mobile, 100%);
+    }
   }
 
   /* Self-contained band: clips the scrolling strip so the block never overflows
@@ -203,6 +221,61 @@
       --wm-phase: var(--wm-turns, 360deg);
     }
   }
+
+  /* ------------------------------------------------------------- round loop */
+
+  /* The loop is bounded by the band box plus half a glyph (letters straddle
+     the path), so the host clip that guards the wave's unbounded scroll is
+     lifted here. */
+  .wave-marquee--round {
+    overflow: visible;
+  }
+
+  .wave-marquee--round .wave-marquee__band {
+    height: var(--wm-height, 100%);
+  }
+
+  .wave-marquee--round .wave-marquee__viewport {
+    overflow: visible;
+    padding-block: 0;
+    height: 100%;
+  }
+
+  /* Spans the band box so it is the glyphs' containing block: offset-path
+     coordinates are resolved against it. */
+  .wave-marquee--round .wave-marquee__track {
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+
+  /* Until the loop positions are baked, the JS keeps this modifier on so the
+     glyphs stay inline and can be measured in normal flow. */
+  .wave-marquee--round .wave-marquee__track:not(.wave-marquee__track--measure) .wave-marquee__glyph {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: none;
+    offset-path: var(--wm-oval-path, none);
+    offset-rotate: auto;
+    offset-distance: mod(calc(var(--wm-dist, 0%) + var(--wm-progress, 0%)), 100%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wave-marquee--round .wave-marquee__track {
+      animation-name: wave-marquee-loop;
+    }
+  }
+
+  @keyframes wave-marquee-loop {
+    from {
+      --wm-progress: 0%;
+    }
+
+    to {
+      --wm-progress: 100%;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -221,6 +294,17 @@
       "content": "Wave"
     },
     {
+      "type": "select",
+      "id": "shape",
+      "label": "Shape",
+      "options": [
+        { "value": "wave", "label": "Wave" },
+        { "value": "round", "label": "Round loop" }
+      ],
+      "default": "wave",
+      "info": "Round loop runs the text around a closed oval instead of a scrolling wave."
+    },
+    {
       "type": "range",
       "id": "frequency",
       "label": "Frequency",
@@ -228,7 +312,8 @@
       "min": 1,
       "max": 12,
       "step": 1,
-      "default": 3
+      "default": 3,
+      "visible_if": "{{ block.settings.shape != 'round' }}"
     },
     {
       "type": "range",
@@ -238,7 +323,8 @@
       "max": 120,
       "step": 2,
       "unit": "px",
-      "default": 24
+      "default": 24,
+      "visible_if": "{{ block.settings.shape != 'round' }}"
     },
     {
       "type": "range",
@@ -421,6 +507,18 @@
       "default": 100
     },
     {
+      "type": "range",
+      "id": "height",
+      "label": "Height",
+      "info": "Height of the loop, relative to the section.",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.shape == 'round' }}"
+    },
+    {
       "type": "header",
       "content": "Mobile"
     },
@@ -462,6 +560,17 @@
       "unit": "%",
       "default": 100,
       "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "label": "Height (mobile)",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.use_mobile_settings and block.settings.shape == 'round' }}"
     },
     {
       "type": "range",
