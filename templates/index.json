@@ -2042,8 +2042,8 @@
               "type": "scroll-highlight-text",
               "name": "Scroll highlight text",
               "settings": {
-                "text": "<p><strong>Why is everyone talking about Zesty?</strong> [Sticker 1] <strong>Because we're not a corporate giant.</strong> [Sticker 2] <strong>We're just a group of friends on a mission to make candy fun again—and build a brand worth supporting.</strong> [Sticker 3] </p>",
-                "mobile_text": "<p>Sour [sticker1] candy, sliced paper- thin. It crunches.[sticker2]It melts. It never takes a molar hostage. [sticker3]  AND FOR THE  HEALTH-CONSCIOUS:[sticker4] WE DRIED YOU SOME [sticker5] FRUIT</p>",
+                "text": "<p>Why is everyone talking about Zesty? [sticker1] Because we're not a corporate giant. [sticker2] We're just a group of friends on a mission to make candy fun again—and build a brand worth supporting. [sticker3] </p>",
+                "mobile_text": "<p>Why is everyone talking about Zesty? [sticker1] Because we're not a corporate giant. [sticker2] We're just a group of friends on a mission to make candy fun again—and build a brand worth supporting. [sticker3] </p>",
                 "split": "characters",
                 "start_position": 85,
                 "end_position": 45,
