@@ -3,6 +3,7 @@
 
   @param {string} [variant] - What version of the menu to render. Defaults to header menu.
   @param {string} [transparent] - Show a transparent menu
+  @param {string} [extra_blocks] - Captured section-block HTML (e.g. the Build a Bundle button) to render inside the mobile drawer
 {%- enddoc -%}
 
 {% liquid
@@ -22,7 +23,8 @@
         linklist: block_settings.menu,
         data_header_drawer_type: 'mobile-drawer',
         block: block,
-        section: section
+        section: section,
+        extra_blocks: extra_blocks
       %}
     </div>
 
@@ -227,6 +229,9 @@
 {% stylesheet %}
   .header__drawer {
     --header-drawer-min-height: 60px;
+    @media screen and (max-width: 749px) {
+      --header-drawer-min-height: 44px;
+    }
     display: flex;
     min-height: var(--header-drawer-min-height);
     align-items: center;

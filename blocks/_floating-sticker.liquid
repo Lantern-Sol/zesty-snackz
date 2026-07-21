@@ -2,8 +2,19 @@
   assign block_settings = block.settings
   assign size_px = block_settings.size | default: 120
   assign size_rem = size_px | divided_by: 16.0
-  assign image_width = size_px | times: 3 | at_most: 1400
+  assign mobile_size_px = block_settings.mobile_size
+  assign largest_size_px = size_px
   assign sizes_attribute = size_px | append: 'px'
+
+  if mobile_size_px != blank
+    assign mobile_size_rem = mobile_size_px | divided_by: 16.0
+    assign sizes_attribute = '(max-width: 749px) ' | append: mobile_size_px | append: 'px, ' | append: sizes_attribute
+    if mobile_size_px > size_px
+      assign largest_size_px = mobile_size_px
+    endif
+  endif
+
+  assign image_width = largest_size_px | times: 3 | at_most: 1400
 
   assign peel_enabled = false
   if block_settings.peel_enabled and block_settings.peel_code != blank
@@ -36,7 +47,12 @@
   style="
     --sticker-x: {{ block_settings.x_position }};
     --sticker-y: {{ block_settings.y_position }}%;
+    {% if block_settings.custom_mobile_position %}
+      --sticker-x-mobile: {{ block_settings.x_position_mobile }};
+      --sticker-y-mobile: {{ block_settings.y_position_mobile }}%;
+    {% endif %}
     --sticker-size: {{ size_rem }}rem;
+    {% if mobile_size_rem %}--sticker-size-mobile: {{ mobile_size_rem }}rem;{% endif %}
     --sticker-rotation: {{ block_settings.rotation | default: 0 }}deg;
     --sticker-offset: {{ block_settings.motion_offset | default: 0 }}s;
   "
@@ -92,6 +108,13 @@
     width: var(--sticker-size, 7.5rem);
     z-index: var(--layer-flat);
     pointer-events: none;
+
+    @media screen and (max-width: 749px) {
+      /* Falls back to the desktop size and position when no mobile values are set */
+      width: var(--sticker-size-mobile, var(--sticker-size, 7.5rem));
+      top: var(--sticker-y-mobile, var(--sticker-y, 50%));
+      left: calc(var(--sticker-x-mobile, var(--sticker-x, 50)) * 1%);
+    }
   }
 
   /* Keep the block clickable in the theme editor so it can be selected on canvas */
@@ -253,6 +276,11 @@
   .floating-sticker__code {
     font-family: var(--font-heading--family);
     font-size: calc(var(--sticker-size, 7.5rem) / 9);
+
+    /* The code scales with the sticker, so follow the mobile size too */
+    @media screen and (max-width: 749px) {
+      font-size: calc(var(--sticker-size-mobile, var(--sticker-size, 7.5rem)) / 9);
+    }
     letter-spacing: 0.06em;
     white-space: nowrap;
     color: var(--color-secondary-button-text, var(--color-foreground));
@@ -355,6 +383,12 @@
       "info": "Width in pixels."
     },
     {
+      "type": "number",
+      "id": "mobile_size",
+      "label": "Mobile width",
+      "info": "Width in pixels on mobile. Leave blank to use the same width as desktop."
+    },
+    {
       "type": "range",
       "id": "rotation",
       "label": "Rotation",
@@ -393,6 +427,34 @@
       "step": 1,
       "unit": "%",
       "default": 50
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_mobile_position",
+      "label": "Custom mobile position",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "x_position_mobile",
+      "label": "Mobile horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.custom_mobile_position }}"
+    },
+    {
+      "type": "range",
+      "id": "y_position_mobile",
+      "label": "Mobile vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.custom_mobile_position }}"
     },
     {
       "type": "header",

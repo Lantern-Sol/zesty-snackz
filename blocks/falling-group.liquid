@@ -11,6 +11,14 @@
     inset: 0;
     z-index: var(--layer-flat);
 
+    /* Non-auto z-index makes the group a stacking context, so this one value
+       moves every image inside it at once */
+    @media screen and (max-width: 749px) {
+      /* On mobile, sit between the section background (-2) and the section's
+         other blocks so the stickers fall behind the content */
+      z-index: var(--layer-lowest);
+    }
+
     /* The group is a pure positioning layer; the images inside re-enable
        pointer events in the theme editor for on-canvas selection */
     pointer-events: none;

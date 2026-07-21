@@ -263,6 +263,65 @@
       "visible_if": "{{ block.settings.style_class == 'button-unstyled' }}"
     },
     {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_text_enabled",
+      "label": "Override text",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "custom_text_size",
+      "label": "Font size",
+      "min": 8,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.custom_text_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_text_line_height",
+      "label": "Line height",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.2,
+      "visible_if": "{{ block.settings.custom_text_enabled }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_text_use_mobile",
+      "label": "Use mobile text size",
+      "default": false,
+      "visible_if": "{{ block.settings.custom_text_enabled }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_text_size_mobile",
+      "label": "Font size (mobile)",
+      "min": 8,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.custom_text_enabled and block.settings.custom_text_use_mobile }}"
+    },
+    {
+      "type": "range",
+      "id": "custom_text_line_height_mobile",
+      "label": "Line height (mobile)",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.2,
+      "visible_if": "{{ block.settings.custom_text_enabled and block.settings.custom_text_use_mobile }}"
+    },
+    {
       "type": "range",
       "id": "rotation",
       "label": "Rotation",
@@ -329,6 +388,22 @@
       "unit": "%",
       "default": 100,
       "visible_if": "{{ block.settings.width_mobile == \"custom\" }}"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_desktop",
+      "label": "Hide on desktop",
+      "default": false
     }
   ],
   "presets": [

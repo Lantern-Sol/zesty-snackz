@@ -58,9 +58,10 @@
       "type": "range",
       "id": "slides_to_show_desktop",
       "label": "Desktop slides per view",
+      "info": "Use decimals to show a partial slide peeking in, e.g. 2.5.",
       "min": 1,
       "max": 5,
-      "step": 1,
+      "step": 0.1,
       "default": 3,
       "visible_if": "{{ block.settings.enable_slider_desktop }}"
     },
@@ -78,9 +79,10 @@
       "type": "range",
       "id": "mobile_slides_to_show",
       "label": "Mobile slides per view",
+      "info": "Use decimals to show a partial slide peeking in, e.g. 1.2.",
       "min": 1,
       "max": 3,
-      "step": 1,
+      "step": 0.1,
       "default": 1,
       "visible_if": "{{ block.settings.enable_slider_mobile }}"
     },

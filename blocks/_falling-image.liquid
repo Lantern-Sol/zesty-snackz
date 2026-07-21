@@ -2,16 +2,32 @@
   assign block_settings = block.settings
   assign size_px = block_settings.size | default: 100
   assign size_rem = size_px | divided_by: 16.0
-  assign image_width = size_px | times: 3 | at_most: 1400
+  assign mobile_size_px = block_settings.mobile_size
+  assign largest_size_px = size_px
   assign sizes_attribute = size_px | append: 'px'
+
+  if mobile_size_px != blank
+    assign mobile_size_rem = mobile_size_px | divided_by: 16.0
+    assign sizes_attribute = '(max-width: 749px) ' | append: mobile_size_px | append: 'px, ' | append: sizes_attribute
+    if mobile_size_px > size_px
+      assign largest_size_px = mobile_size_px
+    endif
+  endif
+
+  assign image_width = largest_size_px | times: 3 | at_most: 1400
 %}
 
 <div
-  class="falling-image{% if request.design_mode %} falling-image--design-mode{% endif %}{% if block_settings.shadow %} falling-image--shadow{% endif %}"
+  class="falling-image{% if request.design_mode %} falling-image--design-mode{% endif %}{% if block_settings.shadow %} falling-image--shadow{% endif %}{% if block_settings.mobile_hide %} falling-image--mobile-hide{% endif %}"
   style="
     --falling-x: {{ block_settings.x_position }};
     --falling-y: {{ block_settings.y_position }}%;
+    {% if block_settings.custom_mobile_position %}
+      --falling-x-mobile: {{ block_settings.x_position_mobile }};
+      --falling-y-mobile: {{ block_settings.y_position_mobile }}%;
+    {% endif %}
     --falling-size: {{ size_rem }}rem;
+    {% if mobile_size_rem %}--falling-size-mobile: {{ mobile_size_rem }}rem;{% endif %}
     --falling-duration: {{ block_settings.duration }}s;
     --falling-rotation: {{ block_settings.rotation | default: 0 }}deg;
     --falling-offset: {{ block_settings.motion_offset | default: 0 }}s;
@@ -46,6 +62,19 @@
     width: var(--falling-size, 7.5rem);
     z-index: var(--layer-flat);
     pointer-events: none;
+
+    @media screen and (max-width: 749px) {
+      /* Falls back to the desktop size and position when no mobile values are set */
+      width: var(--falling-size-mobile, var(--falling-size, 7.5rem));
+      top: var(--falling-y-mobile, var(--falling-y, 50%));
+      left: calc(var(--falling-x-mobile, var(--falling-x, 50)) * 1%);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .falling-image--mobile-hide {
+      display: none;
+    }
   }
 
   /* Keep the block clickable in the theme editor so it can be selected on canvas */
@@ -227,6 +256,19 @@
       "info": "Width in pixels."
     },
     {
+      "type": "number",
+      "id": "mobile_size",
+      "label": "Mobile width",
+      "info": "Width in pixels on mobile. Leave blank to use the same width as desktop."
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_hide",
+      "label": "Mobile hide",
+      "default": false,
+      "info": "Hide this image on mobile."
+    },
+    {
       "type": "range",
       "id": "rotation",
       "label": "Rotation",
@@ -266,6 +308,34 @@
       "unit": "%",
       "default": 50,
       "info": "Where the image lands after falling, relative to the section content area."
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_mobile_position",
+      "label": "Custom mobile position",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "x_position_mobile",
+      "label": "Mobile horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.custom_mobile_position }}"
+    },
+    {
+      "type": "range",
+      "id": "y_position_mobile",
+      "label": "Mobile vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.custom_mobile_position }}"
     },
     {
       "type": "header",

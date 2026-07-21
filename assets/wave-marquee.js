@@ -29,6 +29,8 @@
 /** Safety cap so a tiny host width can never spin the fill loop forever. */
 const MAX_UNITS_PER_SEGMENT = 200;
 
+const mobileMedia = window.matchMedia('(max-width: 749px)');
+
 /**
  * @param {() => void} fn
  * @param {number} wait
@@ -70,23 +72,41 @@ class WaveMarquee extends HTMLElement {
       }, 150)
     );
     this.#resizeObserver.observe(this.#viewport);
+
+    // mobile overrides (amplitude, width) change what to build for
+    this.#onBreakpointChange = () => this.#build();
+    mobileMedia.addEventListener('change', this.#onBreakpointChange);
   }
 
   disconnectedCallback() {
     this.#resizeObserver?.disconnect();
+    if (this.#onBreakpointChange) {
+      mobileMedia.removeEventListener('change', this.#onBreakpointChange);
+    }
   }
+
+  /** @type {(() => void) | undefined} */
+  #onBreakpointChange;
 
   get #text() {
     return this.dataset.text ?? '';
   }
 
   get #frequency() {
-    const freq = Math.round(Number.parseFloat(this.dataset.freq ?? '2'));
+    const raw =
+      mobileMedia.matches && this.dataset.freqMobile != null
+        ? this.dataset.freqMobile
+        : this.dataset.freq;
+    const freq = Math.round(Number.parseFloat(raw ?? '2'));
     return Number.isFinite(freq) && freq > 0 ? freq : 1;
   }
 
   get #amplitude() {
-    const amp = Number.parseFloat(this.dataset.amp ?? '24');
+    const raw =
+      mobileMedia.matches && this.dataset.ampMobile != null
+        ? this.dataset.ampMobile
+        : this.dataset.amp;
+    const amp = Number.parseFloat(raw ?? '24');
     return Number.isFinite(amp) ? amp : 24;
   }
 

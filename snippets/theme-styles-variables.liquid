@@ -175,7 +175,7 @@
   }
   @media only screen and (max-width: 749px) {
     html {
-      font-size: calc(16 * 100vw / 393);
+      font-size: calc(16 * 100vw / 430);
     }
   }
 
@@ -430,6 +430,22 @@
         echo '--font-[preset_name]--line-height: var(--line-height--[preset_line_height]);' | replace: '[preset_name]', preset_name | replace: '[preset_line_height]', settings[preset_line_height]
       endfor
     %}
+
+    /* Mobile typography size overrides (only applied when a preset's mobile size is set) */
+    @media screen and (max-width: 749px) {
+      {% liquid
+        assign mobile_presets = "paragraph, h1, h2, h3, h4, h5, h6, h7" | split: ", "
+        for preset_name in mobile_presets
+          assign mobile_size_id = 'type_size_[preset_name]_mobile' | replace: '[preset_name]', preset_name
+          assign mobile_size_value = settings[mobile_size_id]
+          if mobile_size_value == blank
+            continue
+          endif
+          assign mobile_size_rem = mobile_size_value | times: 1 | divided_by: 16.0
+          echo '--font-[preset_name]--size: [mobile_size_rem]rem;' | replace: '[preset_name]', preset_name | replace: '[mobile_size_rem]', mobile_size_rem
+        endfor
+      %}
+    }
 
     /* Hardcoded font sizes */
     --font-size--2xs: 0.625rem;

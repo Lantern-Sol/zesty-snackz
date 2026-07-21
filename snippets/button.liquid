@@ -12,6 +12,23 @@
 {% assign button_rotation = block_settings.rotation | default: 0 %}
 {% render 'button-custom-styles', block_settings: block_settings, block_id: block.id %}
 
+{% if block_settings.custom_text_enabled %}
+  {% style %}
+    .{{ block_settings.style_class }}--{{ block.id }} {
+      font-size: {{ block_settings.custom_text_size | default: 16 | divided_by: 16.0 }}rem;
+      line-height: {{ block_settings.custom_text_line_height | default: 1.2 }};
+    }
+    {%- if block_settings.custom_text_use_mobile %}
+      @media screen and (max-width: 749px) {
+        .{{ block_settings.style_class }}--{{ block.id }} {
+          font-size: {{ block_settings.custom_text_size_mobile | default: 16 | divided_by: 16.0 }}rem;
+          line-height: {{ block_settings.custom_text_line_height_mobile | default: 1.2 }};
+        }
+      }
+    {%- endif %}
+  {% endstyle %}
+{% endif %}
+
 <a
   {% if link == blank %}
     role="link"
@@ -23,6 +40,8 @@
     size-style
     {{ block_settings.style_class }}
     {{ block_settings.style_class }}--{{ block.id }}
+    {% if block_settings.hide_on_mobile %} hidden--mobile{% endif %}
+    {% if block_settings.hide_on_desktop %} hidden--desktop{% endif %}
   "
   style="{% render 'size-style', settings: block_settings %}{% if button_rotation != 0 %} rotate: {{ button_rotation }}deg;{% endif %}"
   {%- if block_settings.open_in_new_tab -%}

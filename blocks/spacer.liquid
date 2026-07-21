@@ -77,7 +77,9 @@
     .layout-panel-flex--column > .spacer-block--size-mobile-pixel,
     .mobile-column > .spacer-block--size-mobile-pixel {
       width: 100%;
-      flex: 0;
+      /* Basis must stay auto: a shorthand like `flex: 0` sets flex-basis to 0%,
+         which overrides the height below and collapses the spacer */
+      flex: 0 0 auto;
       height: var(--spacer-size-mobile);
     }
   }

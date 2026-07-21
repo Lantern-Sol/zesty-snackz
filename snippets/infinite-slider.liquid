@@ -16,6 +16,10 @@
   assign desktop_slides = settings.slides_to_show_desktop | default: 6.5
   assign mobile_slides = settings.mobile_slides_to_show | default: 1.2
   assign gap = settings.gap | default: 0
+  assign mobile_gap = gap
+  if settings.use_mobile_gap
+    assign mobile_gap = settings.mobile_gap | default: 0
+  endif
 
   assign show_arrows_desktop = settings.show_arrows_desktop
   assign show_arrows_mobile = settings.show_arrows_mobile
@@ -56,6 +60,7 @@
       --slides-per-view-desktop: {{ desktop_slides }};
       --slides-per-view-mobile: {{ mobile_slides }};
       --infinite-slider-gap: {{ gap }}px;
+      --infinite-slider-gap-mobile: {{ mobile_gap }}px;
       --infinite-slider-align: {{ settings.vertical_alignment | default: 'stretch' }};
     "
   >
@@ -108,6 +113,11 @@
     align-items: var(--infinite-slider-align, stretch);
     gap: var(--infinite-slider-gap, 0px);
     overflow-x: auto;
+
+    /* The JS reads the gap from computed style, so looping stays in sync */
+    @media screen and (max-width: 749px) {
+      gap: var(--infinite-slider-gap-mobile, var(--infinite-slider-gap, 0px));
+    }
     overscroll-behavior-x: contain;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
@@ -135,7 +145,10 @@
     @media screen and (max-width: 749px) {
       flex: 0 0
         calc(
-          (100% - (var(--infinite-slider-gap, 0px) * (var(--slides-per-view-mobile, 1) - 1))) /
+          (
+              100% - (var(--infinite-slider-gap-mobile, var(--infinite-slider-gap, 0px)) *
+                    (var(--slides-per-view-mobile, 1) - 1))
+            ) /
             var(--slides-per-view-mobile, 1)
         );
     }

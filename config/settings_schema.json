@@ -172,6 +172,43 @@
       },
       {
         "type": "select",
+        "id": "type_size_paragraph_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          }
+        ],
+        "default": ""
+      },
+      {
+        "type": "select",
         "id": "type_line_height_paragraph",
         "label": "t:settings.line_height",
         "options": [
@@ -285,6 +322,75 @@
           }
         ],
         "default": "72"
+      },
+      {
+        "type": "select",
+        "id": "type_size_h1_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "70",
+            "label": "70px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
       },
       {
         "type": "select",
@@ -437,6 +543,75 @@
           }
         ],
         "default": "48"
+      },
+      {
+        "type": "select",
+        "id": "type_size_h2_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
       },
       {
         "type": "select",
@@ -600,6 +775,75 @@
       },
       {
         "type": "select",
+        "id": "type_size_h3_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
+      },
+      {
+        "type": "select",
         "id": "type_line_height_h3",
         "label": "t:settings.line_height",
         "options": [
@@ -757,6 +1001,75 @@
           }
         ],
         "default": "24"
+      },
+      {
+        "type": "select",
+        "id": "type_size_h4_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
       },
       {
         "type": "select",
@@ -920,6 +1233,75 @@
       },
       {
         "type": "select",
+        "id": "type_size_h5_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
+      },
+      {
+        "type": "select",
         "id": "type_line_height_h5",
         "label": "t:settings.line_height",
         "options": [
@@ -1080,6 +1462,75 @@
       },
       {
         "type": "select",
+        "id": "type_size_h6_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
+      },
+      {
+        "type": "select",
         "id": "type_line_height_h6",
         "label": "t:settings.line_height",
         "options": [
@@ -1237,6 +1688,75 @@
           }
         ],
         "default": "16"
+      },
+      {
+        "type": "select",
+        "id": "type_size_h7_mobile",
+        "label": "Mobile size",
+        "info": "Overrides the size on screens up to 749px wide. \"Default\" keeps the responsive size.",
+        "options": [
+          {
+            "value": "",
+            "label": "Default (responsive)"
+          },
+          {
+            "value": "10",
+            "label": "10px"
+          },
+          {
+            "value": "12",
+            "label": "12px"
+          },
+          {
+            "value": "14",
+            "label": "14px"
+          },
+          {
+            "value": "16",
+            "label": "16px"
+          },
+          {
+            "value": "18",
+            "label": "18px"
+          },
+          {
+            "value": "20",
+            "label": "20px"
+          },
+          {
+            "value": "24",
+            "label": "24px"
+          },
+          {
+            "value": "28",
+            "label": "28px"
+          },
+          {
+            "value": "32",
+            "label": "32px"
+          },
+          {
+            "value": "40",
+            "label": "40px"
+          },
+          {
+            "value": "48",
+            "label": "48px"
+          },
+          {
+            "value": "56",
+            "label": "56px"
+          },
+          {
+            "value": "72",
+            "label": "72px"
+          },
+          {
+            "value": "88",
+            "label": "88px"
+          }
+        ],
+        "default": ""
       },
       {
         "type": "select",

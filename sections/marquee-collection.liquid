@@ -31,12 +31,17 @@
 ></div>
 
 <div
-  class="marquee-collection section spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+  class="marquee-collection section spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}{% if section.settings.use_mobile_sizes %} marquee-collection--mobile-sizes{% endif %}{% if section.settings.mobile_reverse_hover %} marquee-collection--mobile-reverse{% endif %}"
   style="
     {%- render 'spacing-style', settings: section.settings %};
     --mq-title-size: {{ section.settings.title_size }}px;
     --mq-sep-size: {{ section.settings.separator_size }}px;
     --mq-row-gap: {{ section.settings.gap_between_rows }}px;
+    {% if section.settings.use_mobile_sizes %}
+      --mq-title-size-mobile: {{ section.settings.title_size_mobile }}px;
+      --mq-sep-size-mobile: {{ section.settings.separator_size_mobile }}px;
+      --mq-row-gap-mobile: {{ section.settings.gap_between_rows_mobile }}px;
+    {% endif %}
   "
 >
   {%- if products.size > 0 -%}
@@ -60,6 +65,9 @@
         class="marquee-collection__row gap-style"
         style="
           {% render 'gap-style', value: gap, name: 'marquee-gap' %}
+          {% if section.settings.use_mobile_sizes %}
+            {% render 'gap-style', value: section.settings.gap_between_elements_mobile, name: 'marquee-gap-mobile', disable_scaling: true %}
+          {% endif %}
           --marquee-direction: {{ direction }};
           --row-accent: {{ accent }};
           {% if light != blank %}--row-light: {{ light }};{% endif %}
@@ -112,6 +120,9 @@
         class="marquee-collection__row gap-style"
         style="
           {% render 'gap-style', value: gap, name: 'marquee-gap' %}
+          {% if section.settings.use_mobile_sizes %}
+            {% render 'gap-style', value: section.settings.gap_between_elements_mobile, name: 'marquee-gap-mobile', disable_scaling: true %}
+          {% endif %}
           --marquee-direction: {{ direction }};
           --row-accent: var(--color-foreground);
         "
@@ -276,6 +287,57 @@
       transition: none;
     }
   }
+
+  /* --- reversed hover on mobile (only when "Reverse hover on mobile" is on):
+     the product image shows at rest and the arrow appears while tapped, since
+     touch has no hover. The :active rules out-rank the desktop :hover rules
+     (which touch browsers also fire on tap), so the tap always wins. --- */
+  @media screen and (max-width: 749px) {
+    .marquee-collection--mobile-reverse .marquee-collection__sep-gear {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .marquee-collection--mobile-reverse .marquee-collection__sep-arrow {
+      opacity: 0;
+      transform: scale(0.55) rotate(-18deg);
+    }
+
+    .marquee-collection--mobile-reverse .marquee-collection__item:active .marquee-collection__sep-gear {
+      opacity: 0;
+      transform: scale(0.55);
+    }
+
+    .marquee-collection--mobile-reverse .marquee-collection__item:active .marquee-collection__sep-arrow {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  /* --- mobile size overrides (only when "Use mobile sizes" is on) --- */
+  @media screen and (max-width: 749px) {
+    .marquee-collection--mobile-sizes {
+      gap: var(--mq-row-gap-mobile, var(--mq-row-gap, 0px));
+    }
+
+    /* Re-point the inherited gap variable at the wrapper: its descendants and
+       the scroll keyframes all resolve --marquee-gap from here, so the loop
+       distance stays in sync with the visible gap. The --mobile-sizes class
+       guarantees the mobile variable is set, so no fallback is needed (a
+       self-referencing fallback would be an invalid cycle). */
+    .marquee-collection--mobile-sizes .marquee__wrapper {
+      --marquee-gap: var(--marquee-gap-mobile);
+    }
+
+    .marquee-collection--mobile-sizes .marquee-collection__title {
+      font-size: var(--mq-title-size-mobile, var(--mq-title-size));
+    }
+
+    .marquee-collection--mobile-sizes .marquee-collection__sep {
+      width: var(--mq-sep-size-mobile, var(--mq-sep-size));
+      height: var(--mq-sep-size-mobile, var(--mq-sep-size));
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -346,6 +408,60 @@
     },
     {
       "type": "header",
+      "content": "Mobile sizes"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_sizes",
+      "label": "Use mobile sizes",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "label": "Mobile title size",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56,
+      "visible_if": "{{ section.settings.use_mobile_sizes }}"
+    },
+    {
+      "type": "range",
+      "id": "separator_size_mobile",
+      "label": "Mobile separator size",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56,
+      "visible_if": "{{ section.settings.use_mobile_sizes }}"
+    },
+    {
+      "type": "range",
+      "id": "gap_between_elements_mobile",
+      "label": "Mobile gap between title and separator",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ section.settings.use_mobile_sizes }}"
+    },
+    {
+      "type": "range",
+      "id": "gap_between_rows_mobile",
+      "label": "Mobile gap between rows",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.use_mobile_sizes }}"
+    },
+    {
+      "type": "header",
       "content": "Motion"
     },
     {
@@ -379,6 +495,13 @@
       "max": 60,
       "step": 1,
       "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_reverse_hover",
+      "label": "Reverse hover on mobile",
+      "info": "Shows the product image at rest and swaps to the arrow while tapped, since mobile has no hover.",
+      "default": false
     },
     {
       "type": "header",

@@ -23,6 +23,13 @@
   Blocks: sticker (bubble with image), image, text (circle or pill chip), button.
   Each block has an optional "Horizontal position" (0-100%); left empty, items
   spread evenly with a deterministic jitter.
+
+  Mobile (per block): hide entirely (display:none + excluded from physics, lazy
+  images never load), pin independently of desktop with its own x/y/rotation
+  (pinned = desktop only, pinned_mobile = mobile only), and sizes can be set
+  per item: stickers/images an explicit px size, text chips a font size, and
+  buttons font size + padding (width stays fit-content). 0 = fall back to the
+  global mobile item scale. The engine re-collects on breakpoint change.
 {% endcomment %}
 
 <script
@@ -62,9 +69,9 @@
     data-no-squash
   {% endunless %}
 >
-  {%- if section.settings.background_image != blank -%}
+  {%- if section.settings.background_image != blank or section.settings.background_image_mobile != blank -%}
     <div
-      class="gravity-fall__bg"
+      class="gravity-fall__bg{% if section.settings.background_image_mobile != blank %} gravity-fall__bg--has-mobile{% endif %}"
       aria-hidden="true"
       style="
         --bg-size: {{ section.settings.background_image_size }};
@@ -72,18 +79,27 @@
         --bg-opacity: {{ section.settings.background_image_opacity | divided_by: 100.0 }};
       "
     >
-      {{
-        section.settings.background_image
-        | image_url: width: 3840
-        | image_tag: loading: 'lazy', class: 'gravity-fall__bg-media', sizes: '100vw', widths: '750, 1100, 1500, 1780, 2000, 3000, 3840'
-      }}
+      {%- if section.settings.background_image != blank -%}
+        {{
+          section.settings.background_image
+          | image_url: width: 3840
+          | image_tag: loading: 'lazy', class: 'gravity-fall__bg-media gravity-fall__bg-media--desktop', sizes: '100vw', widths: '750, 1100, 1500, 1780, 2000, 3000, 3840'
+        }}
+      {%- endif -%}
+      {%- if section.settings.background_image_mobile != blank -%}
+        {{
+          section.settings.background_image_mobile
+          | image_url: width: 1500
+          | image_tag: loading: 'lazy', class: 'gravity-fall__bg-media gravity-fall__bg-media--mobile', sizes: '100vw', widths: '375, 550, 750, 1100, 1500'
+        }}
+      {%- endif -%}
     </div>
   {%- endif -%}
   {%- for block in section.blocks -%}
     {%- case block.type -%}
       {%- when 'sticker' -%}
         <div
-          class="gravity-item gravity-item--circle"
+          class="gravity-item gravity-item--circle{% if block.settings.hide_mobile %} gravity-item--hide-mobile{% endif %}{% if block.settings.hide_desktop %} gravity-item--hide-desktop{% endif %}{% if block.settings.size_mobile > 0 %} gravity-item--mobile-size{% endif %}"
           data-gravity-item
           data-shape="circle"
           {% if block.settings.position != blank %}
@@ -94,7 +110,13 @@
             data-y="{{ block.settings.position_y | default: 50 }}"
             data-rotation="{{ block.settings.rotation | default: 0 }}"
           {% endif %}
-          style="--item-size: {{ block.settings.size }}px;"
+          {% if block.settings.pinned_mobile %}
+            data-pinned-mobile
+            data-x-mobile="{{ block.settings.position_mobile | default: block.settings.position | default: 50 }}"
+            data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
+            data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
+          {% endif %}
+          style="--item-size: {{ block.settings.size }}px;{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}"
           {{ block.shopify_attributes }}
         >
           <div class="gravity-bubble{% if block.settings.style == 'bare' %} gravity-bubble--bare{% endif %}">
@@ -118,7 +140,7 @@
           endif
         -%}
         <div
-          class="gravity-item gravity-item--image{% if block.settings.round %} gravity-item--circle{% endif %}"
+          class="gravity-item gravity-item--image{% if block.settings.round %} gravity-item--circle{% endif %}{% if block.settings.hide_mobile %} gravity-item--hide-mobile{% endif %}{% if block.settings.hide_desktop %} gravity-item--hide-desktop{% endif %}{% if block.settings.size_mobile > 0 %} gravity-item--mobile-size{% endif %}"
           data-gravity-item
           data-shape="{% if block.settings.round %}circle{% else %}pill{% endif %}"
           {% if block.settings.position != blank %}
@@ -129,7 +151,13 @@
             data-y="{{ block.settings.position_y | default: 50 }}"
             data-rotation="{{ block.settings.rotation | default: 0 }}"
           {% endif %}
-          style="--item-size: {{ block.settings.size }}px; --item-ratio: {{ image_ratio }};"
+          {% if block.settings.pinned_mobile %}
+            data-pinned-mobile
+            data-x-mobile="{{ block.settings.position_mobile | default: block.settings.position | default: 50 }}"
+            data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
+            data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
+          {% endif %}
+          style="--item-size: {{ block.settings.size }}px; --item-ratio: {{ image_ratio }};{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}"
           {{ block.shopify_attributes }}
         >
           {%- if block.settings.image != blank -%}
@@ -145,7 +173,7 @@
 
       {%- when 'text' -%}
         <div
-          class="gravity-item gravity-item--text"
+          class="gravity-item gravity-item--text{% if block.settings.hide_mobile %} gravity-item--hide-mobile{% endif %}{% if block.settings.hide_desktop %} gravity-item--hide-desktop{% endif %}{% if block.settings.font_size_mobile > 0 %} gravity-item--mobile-size{% endif %}"
           data-gravity-item
           data-keep-upright
           data-shape="{% if block.settings.shape == 'circle' %}circle{% else %}pill{% endif %}"
@@ -157,20 +185,27 @@
             data-y="{{ block.settings.position_y | default: 50 }}"
             data-rotation="{{ block.settings.rotation | default: 0 }}"
           {% endif %}
+          {% if block.settings.pinned_mobile %}
+            data-pinned-mobile
+            data-x-mobile="{{ block.settings.position_mobile | default: block.settings.position | default: 50 }}"
+            data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
+            data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
+          {% endif %}
           style="
             {% if block.settings.text_color != blank %}--item-text-color: {{ block.settings.text_color }};{% endif %}
             {% if block.settings.chip_color != blank %}--item-chip-color: {{ block.settings.chip_color }};{% endif %}
+            {% if block.settings.font_size_mobile > 0 %}--item-font-size-mobile: {{ block.settings.font_size_mobile }}px;{% endif %}
           "
           {{ block.shopify_attributes }}
         >
           <div class="gravity-chip gravity-chip--{{ block.settings.shape }}">
             <div class="gravity-chip__text rte">{{ block.settings.text }}</div>
           </div>
-        </div>
+        </div> 
 
       {%- when 'button' -%}
         <div
-          class="gravity-item gravity-item--button"
+          class="gravity-item gravity-item--button{% if block.settings.width_type == 'full' %} gravity-item--full-width{% endif %}{% if block.settings.hide_mobile %} gravity-item--hide-mobile{% endif %}{% if block.settings.hide_desktop %} gravity-item--hide-desktop{% endif %}{% if block.settings.font_size_mobile > 0 %} gravity-item--mobile-font{% endif %}{% if block.settings.padding_vertical_mobile > 0 %} gravity-item--mobile-pad-v{% endif %}{% if block.settings.padding_horizontal_mobile > 0 %} gravity-item--mobile-pad-h{% endif %}"
           data-gravity-item
           data-shape="pill"
           {% if block.settings.position != blank %}
@@ -181,6 +216,17 @@
             data-y="{{ block.settings.position_y | default: 50 }}"
             data-rotation="{{ block.settings.rotation | default: 0 }}"
           {% endif %}
+          {% if block.settings.pinned_mobile %}
+            data-pinned-mobile
+            data-x-mobile="{{ block.settings.position_mobile | default: block.settings.position | default: 50 }}"
+            data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
+            data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
+          {% endif %}
+          style="
+            {% if block.settings.font_size_mobile > 0 %}--button-font-size-mobile: {{ block.settings.font_size_mobile }}px;{% endif %}
+            {% if block.settings.padding_vertical_mobile > 0 %}--button-padding-block-mobile: {{ block.settings.padding_vertical_mobile }}px;{% endif %}
+            {% if block.settings.padding_horizontal_mobile > 0 %}--button-padding-inline-mobile: {{ block.settings.padding_horizontal_mobile }}px;{% endif %}
+          "
           {{ block.shopify_attributes }}
         >
           {% render 'button-custom-styles', block_settings: block.settings, block_id: block.id %}
@@ -216,10 +262,51 @@
     --item-scale: 1;
   }
 
+  /* hidden items are also excluded from the physics simulation */
+  @media screen and (min-width: 750px) {
+    .gravity-item--hide-desktop {
+      display: none;
+    }
+  }
+
   @media screen and (max-width: 749px) {
     gravity-section {
       height: var(--gravity-height-mobile, 480px);
       --item-scale: var(--gravity-item-scale-mobile, 0.7);
+    }
+
+    /* hidden items are also excluded from the physics simulation */
+    .gravity-item--hide-mobile {
+      display: none;
+    }
+
+    .gravity-item--button.gravity-item--mobile-font > a {
+      font-size: var(--button-font-size-mobile);
+    }
+
+    .gravity-item--button.gravity-item--mobile-pad-v > a {
+      padding-block: var(--button-padding-block-mobile);
+    }
+
+    .gravity-item--button.gravity-item--mobile-pad-h > a {
+      padding-inline: var(--button-padding-inline-mobile);
+    }
+
+    /* explicit mobile sizes override the global mobile item scale */
+    .gravity-item--mobile-size.gravity-item--circle {
+      width: var(--item-size-mobile);
+      height: var(--item-size-mobile);
+    }
+
+    .gravity-item--mobile-size.gravity-item--image:not(.gravity-item--circle) {
+      width: var(--item-size-mobile);
+    }
+
+    /* headings inside rich text get their font-size from base.css element
+       rules, so inheritance from the chip isn't enough — target them too */
+    .gravity-item--mobile-size .gravity-chip,
+    .gravity-item--mobile-size .gravity-chip :is(h1, h2, h3, h4, h5, h6, p) {
+      font-size: var(--item-font-size-mobile);
     }
   }
 
@@ -245,6 +332,22 @@
     object-fit: var(--bg-size, cover);
     object-position: var(--bg-position, center);
     opacity: var(--bg-opacity, 1);
+  }
+
+  /* the mobile image swaps in under the breakpoint; hidden + lazy means
+     the off-breakpoint image is never downloaded */
+  .gravity-fall__bg-media--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .gravity-fall__bg--has-mobile .gravity-fall__bg-media--desktop {
+      display: none;
+    }
+
+    .gravity-fall__bg-media--mobile {
+      display: block;
+    }
   }
 
   gravity-section[data-drag] .gravity-item {
@@ -404,6 +507,15 @@
   .gravity-item--button .button {
     white-space: nowrap;
   }
+
+  /* full-width buttons span the section minus 20px inline padding */
+  .gravity-item--button.gravity-item--full-width {
+    width: calc(100% - 40px);
+  }
+
+  .gravity-item--button.gravity-item--full-width > a {
+    width: 100%;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -435,7 +547,7 @@
       "id": "height_mobile",
       "label": "Height (mobile)",
       "min": 200,
-      "max": 800,
+      "max": 1000,
       "step": 10,
       "unit": "px",
       "default": 480
@@ -527,6 +639,12 @@
       "label": "Background image"
     },
     {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image (mobile)",
+      "info": "Replaces the background image on mobile. Leave empty to use the same image everywhere."
+    },
+    {
       "type": "select",
       "id": "background_image_size",
       "label": "Image size",
@@ -541,7 +659,7 @@
         }
       ],
       "default": "cover",
-      "visible_if": "{{ section.settings.background_image != blank }}"
+      "visible_if": "{{ section.settings.background_image != blank or section.settings.background_image_mobile != blank }}"
     },
     {
       "type": "select",
@@ -586,7 +704,7 @@
         }
       ],
       "default": "center",
-      "visible_if": "{{ section.settings.background_image != blank }}"
+      "visible_if": "{{ section.settings.background_image != blank or section.settings.background_image_mobile != blank }}"
     },
     {
       "type": "range",
@@ -597,7 +715,7 @@
       "step": 5,
       "unit": "%",
       "default": 100,
-      "visible_if": "{{ section.settings.background_image != blank }}"
+      "visible_if": "{{ section.settings.background_image != blank or section.settings.background_image_mobile != blank }}"
     },
     {
       "type": "header",
@@ -669,8 +787,8 @@
         {
           "type": "checkbox",
           "id": "pinned",
-          "label": "Pin in place (don't fall)",
-          "info": "Pinned items hold their position and falling items bounce off them.",
+          "label": "Pin in place on desktop (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them. Use the mobile settings below to pin on mobile.",
           "default": false
         },
         {
@@ -690,6 +808,70 @@
           "unit": "°",
           "default": 0,
           "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "Hide on mobile",
+          "info": "Hidden items are skipped entirely: no image download, no physics cost.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "Hide on desktop",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned_mobile",
+          "label": "Pin in place on mobile",
+          "info": "Falls back to the desktop pin position when the fields below are left empty.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_mobile",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "number",
+          "id": "position_y_mobile",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation_mobile",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "size_mobile",
+          "label": "Size (mobile)",
+          "info": "0 scales the desktop size by the section's \"Item size on mobile\" setting.",
+          "min": 0,
+          "max": 330,
+          "step": 10,
+          "unit": "px",
+          "default": 0
         }
       ]
     },
@@ -727,8 +909,8 @@
         {
           "type": "checkbox",
           "id": "pinned",
-          "label": "Pin in place (don't fall)",
-          "info": "Pinned items hold their position and falling items bounce off them.",
+          "label": "Pin in place on desktop (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them. Use the mobile settings below to pin on mobile.",
           "default": false
         },
         {
@@ -748,6 +930,70 @@
           "unit": "°",
           "default": 0,
           "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "Hide on mobile",
+          "info": "Hidden items are skipped entirely: no image download, no physics cost.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "Hide on desktop",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned_mobile",
+          "label": "Pin in place on mobile",
+          "info": "Falls back to the desktop pin position when the fields below are left empty.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_mobile",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "number",
+          "id": "position_y_mobile",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation_mobile",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "size_mobile",
+          "label": "Width (mobile)",
+          "info": "0 scales the desktop width by the section's \"Item size on mobile\" setting.",
+          "min": 0,
+          "max": 300,
+          "step": 10,
+          "unit": "px",
+          "default": 0
         }
       ]
     },
@@ -801,8 +1047,8 @@
         {
           "type": "checkbox",
           "id": "pinned",
-          "label": "Pin in place (don't fall)",
-          "info": "Pinned items hold their position and falling items bounce off them.",
+          "label": "Pin in place on desktop (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them. Use the mobile settings below to pin on mobile.",
           "default": false
         },
         {
@@ -822,6 +1068,70 @@
           "unit": "°",
           "default": 0,
           "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "Hide on mobile",
+          "info": "Hidden items are skipped entirely: no image download, no physics cost.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "Hide on desktop",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned_mobile",
+          "label": "Pin in place on mobile",
+          "info": "Falls back to the desktop pin position when the fields below are left empty.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_mobile",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "number",
+          "id": "position_y_mobile",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation_mobile",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "label": "Font size (mobile)",
+          "info": "0 scales the theme size by the section's \"Item size on mobile\" setting.",
+          "min": 0,
+          "max": 70,
+          "step": 2,
+          "unit": "px",
+          "default": 0
         }
       ]
     },
@@ -859,6 +1169,23 @@
             }
           ],
           "default": "button"
+        },
+        {
+          "type": "select",
+          "id": "width_type",
+          "label": "Width",
+          "options": [
+            {
+              "value": "fit",
+              "label": "Fit content"
+            },
+            {
+              "value": "full",
+              "label": "Full width"
+            }
+          ],
+          "default": "fit",
+          "info": "Full width spans the section minus 20px on each side."
         },
         {
           "type": "header",
@@ -1065,8 +1392,8 @@
         {
           "type": "checkbox",
           "id": "pinned",
-          "label": "Pin in place (don't fall)",
-          "info": "Pinned items hold their position and falling items bounce off them.",
+          "label": "Pin in place on desktop (don't fall)",
+          "info": "Pinned items hold their position and falling items bounce off them. Use the mobile settings below to pin on mobile.",
           "default": false
         },
         {
@@ -1086,6 +1413,92 @@
           "unit": "°",
           "default": 0,
           "visible_if": "{{ block.settings.pinned }}"
+        },
+        {
+          "type": "header",
+          "content": "Visibility"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "Hide on mobile",
+          "info": "Hidden items are skipped entirely: no image download, no physics cost.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "Hide on desktop",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile"
+        },
+        {
+          "type": "checkbox",
+          "id": "pinned_mobile",
+          "label": "Pin in place on mobile",
+          "info": "Falls back to the desktop pin position when the fields below are left empty.",
+          "default": false
+        },
+        {
+          "type": "number",
+          "id": "position_mobile",
+          "label": "Horizontal position (%)",
+          "info": "0 = left, 100 = right.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "number",
+          "id": "position_y_mobile",
+          "label": "Vertical position (%)",
+          "info": "0 = top, 100 = bottom.",
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "rotation_mobile",
+          "label": "Rotation",
+          "min": -45,
+          "max": 45,
+          "step": 1,
+          "unit": "°",
+          "default": 0,
+          "visible_if": "{{ block.settings.pinned_mobile }}"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "label": "Font size (mobile)",
+          "info": "0 uses the theme size.",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "padding_vertical_mobile",
+          "label": "Vertical padding (mobile)",
+          "info": "0 uses the theme padding.",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "padding_horizontal_mobile",
+          "label": "Horizontal padding (mobile)",
+          "info": "0 uses the theme padding.",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px",
+          "default": 0
         }
       ]
     }

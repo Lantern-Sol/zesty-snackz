@@ -108,6 +108,18 @@
 
   # Trim whitespace from styles
   assign resource_list_styles = resource_list_styles | strip
+
+  # Explicit mobile gaps (sections that expose use_mobile_gaps); base.css falls
+  # back to the capped desktop gap when these vars are absent
+  if settings.use_mobile_gaps
+    assign columns_gap_mobile = settings.columns_gap_mobile | default: columns_gap
+    assign rows_gap_mobile = settings.rows_gap_mobile | default: rows_gap
+    capture mobile_gap_styles
+      echo '--resource-list-column-gap-mobile: ' | append: columns_gap_mobile | append: 'px;'
+      echo '--resource-list-row-gap-mobile: ' | append: rows_gap_mobile | append: 'px;'
+    endcapture
+    assign resource_list_styles = resource_list_styles | append: mobile_gap_styles
+  endif
 %}
 
 <div
@@ -161,6 +173,9 @@
     assign mobile_carousel_gap = settings.columns_gap | default: 16
     if settings.layout_type == 'bento'
       assign mobile_carousel_gap = settings.bento_gap | default: 16
+    endif
+    if settings.use_mobile_gaps and settings.columns_gap_mobile != blank
+      assign mobile_carousel_gap = settings.columns_gap_mobile
     endif
   %}
 

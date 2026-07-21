@@ -30,6 +30,7 @@
 
   .product-badges__badge {
     --badge-font-size: var(--font-size--xs);
+    --badge-font-size--mobile: 0.625rem;
 
     display: flex;
     align-items: center;
@@ -42,6 +43,9 @@
     font-weight: var(--badge-font-weight);
     text-transform: var(--badge-text-transform);
     border-radius: var(--badge-border-radius);
+    @media only screen and (max-width: 749px) {
+      font-size: var(--badge-font-size--mobile, var(--badge-font-size));
+    }
   }
 
   .product-badges__badge--rectangle {

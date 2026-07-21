@@ -86,8 +86,14 @@
     content_for 'block', type: '_header-menu', id: 'header-menu'
   endcapture
 
+  # Section blocks (e.g. the Build a Bundle button) are captured up front so they
+  # can be threaded into the mobile drawer as well as rendered in the top row.
+  capture header_blocks
+    content_for 'blocks'
+  endcapture
+
   capture drawer_menu
-    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile'
+    content_for 'block', type: '_header-menu', id: 'header-menu', variant: 'mobile', extra_blocks: header_blocks
   endcapture
 
   capture navigation_bar
@@ -96,10 +102,6 @@
 
   capture actions
     render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
-  endcapture
-
-  capture header_blocks
-    content_for 'blocks'
   endcapture
 
   if shop.customer_accounts_enabled
@@ -648,6 +650,14 @@
     }
   }
 
+  /* Mobile pill: 25px transparent surround on top, 20px on the sides, 0 bottom */
+  @media screen and (max-width: 749px) {
+    .header--floating {
+      --floating-header-inset: 25px;
+      --floating-header-inset-x: 20px;
+    }
+  }
+
   .header--floating .header__underlay {
     top: var(--floating-header-inset);
     right: var(--floating-header-inset-x);
@@ -1017,9 +1027,9 @@
     }
 
     @media screen and (max-width: 749px) {
-      --header-template-columns: 1fr auto auto auto;
+      --header-template-columns: auto 1fr auto auto;
 
-      grid-template-areas: 'logo search actions menu';
+      grid-template-areas: 'menu logo actions search';
       grid-column: span 3;
       column-gap: 0;
       align-items: center;
@@ -1048,9 +1058,9 @@
   /* not ideal but we need to duplicate these styles for when touch comes into play
     We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
   #header-component[data-menu-style='drawer'] .header__columns {
-    --header-template-columns: 1fr auto auto auto;
+    --header-template-columns: auto 1fr auto auto;
 
-    grid-template-areas: 'logo search actions menu';
+    grid-template-areas: 'menu logo actions search';
     grid-column: span 3;
     column-gap: 0;
     align-items: center;
@@ -1191,6 +1201,42 @@
   .header-actions__action svg {
     width: var(--icon-size-lg);
     height: var(--icon-size-lg);
+  }
+
+  .header__blocks {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Mobile: the Build a Bundle button lives in the drawer, so hide the
+     top-row copy; and render the header icons at a uniform 44px. */
+  @media screen and (max-width: 749px) {
+    .header__blocks {
+      display: none;
+    }
+
+    .header-actions__action svg {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* Center the logo in the pill. Take it out of flow and clear its grid
+       placement (grid-area: auto) so its containing block becomes .header__row
+       (position:relative, spanning the pill symmetrically) rather than its grid
+       cell; inset:0 + margin:auto then centers it on both axes, aligned with the
+       icons. #header-component raises specificity above the data-menu-style rules. */
+    #header-component .header__columns .header-logo {
+      position: absolute;
+      grid-area: auto;
+      inset: 0;
+      margin: auto;
+      width: fit-content;
+      height: fit-content;
+    }
+  }
+
+  #header-component[data-menu-style='drawer'] .header__blocks {
+    display: none;
   }
 
   .header:has(#Details-menu-drawer-container[open]) {

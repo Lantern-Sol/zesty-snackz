@@ -94,7 +94,7 @@
         {% endunless %}
       {% endfor %}
       {% if column == 'right' and blocks_html != blank %}
-        {{ blocks_html }}
+        <div class="header__blocks">{{ blocks_html }}</div>
       {% endif %}
     </div>
   {%- endif -%}

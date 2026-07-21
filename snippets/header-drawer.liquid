@@ -6,6 +6,7 @@
   @param {string} [data_header_drawer_type] - The type of header drawer to render
   @param {object} [block] - The block that can be used to provide settings
   @param {object} [section] - The section that can be used to provide settings
+  @param {string} [extra_blocks] - Captured section-block HTML (e.g. the Build a Bundle button) rendered as a CTA at the top of the drawer
 
   @example
   {% render 'header-drawer', linklist: section.settings.menu, class: 'header-drawer--mobile' %}
@@ -89,6 +90,11 @@
           {{- 'icon-close.svg' | inline_asset_content -}}
         </span>
       </button>
+      {%- if extra_blocks != blank -%}
+        <div class="menu-drawer__cta menu-drawer__animated-element" style="--menu-drawer-animation-index: 0;">
+          {{ extra_blocks }}
+        </div>
+      {%- endif -%}
       <nav
         class="menu-drawer__navigation"
         style="
@@ -764,6 +770,16 @@
     }
   }
 
+  /* Scroll-lock sets overflow:hidden on html AND .page-wrapper; the latter
+     turns .page-wrapper into the header-section's nearest scroll container
+     (scrollTop 0), which un-sticks the pinned header and teleports it — with
+     this drawer, whose fixed coords live inside the contained header — back
+     to the document top. While the menu drawer owns the lock, keep
+     .page-wrapper out of it: html's overflow:hidden already locks the page. */
+  html[scroll-lock]:has(#Details-menu-drawer-container[open]) .page-wrapper {
+    overflow: visible;
+  }
+
   .menu-drawer {
     position: fixed;
     transform: translateX(-100%);
@@ -834,6 +850,84 @@
     opacity: 1;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Build a Bundle CTA at the top of the drawer */
+  .menu-drawer__cta {
+    padding: var(--drawer-padding);
+    padding-block-end: 0;
+  }
+
+  .menu-drawer__cta .size-style {
+    width: 100%;
+  }
+
+  /* ================================
+   * Mobile drawer: floating rounded card that reads as the pill expanding.
+   * Instead of a side slide, the card unfolds downward from behind the
+   * floating pill (scale/fade from the top), inset to match the pill width.
+   * ================================ */
+  @media screen and (max-width: 749px) {
+    .menu-drawer {
+      /* --account-offset-top switches formulas when the header is pinned
+         (sticky-active), which shrinks the pill→card gap mid-page. Use the
+         natural-state formula in every state so the spacing stays identical
+         to the page-top look. */
+      --menu-drawer-top: calc(
+        var(--header-group-height) + (var(--header-height) * var(--transparent-header-offset-boolean)) + 8px
+      );
+
+      inset-inline: var(--floating-header-inset-x, 20px);
+      width: auto;
+      max-width: none;
+      top: var(--menu-drawer-top);
+      height: auto;
+      max-height: calc(100dvh - var(--menu-drawer-top) - 20px);
+      border-right: none;
+      border-radius: var(--style-border-radius-lg);
+      box-shadow: 0 18px 40px rgba(11, 27, 43, 0.18);
+      overflow-y: auto;
+
+      /* Unfold downward from behind the pill (origin top), preserving the shadow */
+      transform: translateY(-6px) scaleY(0.9);
+      transform-origin: top center;
+      opacity: 0;
+      transition: transform var(--drawer-animation-speed) var(--ease-out-cubic),
+        opacity var(--drawer-animation-speed) ease, visibility var(--drawer-animation-speed) ease;
+    }
+
+    .menu-open > .menu-drawer {
+      transform: translateY(0) scaleY(1);
+      opacity: 1;
+    }
+
+    /* Reliable scrim: backdrop-filter alone wasn't dimming the bright hero, so
+       pair it with a translucent dark overlay. */
+    .menu-drawer__backdrop {
+      background-color: rgba(11, 27, 43, 0.5);
+    }
+
+    /* Transparent (e.g. homepage) header: the pill floats over page content, so
+       the scrim must sit BEHIND the pill and cover its transparent surround.
+       A negative z-index keeps it under the bright pill (underlay is -1, row
+       content 0) while the header's own stacking context (layer-overlay /
+       sticky) keeps the whole scrim above the page hero. */
+    #header-component[transparent] .menu-drawer__backdrop {
+      top: 0;
+      height: 100dvh;
+      z-index: -2;
+    }
+
+    /* Uniform 44px header icons: match the cart/search glyphs */
+    .menu-drawer-container .header__icon--summary {
+      padding: 0;
+    }
+
+    .header__icon--summary .header-drawer-icon,
+    .header__icon--summary .header-drawer-icon > svg {
+      width: 44px;
+      height: 44px;
+    }
   }
 
   .menu-drawer__inner-container {

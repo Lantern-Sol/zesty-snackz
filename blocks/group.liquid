@@ -114,6 +114,13 @@
       "visible_if": "{{ block.settings.content_direction == 'row' }}"
     },
     {
+      "type": "checkbox",
+      "id": "mobile_wrap",
+      "label": "Mobile wrap",
+      "default": true,
+      "visible_if": "{{ block.settings.content_direction == 'row' and block.settings.vertical_on_mobile == false }}"
+    },
+    {
       "type": "select",
       "id": "horizontal_alignment_flex_direction_column",
       "label": "t:settings.alignment",
@@ -588,6 +595,22 @@
       "id": "placeholder",
       "label": "t:settings.image",
       "visible_if": "{{ false }}"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_desktop",
+      "label": "Hide on desktop",
+      "default": false
     },
     {
       "type": "header",

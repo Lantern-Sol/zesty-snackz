@@ -25,8 +25,8 @@
 -%}
 
 <div
-  class="profile-block"
-  style="--profile-avatar-size: {{ block.settings.avatar_size | default: 44 }}px; --profile-avatar-background: {{ block.settings.avatar_background | default: '#4a72d8' }};"
+  class="profile-block{% if block.settings.avatar_size_mobile > 0 %} profile-block--mobile-avatar{% endif %}"
+  style="--profile-avatar-size: {{ block.settings.avatar_size | default: 44 }}px;{% if block.settings.avatar_size_mobile > 0 %} --profile-avatar-size-mobile: {{ block.settings.avatar_size_mobile }}px;{% endif %} --profile-avatar-background: {{ block.settings.avatar_background | default: '#4a72d8' }};"
   {{ block.shopify_attributes }}
 >
   <span class="profile-block__avatar">
@@ -82,6 +82,14 @@
     align-items: center;
     gap: 12px;
     width: 100%;
+  }
+
+  /* The desktop size var lives in the wrapper's inline style, so the mobile
+     override re-declares it one level down where a class rule can win. */
+  @media screen and (max-width: 749px) {
+    .profile-block--mobile-avatar > * {
+      --profile-avatar-size: var(--profile-avatar-size-mobile, 44px);
+    }
   }
 
   .profile-block__avatar {
@@ -221,6 +229,17 @@
       "step": 2,
       "unit": "px",
       "default": 44
+    },
+    {
+      "type": "range",
+      "id": "avatar_size_mobile",
+      "label": "Size (mobile)",
+      "info": "0 uses the desktop size.",
+      "min": 0,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 0
     },
     {
       "type": "header",

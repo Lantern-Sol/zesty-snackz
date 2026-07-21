@@ -40,9 +40,18 @@
   if settings.content_direction == 'row' and settings.wrap
     assign flex_wrap = 'wrap'
   endif
+
+  comment
+    Only the group block exposes mobile_wrap; for sections the setting is nil,
+    which is not `false`, so they keep the wrap default
+  endcomment
+  assign flex_wrap_mobile = 'wrap'
+  if settings.mobile_wrap == false
+    assign flex_wrap_mobile = 'nowrap'
+  endif
 -%}
 
---flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-wrap: {{ flex_wrap }}; --flex-wrap-mobile: wrap;
+--flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-wrap: {{ flex_wrap }}; --flex-wrap-mobile: {{ flex_wrap_mobile }};
 
 {% render 'gap-style', value: settings.gap %}
 {% if settings.use_mobile_gap %}

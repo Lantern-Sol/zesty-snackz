@@ -141,6 +141,11 @@
 
   .product-card__content.product-card--accent .buy-buttons-block {
     width: fit-content;
+
+    /* Full-width add-to-cart on mobile */
+    @media screen and (max-width: 749px) {
+      width: 100%;
+    }
   }
 
   .product-card__content.product-card--accent .add-to-cart-button {

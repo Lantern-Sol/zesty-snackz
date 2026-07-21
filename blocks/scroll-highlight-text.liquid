@@ -25,9 +25,14 @@
   data-end="{{ block.settings.end_position }}"
   {{ block.shopify_attributes }}
 >
-  <div class="scroll-highlight-text__content rte">
+  <div class="scroll-highlight-text__content rte{% if block.settings.mobile_text != blank %} scroll-highlight-text__content--desktop{% endif %}">
     {{ block.settings.text }}
   </div>
+  {% if block.settings.mobile_text != blank %}
+    <div class="scroll-highlight-text__content scroll-highlight-text__content--mobile rte">
+      {{ block.settings.mobile_text }}
+    </div>
+  {% endif %}
   <div class="scroll-highlight-text__stickers" hidden>
     {% content_for 'blocks' %}
   </div>
@@ -59,6 +64,20 @@
   @media screen and (min-width: 750px) {
     .scroll-highlight-text__content {
       font-size: var(--sht-font-size);
+    }
+  }
+
+  /* The --desktop modifier is only applied when a mobile copy exists, so the
+     single-copy case always stays visible on both breakpoints */
+  @media screen and (max-width: 749px) {
+    .scroll-highlight-text__content--desktop {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .scroll-highlight-text__content--mobile {
+      display: none;
     }
   }
 
@@ -114,6 +133,9 @@
     class ScrollHighlightText extends HTMLElement {
       connectedCallback() {
         this.#refresh();
+        // A separate mobile text copy can swap in at the breakpoint, so
+        // re-resolve which copy drives the animation when it flips
+        this.#mobileQuery.addEventListener('change', this.#onBreakpointChange);
         if (window.Shopify && window.Shopify.designMode) {
           document.addEventListener('shopify:section:load', this.#onSectionLoad);
         }
@@ -123,8 +145,12 @@
         if (this.#onLoad) window.removeEventListener('load', this.#onLoad);
         document.removeEventListener('shopify:section:load', this.#onSectionLoad);
         this.#squeezeQuery.removeEventListener('change', this.#onLayoutChange);
+        this.#mobileQuery.removeEventListener('change', this.#onBreakpointChange);
         if (this.#trigger) this.#trigger.kill();
       }
+
+      #mobileQuery = window.matchMedia('(max-width: 749px)');
+      #onBreakpointChange = () => this.#refresh();
 
       #onLoad = null;
       #trigger = null;
@@ -169,12 +195,13 @@
       }
 
       #prepare() {
-        const content = this.querySelector('.scroll-highlight-text__content');
-        if (!content) return;
+        const contents = Array.from(this.querySelectorAll('.scroll-highlight-text__content'));
+        if (!contents.length) return;
 
         // Detect the split by its spans, not a flag: editor edits can morph
         // the DOM back to its server-rendered (unsplit) state in place
-        if (!content.querySelector('.sht-unit')) {
+        const unsplit = contents.filter((el) => !el.querySelector('.sht-unit'));
+        if (unsplit.length) {
           this.#stickers = new Map(
             Array.from(this.querySelectorAll('.scroll-highlight-text__stickers [data-sticker-key]')).map(
               (el) => [el.dataset.stickerKey, el]
@@ -191,9 +218,13 @@
             ? new RegExp(`(\\[[a-zA-Z0-9_-]+\\]|\\b(?:${keys.join('|')})\\b)`, 'i')
             : /(\[[a-zA-Z0-9_-]+\])/;
 
-          this.#splitWords(content, this.dataset.split === 'characters');
+          unsplit.forEach((el) => this.#splitWords(el, this.dataset.split === 'characters'));
         }
-        this.#units = Array.from(content.querySelectorAll('.sht-unit'));
+
+        // With a separate mobile copy, only the breakpoint-visible one drives
+        // the animation; the hidden copy's units would skew the progress count
+        const visible = contents.find((el) => getComputedStyle(el).display !== 'none') ?? contents[0];
+        this.#units = Array.from(visible.querySelectorAll('.sht-unit'));
         this.#litCount = -1;
       }
 
@@ -315,6 +346,12 @@
       "label": "t:settings.text",
       "default": "<p>Sour candy, sliced paper-thin. It crunches. It melts. It never takes a molar hostage.</p>",
       "info": "Add a Sticker block and give it a key. Type the key as a plain word (e.g. gummy) to show the sticker before that word, or in square brackets (e.g. [gummy]) to show the sticker on its own."
+    },
+    {
+      "type": "richtext",
+      "id": "mobile_text",
+      "label": "Mobile text",
+      "info": "Optional. Replaces the text on mobile. Sticker keys work here too."
     },
     {
       "type": "header",

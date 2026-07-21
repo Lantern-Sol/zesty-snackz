@@ -15,6 +15,12 @@
  * Attributes on items:
  *   data-shape="circle" | "pill"   collider hint (default circle)
  *   data-x="0..100"                preferred horizontal drop position (%)
+ *   data-pinned + data-y/data-rotation             pin on desktop
+ *   data-pinned-mobile + data-*-mobile variants    pin on mobile
+ *
+ * Items hidden via CSS (e.g. display:none on mobile) are excluded from the
+ * simulation; crossing the 750px breakpoint re-collects bodies so mobile
+ * pins/hides apply without a reload.
  *
  * Bodies use circle colliders (pills use an averaged radius and damped,
  * clamped rotation so buttons never end up upside down).
@@ -29,6 +35,7 @@ const SLEEP_FRAMES = 40;
 const DRAG_THRESHOLD = 6; // px before a press becomes a drag
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const mobileMedia = window.matchMedia('(max-width: 749px)');
 
 class GravitySection extends HTMLElement {
   connectedCallback() {
@@ -54,6 +61,11 @@ class GravitySection extends HTMLElement {
 
     this.resizeObserver = new ResizeObserver(() => this.onResize());
     this.resizeObserver.observe(this);
+
+    // crossing the mobile breakpoint changes which items exist/are pinned,
+    // so rebuild the simulation from the current DOM state
+    this.onBreakpointChange = this.onBreakpointChange.bind(this);
+    mobileMedia.addEventListener('change', this.onBreakpointChange);
 
     // text items size from their content, so re-measure once webfonts land
     document.fonts?.ready?.then(() => {
@@ -96,6 +108,7 @@ class GravitySection extends HTMLElement {
     this.running = false;
     this.resizeObserver?.disconnect();
     this.intersectionObserver?.disconnect();
+    mobileMedia.removeEventListener('change', this.onBreakpointChange);
     if (this.onBlockSelect) {
       document.removeEventListener('shopify:block:select', this.onBlockSelect);
     }
@@ -105,21 +118,36 @@ class GravitySection extends HTMLElement {
   }
 
   collectBodies() {
-    const items = [...this.querySelectorAll('[data-gravity-item]')];
+    // items hidden by CSS (display:none → no offsetParent) sit out entirely
+    const items = [...this.querySelectorAll('[data-gravity-item]')].filter(
+      (el) => el.offsetParent !== null
+    );
     const width = this.clientWidth || 1;
+    const isMobile = mobileMedia.matches;
+    this.isMobileLayout = isMobile;
 
     this.bodies = items.map((el, index) => {
       const rect = { w: el.offsetWidth || 1, h: el.offsetHeight || 1 };
       const isPill = el.dataset.shape === 'pill';
       const keepUpright = isPill || el.hasAttribute('data-keep-upright');
-      const radius = isPill ? (rect.w + rect.h) / 4 : Math.max(rect.w, rect.h) / 2;
+      // pills collide as capsules: a horizontal segment (halfLen) with a cap
+      // radius, so wide bars (e.g. full-width buttons) stay flat instead of
+      // acting like giant circles
+      const radius = isPill ? Math.min(rect.w, rect.h) / 2 : Math.max(rect.w, rect.h) / 2;
+      const halfLen = isPill ? Math.max(0, rect.w / 2 - radius) : 0;
+      const maxTilt = keepUpright ? Math.min(0.35, (rect.h / Math.max(rect.w, 1)) * 1.5) : Infinity;
 
       // Pinned bodies hold a fixed x/y (and optional tilt) and act as
-      // immovable obstacles
-      const pinned = el.hasAttribute('data-pinned');
-      const pinX = parseFloat(el.dataset.x);
-      const pinY = parseFloat(el.dataset.y);
-      const pinAngle = (parseFloat(el.dataset.rotation) || 0) * (Math.PI / 180);
+      // immovable obstacles; desktop and mobile each have their own pin
+      const pinned = isMobile
+        ? el.hasAttribute('data-pinned-mobile')
+        : el.hasAttribute('data-pinned');
+      const useMobilePin = isMobile && el.dataset.xMobile != null;
+      const pinX = parseFloat(useMobilePin ? el.dataset.xMobile : el.dataset.x);
+      const pinY = parseFloat(useMobilePin ? el.dataset.yMobile : el.dataset.y);
+      const pinAngle =
+        (parseFloat(useMobilePin ? el.dataset.rotationMobile : el.dataset.rotation) || 0) *
+        (Math.PI / 180);
 
       // Preferred drop x: explicit data-x, otherwise spread evenly with jitter
       const spread = ((index + 0.5) / items.length) * width;
@@ -135,9 +163,11 @@ class GravitySection extends HTMLElement {
         pinX: Number.isFinite(pinX) ? pinX : 50,
         pinY: Number.isFinite(pinY) ? pinY : 50,
         radius,
+        halfLen,
+        maxTilt,
         halfW: rect.w / 2,
         halfH: rect.h / 2,
-        mass: Math.max(radius * radius, 1),
+        mass: Math.max((rect.w * rect.h) / 4, 1),
         x: pinned ? x : this.clampX(x, radius),
         y: pinned
           ? ((Number.isFinite(pinY) ? pinY : 50) / 100) * (this.clientHeight || 1)
@@ -156,6 +186,18 @@ class GravitySection extends HTMLElement {
     });
 
     this.bodies.forEach((body) => this.render(body));
+  }
+
+  onBreakpointChange() {
+    this.collectBodies();
+    if (reducedMotion.matches) {
+      this.settleInstantly();
+    } else if (this.started) {
+      // re-drop with the same choreography as the initial start
+      this.clock = 0;
+      this.wakeAll();
+      this.run();
+    }
   }
 
   // Deterministic jitter so the editor doesn't reshuffle on every re-render
@@ -241,7 +283,7 @@ class GravitySection extends HTMLElement {
       // impact squash recovers on a fast exponential
       body.squash *= Math.max(0, 1 - 10 * dt);
       if (body.squash < 0.003) body.squash = 0;
-      if (body.keepUpright) body.angle = Math.max(-0.35, Math.min(0.35, body.angle));
+      if (body.keepUpright) body.angle = Math.max(-body.maxTilt, Math.min(body.maxTilt, body.angle));
     }
 
     // impulses once per substep; extra iterations only relax positions
@@ -270,6 +312,17 @@ class GravitySection extends HTMLElement {
     }
   }
 
+  // closest point on a capsule body's core segment to (px, py)
+  closestOnSegment(body, px, py) {
+    const cos = Math.cos(body.angle);
+    const sin = Math.sin(body.angle);
+    const t = Math.max(
+      -body.halfLen,
+      Math.min(body.halfLen, (px - body.x) * cos + (py - body.y) * sin)
+    );
+    return [body.x + cos * t, body.y + sin * t];
+  }
+
   solvePairs(applyImpulses) {
     const bodies = this.bodies;
     for (let i = 0; i < bodies.length; i++) {
@@ -279,8 +332,18 @@ class GravitySection extends HTMLElement {
         const b = bodies[j];
         if (!b.active) continue;
 
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
+        // contact points: capsules collide via the closest point on their
+        // core segment (circles have halfLen 0, so this is a no-op for them)
+        let ax = a.x;
+        let ay = a.y;
+        let bx = b.x;
+        let by = b.y;
+        if (a.halfLen > 0) [ax, ay] = this.closestOnSegment(a, bx, by);
+        if (b.halfLen > 0) [bx, by] = this.closestOnSegment(b, ax, ay);
+        if (a.halfLen > 0 && b.halfLen > 0) [ax, ay] = this.closestOnSegment(a, bx, by);
+
+        const dx = bx - ax;
+        const dy = by - ay;
         const minDist = a.radius + b.radius;
         const distSq = dx * dx + dy * dy;
         if (distSq >= minDist * minDist || distSq === 0) continue;
@@ -425,14 +488,24 @@ class GravitySection extends HTMLElement {
   /* Resize                                                              */
   /* ------------------------------------------------------------------ */
   onResize() {
+    // belt and braces: some browsers deliver the resize before the media
+    // query change event — rebuild on breakpoint crossing from here too
+    if (mobileMedia.matches !== this.isMobileLayout) {
+      this.onBreakpointChange();
+      return;
+    }
     if (!this.bodies.length) return;
     for (const body of this.bodies) {
       body.halfW = (body.el.offsetWidth || 1) / 2;
       body.halfH = (body.el.offsetHeight || 1) / 2;
       body.radius = body.isPill
-        ? (body.halfW + body.halfH) / 2
+        ? Math.min(body.halfW, body.halfH)
         : Math.max(body.halfW, body.halfH);
-      body.mass = Math.max(body.radius * body.radius, 1);
+      body.halfLen = body.isPill ? Math.max(0, body.halfW - body.radius) : 0;
+      if (body.keepUpright) {
+        body.maxTilt = Math.min(0.35, (body.halfH / Math.max(body.halfW, 0.5)) * 1.5);
+      }
+      body.mass = Math.max(body.halfW * body.halfH, 1);
       if (body.pinned) {
         body.x = (body.pinX / 100) * this.clientWidth;
         body.y = (body.pinY / 100) * this.clientHeight;

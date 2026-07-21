@@ -1,7 +1,10 @@
 <rotating-arc-component
   class="rotating-arc{% if block.settings.pause_on_hover %} rotating-arc--pause-hover{% endif %}"
-  style="--arc-radius: {{ block.settings.radius }}px; --arc-item-height: {{ block.settings.item_height }}px; --arc-crop: {{ block.settings.bottom_crop }}px;"
+  style="--arc-radius: {{ block.settings.radius }}px; --arc-item-height: {{ block.settings.item_height }}px; --arc-crop: {{ block.settings.bottom_crop }}px;{% if block.settings.custom_mobile_height %} --arc-item-height-mobile: {{ block.settings.item_height_mobile }}px;{% endif %}"
   data-radius="{{ block.settings.radius }}"
+  {% if block.settings.custom_mobile_radius %}
+    data-radius-mobile="{{ block.settings.radius_mobile }}"
+  {% endif %}
   data-gap="{{ block.settings.gap }}"
   data-speed="{{ block.settings.speed }}"
   {% if block.settings.reverse %}
@@ -68,6 +71,12 @@
     height: var(--arc-item-height, auto);
     width: auto;
     aspect-ratio: var(--ratio, auto);
+
+    /* The JS measures the rendered height and re-lays-out on resize, so the
+       arc geometry follows this override automatically */
+    @media screen and (max-width: 749px) {
+      height: var(--arc-item-height-mobile, var(--arc-item-height, auto));
+    }
   }
 
   /* After layout the disc is a full-width strip whose top-center point is the
@@ -161,7 +170,15 @@
       }
 
       layout() {
-        const radius = Math.max(parseFloat(this.dataset.radius) || 1600, 100);
+        // Pick the radius for the current viewport; layout() reruns on resize,
+        // so crossing the breakpoint re-resolves it. The CSS transforms read
+        // --arc-radius, so the inline value set here must stay in sync with
+        // the radius used for the angle math below.
+        const mobileRadius = parseFloat(this.dataset.radiusMobile);
+        const isMobile = window.matchMedia('(max-width: 749px)').matches;
+        const chosenRadius = isMobile && mobileRadius ? mobileRadius : parseFloat(this.dataset.radius);
+        const radius = Math.max(chosenRadius || 1600, 100);
+        this.style.setProperty('--arc-radius', radius + 'px');
         const gap = parseFloat(this.dataset.gap) || 0;
         const speed = Math.max(parseFloat(this.dataset.speed) || 60, 1);
         const MAX_ITEMS = 200;
@@ -257,6 +274,23 @@
       "info": "All images share this height; width follows each image's aspect ratio."
     },
     {
+      "type": "checkbox",
+      "id": "custom_mobile_height",
+      "label": "Custom mobile height",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "item_height_mobile",
+      "label": "Mobile image height",
+      "min": 60,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 140,
+      "visible_if": "{{ block.settings.custom_mobile_height }}"
+    },
+    {
       "type": "range",
       "id": "gap",
       "label": "Horizontal gap",
@@ -287,6 +321,23 @@
       "unit": "px",
       "default": 1600,
       "info": "Larger radius, flatter arc."
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_mobile_radius",
+      "label": "Custom mobile radius",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "radius_mobile",
+      "label": "Mobile arc radius",
+      "min": 600,
+      "max": 4000,
+      "step": 100,
+      "unit": "px",
+      "default": 1000,
+      "visible_if": "{{ block.settings.custom_mobile_radius }}"
     },
     {
       "type": "header",

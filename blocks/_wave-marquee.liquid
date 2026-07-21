@@ -44,14 +44,19 @@
 ></script>
 
 <wave-marquee
-  class="wave-marquee {{ type_classes }}{% if s.shadow %} wave-marquee--shadow{% endif %}{% if request.design_mode %} wave-marquee--design-mode{% endif %}"
+  class="wave-marquee {{ type_classes }}{% if s.shadow %} wave-marquee--shadow{% endif %}{% if request.design_mode %} wave-marquee--design-mode{% endif %}{% if s.use_mobile_settings %} wave-marquee--mobile-settings{% endif %}{% if s.hide_on_mobile %} hidden--mobile{% endif %}{% if s.hide_on_desktop %} hidden--desktop{% endif %}"
   role="marquee"
   aria-label="{{ text | escape }}"
   data-text="{{ text | escape }}"
   data-freq="{{ frequency }}"
   data-amp="{{ amplitude }}"
+  {% if s.use_mobile_settings %}
+    data-amp-mobile="{{ s.amplitude_mobile }}"
+    data-freq-mobile="{{ s.frequency_mobile }}"
+  {% endif %}
   style="
     --wm-amp: {{ amplitude }}px;
+    {% if s.use_mobile_settings %}--wm-amp-mobile: {{ s.amplitude_mobile }}px;{% endif %}
     --wm-speed: {{ speed }}s;
     --wm-gap: {{ gap }}px;
     --wm-dir: {{ direction }};
@@ -69,6 +74,12 @@
       --wm-y: {{ s.y_position }}%;
       --wm-width: {{ width }}%;
       --wm-rotation: {{ rotation }}deg;
+      {% if s.use_mobile_settings %}
+        --wm-x-mobile: {{ s.x_position_mobile }}%;
+        --wm-y-mobile: {{ s.y_position_mobile }}%;
+        --wm-width-mobile: {{ s.width_mobile }}%;
+        --wm-rotation-mobile: {{ s.rotation_mobile }}deg;
+      {% endif %}
     "
   >
     <div class="wave-marquee__viewport" data-wm-viewport>
@@ -103,8 +114,10 @@
     pointer-events: none;
   }
 
-  /* Selectable on canvas in the theme editor. */
-  .wave-marquee--design-mode {
+  /* Selectable on canvas in the theme editor — but only the visible strip
+     takes clicks, so the host overlay (which spans the whole section) never
+     blocks selecting the blocks behind it. */
+  .wave-marquee--design-mode .wave-marquee__band {
     pointer-events: auto;
   }
 
@@ -123,6 +136,21 @@
      silhouette. On the band so it is a single pass over the whole strip. */
   .wave-marquee--shadow .wave-marquee__band {
     filter: drop-shadow(0 2.505px 2.505px #000);
+  }
+
+  /* Optional mobile overrides: position, width, tilt and amplitude. The JS
+     re-reads data-amp-mobile and rebuilds when the breakpoint flips.
+     --wm-amp is re-declared on the band (not the host) because the host's
+     inline style would beat this rule. */
+  @media screen and (max-width: 749px) {
+    .wave-marquee--mobile-settings .wave-marquee__band {
+      --wm-amp: var(--wm-amp-mobile, 24px);
+
+      top: var(--wm-y-mobile, 50%);
+      left: var(--wm-x-mobile, 50%);
+      width: var(--wm-width-mobile, 100%);
+      rotate: var(--wm-rotation-mobile, 0deg);
+    }
   }
 
   /* Self-contained band: clips the scrolling strip so the block never overflows
@@ -391,6 +419,98 @@
       "step": 5,
       "unit": "%",
       "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_settings",
+      "label": "Use different settings on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "x_position_mobile",
+      "label": "Horizontal position (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "y_position_mobile",
+      "label": "Vertical position (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "width_mobile",
+      "label": "Width (mobile)",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "rotation_mobile",
+      "label": "Rotation (mobile)",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -4,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "amplitude_mobile",
+      "label": "Amplitude (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "frequency_mobile",
+      "label": "Frequency (mobile)",
+      "info": "Number of wave peaks across the marquee.",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_desktop",
+      "label": "Hide on desktop",
+      "default": false
     }
   ],
   "presets": [

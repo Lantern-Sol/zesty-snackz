@@ -27,6 +27,9 @@
   style="
     {% render 'spacing-style', settings: section.settings %}
     {% render 'gap-style', value: section.settings.gap %}
+    {% if section.settings.use_mobile_gaps %}
+      {% render 'gap-style', name: 'mobile-gap', value: section.settings.gap_mobile, disable_scaling: true %}
+    {% endif %}
   "
 >
   {%- if has_background_media or section.settings.toggle_overlay -%}
@@ -249,6 +252,34 @@
       "visible_if": "{{ section.settings.layout_type == 'grid'}}"
     },
     {
+      "type": "checkbox",
+      "id": "use_mobile_gaps",
+      "label": "Use mobile gaps",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_mobile",
+      "label": "Mobile horizontal gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
+    },
+    {
+      "type": "range",
+      "id": "rows_gap_mobile",
+      "label": "Mobile vertical gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
+    },
+    {
       "type": "header",
       "content": "t:content.carousel_navigation",
       "visible_if": "{{ section.settings.layout_type == 'carousel' or section.settings.carousel_on_mobile == true }}"
@@ -352,6 +383,17 @@
       "step": 1,
       "unit": "px",
       "default": 12
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Mobile gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
     },
     {
       "type": "header",
@@ -507,6 +549,38 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Mobile padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_padding",
+      "label": "Use mobile padding",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start-mobile",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.use_mobile_padding }}"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end-mobile",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ section.settings.use_mobile_padding }}"
     }
   ],
   "presets": [
