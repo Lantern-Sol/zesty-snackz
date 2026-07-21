@@ -137,7 +137,9 @@
       display: none;
     }
   }
-  slideshow-slide.product-media-container.product-media-container--image {
+  /* Scoped to card galleries — unscoped, this leaks onto the product page's
+     main media gallery and tints every slide */
+  .card-gallery slideshow-slide.product-media-container.product-media-container--image {
     background-color: var(--card-media-background, var(--color-background, transparent));
   }
 

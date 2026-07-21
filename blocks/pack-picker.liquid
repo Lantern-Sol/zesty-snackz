@@ -46,14 +46,35 @@
       {% endif %}
     >
       {% if block_settings.heading != blank %}
-        <h2 class="pack-picker__heading">{{ block_settings.heading }}</h2>
+        <h2 class="pack-picker__heading h5">{{ block_settings.heading }}</h2>
       {% endif %}
       <form class="variant-picker__form">
         {%- for product_option in product_resource.options_with_values -%}
           {%- liquid
             assign default_option_index = product_option.position | minus: 1
             assign default_value_at_position = default_variant.options[default_option_index]
-            assign column_count = product_option.values.size | at_most: 4
+
+            # Build-a-Box-only variants are hidden from the picker: the
+            # custom.hide_from_pack_picker variant metafield decides when set;
+            # unset falls back to detecting a "1 …" (single bag) option name.
+            # Count only the visible values for the grid.
+            assign visible_value_count = 0
+            for value in product_option.values
+              assign value_hidden = nil
+              assign value_hidden = value.variant.metafields.custom.hide_from_pack_picker.value
+              if value_hidden == nil
+                assign value_first_word = value.name | split: ' ' | first
+                assign value_count = value_first_word | plus: 0
+                assign value_roundtrip = value_count | append: ''
+                if value_roundtrip == value_first_word and value_count == 1
+                  assign value_hidden = true
+                endif
+              endif
+              unless value_hidden == true
+                assign visible_value_count = visible_value_count | plus: 1
+              endunless
+            endfor
+            assign column_count = visible_value_count | at_most: 4
           -%}
           <fieldset
             class="pack-picker__grid"
@@ -64,6 +85,20 @@
             <legend class="visually-hidden">{{ product_option.name | escape }}</legend>
             {%- for product_option_value in product_option.values -%}
               {%- liquid
+                # Build-a-Box-only variants are skipped — explicit metafield
+                # first, "1 …" (single bag) name detection when unset
+                assign card_hidden = nil
+                assign card_hidden = product_option_value.variant.metafields.custom.hide_from_pack_picker.value
+                assign first_word = product_option_value.name | split: ' ' | first
+                assign first_word_number = first_word | plus: 0
+                assign number_roundtrip = first_word_number | append: ''
+                if card_hidden == nil and number_roundtrip == first_word and first_word_number == 1
+                  assign card_hidden = true
+                endif
+                if card_hidden == true
+                  continue
+                endif
+
                 assign is_selected_default = false
                 if product_option_value.name == default_value_at_position
                   assign is_selected_default = true
@@ -80,15 +115,8 @@
 
                 # Subtitle: "3 Pack" -> "3 BAGS"
                 assign card_subtitle = product_option_value.name
-                assign first_word = product_option_value.name | split: ' ' | first
-                assign first_word_number = first_word | plus: 0
-                assign number_roundtrip = first_word_number | append: ''
                 if number_roundtrip == first_word and first_word_number > 0
-                  if first_word_number == 1
-                    assign card_subtitle = '1 bag'
-                  else
-                    assign card_subtitle = first_word_number | append: ' bags'
-                  endif
+                  assign card_subtitle = first_word_number | append: ' bags'
                 endif
 
                 # Discount chip: computed from compare-at price, else metafield label
@@ -109,6 +137,14 @@
 
                 assign card_badge = option_variant.metafields.custom.badge.value
                 assign card_badge_tone = card_badge | handleize
+
+                # Subscription price: first selling plan allocation, same as the
+                # purchase-options block uses for its Subscribe & Save label
+                assign card_subscription_price = blank
+                assign first_allocation = option_variant.selling_plan_allocations.first
+                if first_allocation and first_allocation.price < option_variant.price
+                  assign card_subscription_price = first_allocation.price
+                endif
               -%}
               <label class="pack-card{% if card_badge != blank %} pack-card--has-badge{% endif %}">
                 <input
@@ -144,7 +180,10 @@
                 <span class="pack-card__name">{{ card_title }}</span>
                 <span class="pack-card__subtitle">{{ card_subtitle }}</span>
                 <span class="pack-card__price-row">
-                  <span class="pack-card__price">{{ option_variant.price | money }}</span>
+                  <span class="pack-card__price pack-card__price--onetime">{{ option_variant.price | money }}</span>
+                  {% if card_subscription_price != blank %}
+                    <span class="pack-card__price pack-card__price--subscribe">{{ card_subscription_price | money }}</span>
+                  {% endif %}
                   {% if card_chip != blank %}
                     <span class="pack-card__chip">{{ card_chip }}</span>
                   {% endif %}
@@ -189,11 +228,8 @@
   }
 
   .pack-picker__heading {
-    font-family: var(--font-heading--family);
-    font-size: 1.25rem;
     line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 0.01em;
     margin: 0 0 12px;
   }
 
@@ -217,8 +253,11 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    align-items: baseline;
     gap: 2px;
-    padding: 12px 12px 10px;
+    text-align: left;
+    padding: 20px 19px 13px;
+    margin-top: 6px;
     background-color: var(--color-variant-background, #e5eeff);
     border: var(--variant-picker-button-border-width, 3px) solid var(--color-variant-border, #c8daff);
     border-radius: var(--variant-picker-button-radius, 15px);
@@ -227,24 +266,29 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* base.css `label:has(input[type='radio'])` sets inline-flex / center / gap
+     at higher specificity than .pack-card — restate the layout above it so the
+     card content stays left-aligned with the intended 2px gap */
+  .pack-card:has(.pack-card__input) {
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
   .pack-card:hover {
     border-color: var(--color-selected-variant-border, #5c8dee);
   }
 
-  .pack-card--has-badge {
-    margin-top: 6px;
-  }
-
   .pack-card__name {
     font-family: var(--font-heading--family);
-    font-size: 1rem;
+    font-size: 1.25rem;
     line-height: 1.1;
     text-transform: uppercase;
     color: var(--color-foreground);
   }
 
   .pack-card__subtitle {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1.3;
     text-transform: uppercase;
     color: rgb(var(--color-foreground-rgb) / 0.75);
@@ -252,36 +296,79 @@
 
   .pack-card__price-row {
     display: flex;
-    align-items: center;
+    align-items: start;
+    justify-content: flex-start;
     gap: 6px;
-    margin-top: 6px;
+    /* 2px card gap + 10px = 12px between subtitle and price */
+    margin-top: 10px;
     flex-wrap: wrap;
   }
 
   .pack-card__price {
     font-family: var(--font-heading--family);
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     line-height: 1;
     color: var(--color-foreground);
   }
 
+  /* While Subscribe & Save is picked, cards with a selling plan swap their
+     one-time price for the subscription price */
+  .pack-card__price--subscribe {
+    display: none;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden]))
+    .pack-card__price-row:has(.pack-card__price--subscribe)
+    .pack-card__price--onetime {
+    display: none;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden])) .pack-card__price--subscribe {
+    display: inline;
+  }
+
+  /* Only shown while Subscribe & Save is picked in the purchase-options block */
   .pack-card__chip {
+    display: none;
     font-size: 0.625rem;
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.02em;
     color: #3fa34d;
-    background-color: rgb(99 185 68 / 0.18);
+    background-color: #dff1d8;
     border-radius: 100px;
-    padding: 4px 7px;
+    padding: 2px 5px;
     white-space: nowrap;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden])) .pack-card__chip {
+    display: inline-block;
+  }
+
+  @media screen and (min-width: 750px) {
+    .pack-card__name {
+      font-size: 1.5rem;
+    }
+
+    .pack-card__subtitle {
+      font-size: 1rem;
+    }
+
+    .pack-card__price {
+      font-size: 1.25rem;
+    }
+
+    .pack-card__chip {
+      font-size: 0.75rem;
+    }
   }
 
   /* Selected state */
   .pack-card:has(.pack-card__input:checked) {
     background-color: var(--color-selected-variant-background, #5c8dee);
     border-color: var(--color-selected-variant-border, #5c8dee);
+    box-shadow: 0 14px 30px 0 rgba(91, 141, 239, 0.22);
   }
 
   .pack-card:has(.pack-card__input:checked) .pack-card__name,
@@ -291,11 +378,6 @@
 
   .pack-card:has(.pack-card__input:checked) .pack-card__subtitle {
     color: rgb(255 255 255 / 0.85);
-  }
-
-  .pack-card:has(.pack-card__input:checked) .pack-card__chip {
-    color: #eaffe2;
-    background-color: rgb(255 255 255 / 0.22);
   }
 
   .pack-card:has(.pack-card__input:focus-visible) {
@@ -320,15 +402,18 @@
 
   .pack-card__badge {
     position: absolute;
-    top: -11px;
-    right: 8px;
+    top: -1rem;
+    right: 0;
+    left: 0;
     z-index: 1;
     font-family: var(--font-heading--family);
-    font-size: 0.6875rem;
+    font-size: 1.25rem;
     line-height: 1;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    padding: 5px 10px 4px;
+    padding: 0.31rem 0.62rem;
+    margin: 0 auto;
+    width: fit-content;
     border-radius: 100px;
     background-color: #ffd23f;
     color: var(--color-foreground);
@@ -344,7 +429,7 @@
     margin: 10px 0 0;
     font-size: 0.875rem;
     line-height: 1.45;
-    color: #3fa34d;
+    color: #5E7B93;
   }
 {% endstylesheet %}
 

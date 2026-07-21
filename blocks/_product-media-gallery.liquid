@@ -292,7 +292,7 @@
       media-gallery--tinted
     {% endif %}
   "
-  style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}{% if media_metafield_background != blank %} --media-metafield-background: {{ media_metafield_background }}; --card-media-background: {{ media_metafield_background }};{% endif %}"
+  style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}{% if media_metafield_background != blank %} --media-metafield-background: {{ media_metafield_background }};{% endif %}"
   data-presentation="{{ block_settings.media_presentation }}"
   {{ block.shopify_attributes }}
 >
@@ -577,9 +577,11 @@
 
 {% stylesheet %}
   /* Media background pulled from the product's custom.color_light metafield —
-     same treatment as the product cards' card-gallery background. Excludes the
-     zoomed gallery dialog, which stays on white. */
-  .media-gallery--tinted :not(.dialog-zoomed-gallery) > .product-media-container {
+     same treatment as the product cards' card-gallery background. Only the
+     first (hero) image gets the tint and padding; the remaining slides and the
+     zoomed gallery dialog stay untouched. */
+  .media-gallery--tinted :not(.dialog-zoomed-gallery) > slideshow-slide.product-media-container:first-of-type,
+  .media-gallery--tinted .media-gallery__grid > .product-media-container:first-child {
     background-color: var(--media-metafield-background, transparent);
     border-radius: var(--media-radius, 0);
     overflow: clip;
@@ -587,14 +589,65 @@
   }
 
   @media screen and (min-width: 750px) {
-    .media-gallery--tinted :not(.dialog-zoomed-gallery) > .product-media-container {
+    .media-gallery--tinted :not(.dialog-zoomed-gallery) > slideshow-slide.product-media-container:first-of-type,
+    .media-gallery--tinted .media-gallery__grid > .product-media-container:first-child {
       padding: 32px;
     }
   }
 
-  .media-gallery--tinted .slideshow-controls__thumbnail {
+  /* The contain-fit helper paints images with the page background (for the
+     arrows' mix-blend-mode); on the tinted hero that shows as a white box
+     behind transparent PNGs — let the tint show through instead */
+  .media-gallery--tinted :not(.dialog-zoomed-gallery) > slideshow-slide.product-media-container:first-of-type :is(img, .deferred-media__poster-image),
+  .media-gallery--tinted .media-gallery__grid > .product-media-container:first-child :is(img, .deferred-media__poster-image) {
+    background-color: transparent;
+  }
+
+  /* The first thumbnail mirrors the tinted hero image */
+  .media-gallery--tinted .slideshow-controls__thumbnail:first-of-type {
     background-color: var(--media-metafield-background, transparent);
     padding: 4px;
+  }
+
+  /* Keep the gallery in view on desktop while the details column scrolls.
+     base.css's .media-gallery--carousel { position: relative } outranks
+     .sticky-content by source order, so restate sticky at higher specificity.
+     Mobile stays in flow (media stacks above the details there). */
+  @media screen and (min-width: 750px) {
+    media-gallery.sticky-content {
+      position: sticky;
+      top: var(--sticky-header-offset, 0);
+    }
+  }
+
+  /* Stick below the header while it's pinned, like the details column does */
+  body:has(#header-group #header-component[data-sticky-state='active']) media-gallery.sticky-content {
+    --sticky-header-offset: var(--header-height);
+  }
+
+  /* Thumbnail strip spacing: 1.2rem between thumbs and between the main image
+     and the strip (base.css defaults to 1rem / 0.75rem). The <media-gallery>
+     element has no `media-gallery` class, so scope by element name. */
+  media-gallery slideshow-controls[thumbnails] .slideshow-controls__thumbnails {
+    gap: 1.2rem;
+  }
+
+  /* Thumbs below the main image (bottom position renders as 'center') */
+  media-gallery slideshow-controls[thumbnails][pagination-position='center'] {
+    margin-top: 1.2rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    media-gallery slideshow-controls[thumbnails] {
+      margin-top: 1.2rem;
+    }
+  }
+
+  /* Thumbs beside the main image (left/right positions use a grid column) */
+  @media screen and (min-width: 750px) {
+    .media-gallery--carousel slideshow-component:has(slideshow-controls[thumbnails]) {
+      column-gap: 1.2rem;
+    }
   }
 
   .dialog-zoomed-gallery {

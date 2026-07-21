@@ -46,7 +46,7 @@
     {{ block.shopify_attributes }}
   >
     {% if block_settings.heading != blank %}
-      <h2 class="purchase-options__heading">{{ block_settings.heading }}</h2>
+      <h2 class="purchase-options__heading h5">{{ block_settings.heading }}</h2>
     {% endif %}
 
     <label class="purchase-options__onetime">
@@ -153,11 +153,8 @@
   }
 
   .purchase-options__heading {
-    font-family: var(--font-heading--family);
-    font-size: 1.25rem;
     line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 0.01em;
     margin: 0;
   }
 
@@ -187,19 +184,26 @@
   }
 
   .purchase-options__label {
-    font-family: var(--font-heading--family);
-    font-size: 1.0625rem;
-    line-height: 1.15;
-    text-transform: uppercase;
-    letter-spacing: 0.01em;
+    font-family: var(--font-h4--family);
+    font-style: var(--font-h4--style);
+    font-weight: var(--font-h4--weight);
+    font-size: var(--font-h4--size);
+    line-height: var(--font-h4--size);
+    letter-spacing: var(--font-h4--letter-spacing);
+    text-transform: var(--font-h4--case);
     flex: 1;
     min-width: 0;
+    margin-top: 0.35rem;
   }
 
   .purchase-options__price {
-    font-family: var(--font-heading--family);
-    font-size: 1.0625rem;
-    line-height: 1;
+    font-family: var(--font-h4--family);
+    font-style: var(--font-h4--style);
+    font-weight: var(--font-h4--weight);
+    font-size: var(--font-h4--size);
+    line-height: var(--font-h4--line-height);
+    letter-spacing: var(--font-h4--letter-spacing);
+    text-transform: var(--font-h4--case);
   }
 
   /* Both cards share the light-blue "unselected" look; the checked one flips
@@ -207,8 +211,8 @@
   .purchase-options__onetime {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    gap: 0.81rem !important;
+    padding: 1.25rem 1.19rem;
     border-radius: 12px;
     background-color: var(--color-variant-background, #e5eeff);
     color: var(--color-foreground);
@@ -225,7 +229,7 @@
   .purchase-options__subscribe {
     display: flex;
     flex-direction: column;
-    padding: 16px 18px;
+    padding: 1.25rem 1.19rem;
     border-radius: 12px;
     background-color: var(--color-variant-background, #e5eeff);
     color: var(--color-foreground);
@@ -240,7 +244,7 @@
   .purchase-options__subscribe-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.81rem !important;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
@@ -265,8 +269,13 @@
   }
 
   .purchase-options__compare-price {
-    font-family: var(--font-heading--family);
-    font-size: 0.875rem;
+    font-family: var(--font-h5--family);
+    font-style: var(--font-h5--style);
+    font-weight: var(--font-h5--weight);
+    font-size: var(--font-h5--size);
+    line-height: var(--font-h5--line-height);
+    letter-spacing: var(--font-h5--letter-spacing);
+    text-transform: var(--font-h5--case);
     color: rgb(var(--color-foreground-rgb) / 0.55);
   }
 
@@ -333,10 +342,13 @@
   }
 
   .purchase-options__frequency-label {
-    font-family: var(--font-heading--family);
-    font-size: 0.9375rem;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+    font-family: var(--font-h6--family);
+    font-style: var(--font-h6--style);
+    font-weight: var(--font-h6--weight);
+    font-size: var(--font-h6--size);
+    line-height: var(--font-h6--line-height);
+    letter-spacing: var(--font-h6--letter-spacing);
+    text-transform: var(--font-h6--case);
     margin: 6px 0 0;
   }
 

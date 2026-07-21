@@ -56,8 +56,25 @@
     endif
   endif
 
-  # Discount chip - computed while prices are still raw numbers
+  # Subscription price (product pages only): first selling plan allocation,
+  # mirroring the purchase-options block. Rendered alongside the regular price
+  # and swapped in via CSS while Subscribe & Save is selected.
+  assign subscription_price = nil
+  assign subscription_compare_price = nil
+  if is_product_card == false
+    assign sub_allocation = selected_variant.selling_plan_allocations.first
+    if sub_allocation and sub_allocation.price < selected_variant.price
+      assign subscription_price = sub_allocation.price
+      assign subscription_compare_price = selected_variant.price
+    endif
+  endif
+
+  # Discount chip - computed while prices are still raw numbers. A chip from a
+  # real compare-at discount always shows; the discount_label metafield
+  # describes the subscription discount, so on product pages that chip only
+  # shows while Subscribe & Save is selected.
   assign discount_chip_text = ''
+  assign discount_chip_subscribe_only = false
   if show_discount_chip
     if compare_at_price > price
       assign chip_difference = compare_at_price | minus: price
@@ -70,6 +87,9 @@
       assign metafield_chip = selected_variant.metafields.custom.discount_label.value
       if metafield_chip != blank
         assign discount_chip_text = metafield_chip
+        if is_product_card == false
+          assign discount_chip_subscribe_only = true
+        endif
       endif
     endif
   endif
@@ -90,11 +110,19 @@
     assign compare_at_price = compare_at_price | money_with_currency
     assign price_min = price_min | money_with_currency
     assign price_max = price_max | money_with_currency
+    if subscription_price
+      assign subscription_price = subscription_price | money_with_currency
+      assign subscription_compare_price = subscription_compare_price | money_with_currency
+    endif
   else
     assign price = price | money
     assign compare_at_price = compare_at_price | money
     assign price_min = price_min | money
     assign price_max = price_max | money
+    if subscription_price
+      assign subscription_price = subscription_price | money
+      assign subscription_compare_price = subscription_compare_price | money
+    endif
   endif
 -%}
 
@@ -159,8 +187,22 @@
       {% endif %}
     </div>
   {% endif %}
+  {%- if subscription_price -%}
+    <div class="price__subscribe">
+      <span class="price-item__group">
+        <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+        <span class="price-item--sale price">{{ subscription_price }}</span>
+      </span>
+      <span class="price-item__group">
+        <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+        <s class="price__subscribe-compare">{{ subscription_compare_price }}</s>
+      </span>
+    </div>
+  {%- endif -%}
   {%- if discount_chip_text != '' -%}
-    <span class="price-discount-chip">{{ discount_chip_text }}</span>
+    <span class="price-discount-chip{% if discount_chip_subscribe_only %} price-discount-chip--subscribe-only{% endif %}">
+      {{- discount_chip_text -}}
+    </span>
   {%- endif -%}
   {%- if selected_variant.unit_price and show_unit_price %}
     {%- liquid
@@ -189,16 +231,60 @@
     gap: 10px;
   }
 
+  /* Subscribe & Save pricing: while the purchase-options block is in
+     subscribe mode, the subscription price + struck-through one-time price
+     replace the regular price display */
+  .price__subscribe {
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden]))
+    [ref='priceContainer']
+    > .price__subscribe {
+    display: inline-flex;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden]))
+    [ref='priceContainer']:has(> .price__subscribe)
+    > :is(.price__regular, .price__sale) {
+    display: none;
+  }
+
+  .price__subscribe-compare {
+    font-family: var(--font-heading--family);
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.02rem;
+    text-decoration-line: line-through;
+    color: var(--color-foreground, #0b1b2b);
+    opacity: 0.3;
+  }
+
   .price-discount-chip {
-    font-size: 0.75rem;
+    font-family: var(--font-body--family);
+    font-size: 1.05369rem;
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
     color: #3fa34d;
     background-color: rgb(99 185 68 / 0.18);
     border-radius: 100px;
     padding: 6px 10px;
     white-space: nowrap;
+    margin-top: 0.4rem;
+  }
+
+  /* Subscription-discount chips only show while Subscribe & Save is picked */
+  .price-discount-chip--subscribe-only {
+    display: none;
+  }
+
+  .shopify-section:has(purchase-options-component[data-mode='subscribe']:not([hidden]))
+    .price-discount-chip--subscribe-only {
+    display: inline-block;
   }
 {% endstylesheet %}
