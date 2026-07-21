@@ -27,6 +27,7 @@
     can_add_to_cart: can_add_to_cart,
     product: closest.product,
     add_to_cart_text: add_to_cart_text,
+    show_price: block.settings.show_price,
     data_testid: 'standalone-add-to-cart'
   %}
 </span>
@@ -41,6 +42,13 @@
       "id": "custom_label",
       "label": "Custom label",
       "info": "Optional. Replaces the default \"Add to cart\" text when the product is available."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price in label",
+      "info": "Appends the current price to the button, e.g. \"Add to cart • $12.99\".",
+      "default": false
     },
     {
       "type": "select",

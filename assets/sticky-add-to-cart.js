@@ -184,6 +184,8 @@ class StickyAddToCartComponent extends Component {
     }
 
     if (!cartIcon || !this.refs.addToCartButton || !this.refs.productImage) return;
+    // Skip the fly-to-cart animation when the product image is hidden (mobile bar)
+    if (this.refs.productImage.offsetParent === null) return;
     if (this.#resetTimeout) clearTimeout(this.#resetTimeout);
 
     const flyToCartElement = /** @type {FlyToCart} */ (document.createElement('fly-to-cart'));
@@ -202,6 +204,32 @@ class StickyAddToCartComponent extends Component {
       this.refs.addToCartButton.removeAttribute('data-added');
     }, 800);
   };
+
+  /**
+   * Increases the quantity via the main quantity selector so all
+   * displays (main input, sticky bar) stay in sync.
+   */
+  increaseQuantity = () => {
+    this.#proxyQuantityClick('plus');
+  };
+
+  /**
+   * Decreases the quantity via the main quantity selector.
+   */
+  decreaseQuantity = () => {
+    this.#proxyQuantityClick('minus');
+  };
+
+  /**
+   * Clicks the main quantity selector's plus/minus button. The resulting
+   * QuantitySelectorUpdateEvent updates this component's quantity display.
+   * @param {'plus' | 'minus'} direction
+   */
+  #proxyQuantityClick(direction) {
+    const productForm = this.#getProductForm();
+    const button = productForm?.querySelector(`quantity-selector-component button[name="${direction}"]`);
+    if (button instanceof HTMLButtonElement) button.click();
+  }
 
   /**
    * Handles product select events (variant selected and updated)
@@ -389,8 +417,16 @@ class StickyAddToCartComponent extends Component {
     // Update the quantity number
     quantityNumber.textContent = this.#currentQuantity.toString();
 
-    // Show/hide the quantity display based on availability and quantity
-    if (available && this.#currentQuantity > 1) {
+    // Update the mobile stepper display
+    const stepperQuantity = this.querySelector('[data-sticky-qty]');
+    if (stepperQuantity) {
+      stepperQuantity.textContent = this.#currentQuantity.toString();
+    }
+
+    // The "(n)" suffix stays hidden when the stepper shows the quantity;
+    // keep it for desktop where the stepper is not rendered.
+    const stepperVisible = stepperQuantity instanceof HTMLElement && stepperQuantity.offsetParent !== null;
+    if (available && this.#currentQuantity > 1 && !stepperVisible) {
       quantityDisplay.style.display = 'inline';
     } else {
       quantityDisplay.style.display = 'none';

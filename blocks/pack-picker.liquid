@@ -1,0 +1,436 @@
+{%- doc -%}
+  "Pick your pack" variant picker — renders product variants as selectable cards
+  (name, bag count, price, discount chip, badge) driven by variant metafields:
+    - custom.display_name  (e.g. "Mini Munch")
+    - custom.badge         (e.g. "Popular", "Best value")
+    - custom.discount_label (e.g. "5% OFF", used when no compare-at price)
+    - custom.inclusions    (line shown under the grid for the selected variant)
+
+  Reuses the <variant-picker> custom element so variant switching, section
+  morphing and URL updates keep working. Falls back to the default picker for
+  multi-option products.
+{%- enddoc -%}
+
+{% liquid
+  assign product_resource = closest.product
+  if request.visual_preview_mode and product_resource == blank
+    assign product_resource = collections.all.products.first
+  endif
+  assign block_settings = block.settings
+%}
+
+{% unless product_resource == blank or product_resource.has_only_default_variant %}
+  {% if product_resource.options.size > 1 %}
+    {% render 'variant-main-picker', product_resource: product_resource, section: section, product: product %}
+  {% else %}
+    {% liquid
+      assign default_variant = product_resource.selected_or_first_available_variant
+      assign selected_inclusions = default_variant.metafields.custom.inclusions.value
+    %}
+    <variant-picker
+      class="variant-picker pack-picker spacing-style{% if block_settings.divider_top %} pack-picker--divider-top{% endif %}{% if block_settings.divider_bottom %} pack-picker--divider-bottom{% endif %}"
+      style="{% render 'spacing-style', settings: block_settings %}"
+      data-section-id="{{ section.id }}"
+      data-product-id="{{ product_resource.id }}"
+      data-product-handle="{{ product_resource.handle }}"
+      data-product-title="{{ product_resource.title | escape }}"
+      data-block-id="{{ block.id }}"
+      data-product-url="{{ product_resource.url }}"
+      ref="mainVariantPicker"
+      {% if product.id == product_resource.id %}
+        data-template-product-match="true"
+      {% endif %}
+      {{ block.shopify_attributes }}
+      {% if request.visual_preview_mode %}
+        data-shopify-visual-preview
+      {% endif %}
+    >
+      {% if block_settings.heading != blank %}
+        <h2 class="pack-picker__heading">{{ block_settings.heading }}</h2>
+      {% endif %}
+      <form class="variant-picker__form">
+        {%- for product_option in product_resource.options_with_values -%}
+          {%- liquid
+            assign default_option_index = product_option.position | minus: 1
+            assign default_value_at_position = default_variant.options[default_option_index]
+            assign column_count = product_option.values.size | at_most: 4
+          -%}
+          <fieldset
+            class="pack-picker__grid"
+            style="--pack-columns: {{ column_count }};"
+            data-fieldset-index="0"
+            ref="fieldsets[]"
+          >
+            <legend class="visually-hidden">{{ product_option.name | escape }}</legend>
+            {%- for product_option_value in product_option.values -%}
+              {%- liquid
+                assign is_selected_default = false
+                if product_option_value.name == default_value_at_position
+                  assign is_selected_default = true
+                endif
+
+                assign option_variant = product_option_value.variant
+
+                # Card title: display-name metafield, falling back to the option value
+                assign card_title = product_option_value.name
+                assign metafield_title = option_variant.metafields.custom.display_name.value
+                if metafield_title != blank
+                  assign card_title = metafield_title
+                endif
+
+                # Subtitle: "3 Pack" -> "3 BAGS"
+                assign card_subtitle = product_option_value.name
+                assign first_word = product_option_value.name | split: ' ' | first
+                assign first_word_number = first_word | plus: 0
+                assign number_roundtrip = first_word_number | append: ''
+                if number_roundtrip == first_word and first_word_number > 0
+                  if first_word_number == 1
+                    assign card_subtitle = '1 bag'
+                  else
+                    assign card_subtitle = first_word_number | append: ' bags'
+                  endif
+                endif
+
+                # Discount chip: computed from compare-at price, else metafield label
+                assign card_chip = ''
+                if option_variant.compare_at_price > option_variant.price
+                  assign price_difference = option_variant.compare_at_price | minus: option_variant.price
+                  assign discount_percent = price_difference | times: 100.0 | divided_by: option_variant.compare_at_price | round
+                  if discount_percent > 0
+                    assign card_chip = discount_percent | append: '% OFF'
+                  endif
+                endif
+                if card_chip == blank
+                  assign metafield_chip = option_variant.metafields.custom.discount_label.value
+                  if metafield_chip != blank
+                    assign card_chip = metafield_chip
+                  endif
+                endif
+
+                assign card_badge = option_variant.metafields.custom.badge.value
+                assign card_badge_tone = card_badge | handleize
+              -%}
+              <label class="pack-card{% if card_badge != blank %} pack-card--has-badge{% endif %}">
+                <input
+                  class="visually-hidden pack-card__input"
+                  type="radio"
+                  name="{{ product_option.name | escape }}-{{ block.id }}-{{ product_resource.id }}"
+                  value="{{ product_option_value | escape }}"
+                  aria-label="{{ product_option_value.name | escape }}{% if product_option_value.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                  {% if product_option_value.available == false %}
+                    aria-disabled="true"
+                  {% endif %}
+                  data-previous-checked="false"
+                  data-fieldset-index="0"
+                  data-input-index="{{ forloop.index0 }}"
+                  data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+                  data-option-name="{{ product_option.name | escape }}"
+                  data-option-value-id="{{ product_option_value.id }}"
+                  data-option-available="{{ product_option_value.available }}"
+                  data-connected-product-url="{{ product_option_value.product_url }}"
+                  {% if product_option_value.variant.id %}
+                    data-variant-id="{{ product_option_value.variant.id }}"
+                  {% endif %}
+                  {% if is_selected_default %}
+                    data-current-checked="true"
+                    checked
+                  {% else %}
+                    data-current-checked="false"
+                  {% endif %}
+                >
+                {% if card_badge != blank %}
+                  <span class="pack-card__badge pack-card__badge--{{ card_badge_tone }}">{{ card_badge }}</span>
+                {% endif %}
+                <span class="pack-card__name">{{ card_title }}</span>
+                <span class="pack-card__subtitle">{{ card_subtitle }}</span>
+                <span class="pack-card__price-row">
+                  <span class="pack-card__price">{{ option_variant.price | money }}</span>
+                  {% if card_chip != blank %}
+                    <span class="pack-card__chip">{{ card_chip }}</span>
+                  {% endif %}
+                </span>
+              </label>
+            {%- endfor -%}
+          </fieldset>
+        {%- endfor -%}
+
+        <script type="application/json">
+          {{ default_variant | json }}
+        </script>
+        <script type="application/json" data-all-variants>
+          [
+            {%- for v in product_resource.variants -%}
+              {"id":{{ v.id | json }},"available":{{ v.available | json }},"options":{{ v.options | json }}}
+              {%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        </script>
+      </form>
+      {% if block_settings.show_inclusions and selected_inclusions != blank %}
+        <p class="pack-picker__inclusions">{{ selected_inclusions }}</p>
+      {% endif %}
+    </variant-picker>
+  {% endif %}
+{% endunless %}
+
+{% stylesheet %}
+  .pack-picker {
+    display: block;
+  }
+
+  .pack-picker--divider-top {
+    border-top: 1.5px dashed rgb(var(--color-foreground-rgb) / 0.15);
+    padding-top: var(--padding-xl) !important;
+  }
+
+  .pack-picker--divider-bottom {
+    border-bottom: 1.5px dashed rgb(var(--color-foreground-rgb) / 0.15);
+    padding-bottom: var(--padding-xl) !important;
+  }
+
+  .pack-picker__heading {
+    font-family: var(--font-heading--family);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin: 0 0 12px;
+  }
+
+  .pack-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .pack-picker__grid {
+      grid-template-columns: repeat(var(--pack-columns, 4), minmax(0, 1fr));
+      gap: 16px 12px;
+    }
+  }
+
+  .pack-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 12px 10px;
+    background-color: var(--color-variant-background, #e5eeff);
+    border: var(--variant-picker-button-border-width, 3px) solid var(--color-variant-border, #c8daff);
+    border-radius: var(--variant-picker-button-radius, 15px);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pack-card:hover {
+    border-color: var(--color-selected-variant-border, #5c8dee);
+  }
+
+  .pack-card--has-badge {
+    margin-top: 6px;
+  }
+
+  .pack-card__name {
+    font-family: var(--font-heading--family);
+    font-size: 1rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--color-foreground);
+  }
+
+  .pack-card__subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.75);
+  }
+
+  .pack-card__price-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pack-card__price {
+    font-family: var(--font-heading--family);
+    font-size: 0.9375rem;
+    line-height: 1;
+    color: var(--color-foreground);
+  }
+
+  .pack-card__chip {
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #3fa34d;
+    background-color: rgb(99 185 68 / 0.18);
+    border-radius: 100px;
+    padding: 4px 7px;
+    white-space: nowrap;
+  }
+
+  /* Selected state */
+  .pack-card:has(.pack-card__input:checked) {
+    background-color: var(--color-selected-variant-background, #5c8dee);
+    border-color: var(--color-selected-variant-border, #5c8dee);
+  }
+
+  .pack-card:has(.pack-card__input:checked) .pack-card__name,
+  .pack-card:has(.pack-card__input:checked) .pack-card__price {
+    color: rgb(255 255 255);
+  }
+
+  .pack-card:has(.pack-card__input:checked) .pack-card__subtitle {
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .pack-card:has(.pack-card__input:checked) .pack-card__chip {
+    color: #eaffe2;
+    background-color: rgb(255 255 255 / 0.22);
+  }
+
+  .pack-card:has(.pack-card__input:focus-visible) {
+    outline: var(--focus-outline-width) solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  /* Unavailable option */
+  .pack-card:has(.pack-card__input[data-option-available='false']) {
+    opacity: 0.45;
+  }
+
+  /* The variant-picker JS injects a strikethrough SVG for unavailable options —
+     cards communicate that state with opacity + text strikethrough instead. */
+  .pack-card .variant-option__strikethrough {
+    display: none;
+  }
+
+  .pack-card:has(.pack-card__input[data-option-available='false']) .pack-card__name {
+    text-decoration: line-through;
+  }
+
+  .pack-card__badge {
+    position: absolute;
+    top: -11px;
+    right: 8px;
+    z-index: 1;
+    font-family: var(--font-heading--family);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 10px 4px;
+    border-radius: 100px;
+    background-color: #ffd23f;
+    color: var(--color-foreground);
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.08);
+  }
+
+  .pack-card__badge--best-value {
+    background-color: #ff7bac;
+    color: rgb(255 255 255);
+  }
+
+  .pack-picker__inclusions {
+    margin: 10px 0 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: #3fa34d;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Pack picker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Variant cards use the variant metafields Display name (custom.display_name), Card badge (custom.badge), Discount label (custom.discount_label) and Inclusions (custom.inclusions)."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pick your pack"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_inclusions",
+      "label": "Show selected variant inclusions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "divider_top",
+      "label": "Dashed divider above",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "divider_bottom",
+      "label": "Dashed divider below",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pack picker",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

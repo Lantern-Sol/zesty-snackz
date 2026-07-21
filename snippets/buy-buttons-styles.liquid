@@ -47,6 +47,56 @@
     height: var(--height-buy-buttons);
   }
 
+  /* Zesty branded quantity stepper: light-blue pill with round blue buttons */
+  .product-form-buttons .quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 5px;
+    border: 0;
+    border-radius: 100px;
+    background-color: var(--color-variant-background, #e5eeff);
+  }
+
+  .product-form-buttons .quantity-selector .quantity-minus,
+  .product-form-buttons .quantity-selector .quantity-plus {
+    width: calc(var(--height-buy-buttons) - 10px);
+    height: calc(var(--height-buy-buttons) - 10px);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background-color: var(--color-selected-variant-background, #5c8dee);
+    color: rgb(255 255 255);
+    cursor: pointer;
+  }
+
+  .product-form-buttons .quantity-selector .quantity-minus svg,
+  .product-form-buttons .quantity-selector .quantity-plus svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .product-form-buttons .quantity-selector input[type='number'] {
+    width: 2.6ch;
+    text-align: center;
+    border: 0;
+    background: transparent;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-foreground);
+    appearance: textfield;
+  }
+
+  .product-form-buttons .quantity-selector input[type='number']::-webkit-outer-spin-button,
+  .product-form-buttons .quantity-selector input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   .quantity-label {
     flex: 1 0 100%;
     width: 100%;

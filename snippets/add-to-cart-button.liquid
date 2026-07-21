@@ -10,6 +10,7 @@
   @param {string} [data_testid] - The data-testid attribute for testing.
   @param {string} [style_class] - Button style class ('button' or 'button-secondary'). Defaults to 'button'.
   @param {boolean} [show_icon] - Whether to render the cart icon. Defaults to true.
+  @param {boolean} [show_price] - Whether to append the variant price to the label (e.g. "Add to cart • $12.99").
 {%- enddoc -%}
 
 {%- liquid
@@ -64,6 +65,11 @@
             {{- add_to_cart_text | default: default_add_to_cart_text -}}
           </span>
         </span>
+        {%- if show_price and can_add_to_cart -%}
+          <span class="add-to-cart-price">
+            {{- product.selected_or_first_available_variant.price | money -}}
+          </span>
+        {%- endif -%}
       </span>
     </span>
     {% comment %} checkmark burst markup {% endcomment %}
@@ -74,3 +80,10 @@
     </span>
   </button>
 </add-to-cart-component>
+
+{% stylesheet %}
+  .add-to-cart-price::before {
+    content: '\2022';
+    margin-inline: 8px 8px;
+  }
+{% endstylesheet %}

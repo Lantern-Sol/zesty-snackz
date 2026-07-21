@@ -114,6 +114,39 @@
         {% render 'price', product_resource: product, show_sale_price_first: true %}
       </div>
 
+      <div
+        class="sticky-add-to-cart__stepper"
+        data-testid="sticky-stepper"
+      >
+        <button
+          type="button"
+          class="button-unstyled sticky-add-to-cart__step"
+          on:click="/decreaseQuantity"
+          aria-label="{{ 'accessibility.decrease_quantity' | t }}"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-minus.svg' | inline_asset_content -}}
+          </span>
+        </button>
+        <span
+          class="sticky-add-to-cart__qty"
+          data-sticky-qty
+          aria-live="polite"
+        >
+          {{- initial_quantity -}}
+        </span>
+        <button
+          type="button"
+          class="button-unstyled sticky-add-to-cart__step"
+          on:click="/increaseQuantity"
+          aria-label="{{ 'accessibility.increase_quantity' | t }}"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-plus.svg' | inline_asset_content -}}
+          </span>
+        </button>
+      </div>
+
       <button
         type="button"
         class="sticky-add-to-cart__button add-to-cart-button button"
@@ -126,11 +159,6 @@
         <span
           class="add-to-cart-text"
         >
-          {% if current_variant.available %}
-            <span class="svg-wrapper is-visually-hidden-desktop">
-              {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
-            </span>
-          {% endif %}
           <span class="add-to-cart-text__content">
             <span>
               {%- if current_variant.available -%}
@@ -143,16 +171,17 @@
             </span>
             <span
               ref="quantityDisplay"
-              {% if current_variant.available and initial_quantity > 1 %}
-                style="display: inline;"
-              {% else %}
-                style="display: none;"
-              {% endif %}
+              style="display: none;"
             >
               {{- ' (' -}}
               <span ref="quantityNumber">{{- initial_quantity -}}</span>
               {{- ')' -}}
             </span>
+            {%- if current_variant.available -%}
+              <span class="add-to-cart-price">
+                {{- current_variant.price | money -}}
+              </span>
+            {%- endif -%}
           </span>
         </span>
         <span class="add-to-cart__added">
@@ -282,50 +311,84 @@
     position: relative;
   }
 
-  /* Mobile adjustments */
+  /* Quantity stepper - mobile only, mirrors the main quantity selector */
+  .sticky-add-to-cart__stepper {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 5px;
+    border-radius: 100px;
+    background-color: var(--color-variant-background, #e5eeff);
+    flex-shrink: 0;
+  }
+
+  .sticky-add-to-cart__step {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background-color: var(--color-selected-variant-background, #5c8dee);
+    color: rgb(255 255 255);
+    cursor: pointer;
+  }
+
+  .sticky-add-to-cart__step .svg-wrapper,
+  .sticky-add-to-cart__step svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .sticky-add-to-cart__qty {
+    min-width: 2.2ch;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-foreground);
+  }
+
+  /* Mobile adjustments - stepper + full-width add to cart, per Figma */
   @media screen and (max-width: 749px) {
     .sticky-add-to-cart__bar {
       bottom: 0;
       width: 100%;
       max-width: none;
       border-radius: 0;
+      padding: 10px var(--padding-lg);
+      gap: var(--gap-sm);
 
       &::before {
         --border: 1px;
       }
     }
 
-    .sticky-add-to-cart__bar .add-to-cart-text__content {
+    .sticky-add-to-cart__image,
+    .sticky-add-to-cart__info,
+    .sticky-add-to-cart__price {
       display: none;
     }
 
-    .sticky-add-to-cart__info[data-has-image='false'] {
-      padding-left: 0;
-    }
-
-    .sticky-add-to-cart__title {
-      font-size: var(--font-paragraph--size);
+    .sticky-add-to-cart__stepper {
+      display: flex;
     }
 
     .sticky-add-to-cart__button {
+      flex: 1;
       padding: var(--padding-lg);
     }
+  }
 
-    .sticky-add-to-cart__price {
-      font-size: var(--font-paragraph-small--size);
-    }
+  /* Judge.me preview badge - align the stars row with the design */
+  .product-details .jdgm-widget.jdgm-preview-badge {
+    display: block;
+  }
 
-    .sticky-add-to-cart__button {
-      width: var(--height-buy-buttons);
-    }
-
-    sticky-add-to-cart:not([data-variant-available='true']) .add-to-cart-text__content {
-      display: initial;
-    }
-
-    sticky-add-to-cart:not([data-variant-available='true']) .sticky-add-to-cart__button {
-      width: auto;
-    }
+  .product-details .jdgm-prev-badge__text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-foreground);
   }
 
   /* Small mobile - hide text content and compare price */

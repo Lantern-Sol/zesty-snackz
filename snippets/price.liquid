@@ -6,6 +6,7 @@
   @param {boolean} [show_unit_price] - Whether to show the unit price
   @param {boolean} [show_sale_price_first] - Whether to show the sale price first
   @param {boolean} [allow_from_prefix] - Whether a varying price may show the "From" prefix on cards (default true)
+  @param {boolean} [show_discount_chip] - Whether to show a "X% OFF" chip (computed from compare-at price, falling back to the variant's custom.discount_label metafield)
 {%- enddoc -%}
 
 {%- liquid
@@ -52,6 +53,24 @@
       assign has_volume_pricing = true
       assign price_min = selected_variant.quantity_price_breaks.last.price
       assign price_max = selected_variant.price
+    endif
+  endif
+
+  # Discount chip - computed while prices are still raw numbers
+  assign discount_chip_text = ''
+  if show_discount_chip
+    if compare_at_price > price
+      assign chip_difference = compare_at_price | minus: price
+      assign chip_percent = chip_difference | times: 100.0 | divided_by: compare_at_price | round
+      if chip_percent > 0
+        assign discount_chip_text = chip_percent | append: '% OFF'
+      endif
+    endif
+    if discount_chip_text == ''
+      assign metafield_chip = selected_variant.metafields.custom.discount_label.value
+      if metafield_chip != blank
+        assign discount_chip_text = metafield_chip
+      endif
     endif
   endif
 
@@ -140,6 +159,9 @@
       {% endif %}
     </div>
   {% endif %}
+  {%- if discount_chip_text != '' -%}
+    <span class="price-discount-chip">{{ discount_chip_text }}</span>
+  {%- endif -%}
   {%- if selected_variant.unit_price and show_unit_price %}
     {%- liquid
       if use_currency
@@ -159,3 +181,24 @@
     {{- 'content.volume_pricing_available' | t -}}
   </small>
 {%- endif -%}
+
+{% stylesheet %}
+  [ref='priceContainer']:has(> .price-discount-chip) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .price-discount-chip {
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #3fa34d;
+    background-color: rgb(99 185 68 / 0.18);
+    border-radius: 100px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+{% endstylesheet %}

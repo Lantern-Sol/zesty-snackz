@@ -1,0 +1,445 @@
+{%- doc -%}
+  "How do you want it?" purchase options — one-time purchase vs. Subscribe & Save.
+
+  Renders the selected variant's native selling plan allocations (created by
+  Appstle, which uses Shopify selling plans), so no Appstle widget markup is
+  needed. The companion purchase-options.js syncs the chosen plan into the
+  product form's hidden `selling_plan` input; the Appstle helper app embed
+  takes it from there after checkout.
+
+  Hidden automatically when the selected variant has no selling plans.
+{%- enddoc -%}
+
+{% liquid
+  assign product_resource = closest.product
+  if request.visual_preview_mode and product_resource == blank
+    assign product_resource = collections.all.products.first
+  endif
+  assign block_settings = block.settings
+  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign allocations = selected_variant.selling_plan_allocations
+%}
+
+<script
+  src="{{ 'purchase-options.js' | asset_url }}"
+  type="module"
+></script>
+
+{% if product_resource != blank and allocations.size > 0 %}
+  {% liquid
+    assign first_allocation = allocations.first
+    assign onetime_price = selected_variant.price
+    assign subscription_price = first_allocation.price
+
+    assign save_percent = 0
+    if onetime_price > 0 and subscription_price < onetime_price
+      assign price_difference = onetime_price | minus: subscription_price
+      assign save_percent = price_difference | times: 100.0 | divided_by: onetime_price | round
+    endif
+  %}
+  <purchase-options-component
+    class="purchase-options"
+    data-block-id="{{ block.id }}"
+    data-product-id="{{ product_resource.id }}"
+    data-section-id="{{ section.id }}"
+    data-mode="onetime"
+    {{ block.shopify_attributes }}
+  >
+    {% if block_settings.heading != blank %}
+      <h2 class="purchase-options__heading">{{ block_settings.heading }}</h2>
+    {% endif %}
+
+    <label class="purchase-options__onetime">
+      <input
+        class="visually-hidden purchase-options__mode-input"
+        type="radio"
+        name="purchase-mode-{{ section.id }}-{{ block.id }}"
+        value="onetime"
+        data-price="{{ onetime_price | money }}"
+        checked
+      >
+      <span class="purchase-options__radio" aria-hidden="true"></span>
+      <span class="purchase-options__label">{{ block_settings.onetime_label }}</span>
+      <span class="purchase-options__price">{{ onetime_price | money }}</span>
+    </label>
+
+    <div class="purchase-options__subscribe">
+      <label class="purchase-options__subscribe-header">
+        <input
+          class="visually-hidden purchase-options__mode-input"
+          type="radio"
+          name="purchase-mode-{{ section.id }}-{{ block.id }}"
+          value="subscribe"
+        >
+        <span class="purchase-options__radio" aria-hidden="true"></span>
+        <span class="purchase-options__label">
+          {%- if save_percent > 0 -%}
+            {{ block_settings.subscribe_label }} {{ save_percent }}%
+          {%- else -%}
+            {{ block_settings.subscribe_label }}
+          {%- endif -%}
+        </span>
+        <span class="purchase-options__price-group">
+          <span class="purchase-options__price" data-subscription-price>{{ subscription_price | money }}</span>
+          {% if subscription_price < onetime_price %}
+            <s class="purchase-options__compare-price">{{ onetime_price | money }}</s>
+          {% endif %}
+        </span>
+      </label>
+
+      <div class="purchase-options__details">
+        <div class="purchase-options__details-inner">
+          {% liquid
+            assign benefits = ''
+            if block_settings.benefit_1 != blank
+              assign benefits = block_settings.benefit_1
+            endif
+            if block_settings.benefit_2 != blank
+              assign benefits = benefits | append: '|' | append: block_settings.benefit_2
+            endif
+            if block_settings.benefit_3 != blank
+              assign benefits = benefits | append: '|' | append: block_settings.benefit_3
+            endif
+            assign benefit_list = benefits | split: '|'
+          %}
+          {% if benefit_list.size > 0 %}
+            <ul class="purchase-options__benefits">
+              {% for benefit in benefit_list %}
+                {% if benefit != blank %}
+                  <li class="purchase-options__benefit">
+                    <span class="purchase-options__check svg-wrapper" aria-hidden="true">
+                      {{- 'icon-checkmark.svg' | inline_asset_content -}}
+                    </span>
+                    {{ benefit }}
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
+
+          {% if block_settings.frequency_label != blank %}
+            <p class="purchase-options__frequency-label">{{ block_settings.frequency_label }}</p>
+          {% endif %}
+
+          <div class="purchase-options__frequencies">
+            {% for allocation in allocations %}
+              <label class="purchase-options__chip">
+                <input
+                  class="visually-hidden purchase-options__plan-input"
+                  type="radio"
+                  name="selling-plan-{{ section.id }}-{{ block.id }}"
+                  value="{{ allocation.selling_plan.id }}"
+                  data-plan-name="{{ allocation.selling_plan.name | escape }}"
+                  data-price="{{ allocation.price | money }}"
+                  {% if forloop.first %}
+                    checked
+                  {% endif %}
+                >
+                <span class="purchase-options__chip-text">{{ allocation.selling_plan.name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </purchase-options-component>
+{% endif %}
+
+{% stylesheet %}
+  .purchase-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .purchase-options__heading {
+    font-family: var(--font-heading--family);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+
+  .purchase-options__radio {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgb(var(--color-foreground-rgb) / 0.35);
+    background-color: rgb(255 255 255);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease;
+  }
+
+  .purchase-options__mode-input:checked + .purchase-options__radio {
+    border-color: currentcolor;
+  }
+
+  .purchase-options__mode-input:checked + .purchase-options__radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-selected-variant-background, #5c8dee);
+  }
+
+  .purchase-options__label {
+    font-family: var(--font-heading--family);
+    font-size: 1.0625rem;
+    line-height: 1.15;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .purchase-options__price {
+    font-family: var(--font-heading--family);
+    font-size: 1.0625rem;
+    line-height: 1;
+  }
+
+  /* Both cards share the light-blue "unselected" look; the checked one flips
+     to white-on-blue (driven by data-mode on the component). */
+  .purchase-options__onetime {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background-color: var(--color-variant-background, #e5eeff);
+    color: var(--color-foreground);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .purchase-options[data-mode='onetime'] .purchase-options__onetime {
+    background-color: var(--color-selected-variant-background, #5c8dee);
+    color: rgb(255 255 255);
+  }
+
+  .purchase-options__subscribe {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background-color: var(--color-variant-background, #e5eeff);
+    color: var(--color-foreground);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .purchase-options[data-mode='subscribe'] .purchase-options__subscribe {
+    background-color: var(--color-selected-variant-background, #5c8dee);
+    color: rgb(255 255 255);
+  }
+
+  .purchase-options__subscribe-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Radio on a blue (selected) card: white ring + white dot */
+  .purchase-options[data-mode='onetime'] .purchase-options__onetime .purchase-options__radio,
+  .purchase-options[data-mode='subscribe'] .purchase-options__subscribe .purchase-options__radio {
+    border-color: rgb(255 255 255);
+    background-color: transparent;
+  }
+
+  .purchase-options[data-mode='onetime'] .purchase-options__onetime .purchase-options__radio::after,
+  .purchase-options[data-mode='subscribe'] .purchase-options__subscribe .purchase-options__radio::after {
+    background-color: rgb(255 255 255);
+  }
+
+  .purchase-options__price-group {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .purchase-options__compare-price {
+    font-family: var(--font-heading--family);
+    font-size: 0.875rem;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .purchase-options[data-mode='subscribe'] .purchase-options__compare-price {
+    color: rgb(255 255 255 / 0.6);
+  }
+
+  /* Collapsible details: closed by default, open while subscribed */
+  .purchase-options__details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+
+  .purchase-options[data-mode='subscribe'] .purchase-options__details {
+    grid-template-rows: 1fr;
+  }
+
+  .purchase-options__details-inner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Keep collapsed content out of the tab order / accessibility tree */
+    visibility: hidden;
+    transition: visibility 0.25s;
+  }
+
+  .purchase-options[data-mode='subscribe'] .purchase-options__details-inner {
+    visibility: visible;
+  }
+
+  .purchase-options__details-inner > :first-child {
+    margin-top: 12px;
+  }
+
+  .purchase-options__benefits {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0 0;
+    padding: 0;
+  }
+
+  .purchase-options__benefit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+  }
+
+  .purchase-options__check {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: currentcolor;
+  }
+
+  .purchase-options__check svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .purchase-options__frequency-label {
+    font-family: var(--font-heading--family);
+    font-size: 0.9375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 6px 0 0;
+  }
+
+  .purchase-options__frequencies {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .purchase-options__chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 2px solid rgb(255 255 255 / 0.55);
+    color: rgb(255 255 255 / 0.9);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .purchase-options__chip:has(.purchase-options__plan-input:checked) {
+    background-color: rgb(255 255 255);
+    border-color: rgb(255 255 255);
+    color: var(--color-foreground);
+  }
+
+  .purchase-options__chip:has(.purchase-options__plan-input:focus-visible) {
+    outline: var(--focus-outline-width) solid rgb(255 255 255);
+    outline-offset: 2px;
+  }
+
+  /* Hide the injected Appstle widget wherever this block handles plan
+     selection - the Appstle helper embed still processes the cart. */
+  .product-information:has(purchase-options-component) .appstle_sub_widget,
+  .product-information:has(purchase-options-component) [id^='appstle_subscription_widget'],
+  .product-details:has(purchase-options-component) .appstle_sub_widget,
+  .product-details:has(purchase-options-component) [id^='appstle_subscription_widget'] {
+    display: none !important;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Purchase options",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows one-time purchase vs. subscription using the variant's selling plans (e.g. created by Appstle). Hidden when the selected variant has no selling plans."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "How do you want it?"
+    },
+    {
+      "type": "text",
+      "id": "onetime_label",
+      "label": "One-time purchase label",
+      "default": "One-time purchase"
+    },
+    {
+      "type": "text",
+      "id": "subscribe_label",
+      "label": "Subscription label",
+      "info": "The savings percentage is appended automatically when the plan has a discount.",
+      "default": "Subscribe & Save"
+    },
+    {
+      "type": "text",
+      "id": "benefit_1",
+      "label": "Benefit 1",
+      "default": "100% satisfaction guarantee"
+    },
+    {
+      "type": "text",
+      "id": "benefit_2",
+      "label": "Benefit 2",
+      "default": "Skip, swap or cancel anytime"
+    },
+    {
+      "type": "text",
+      "id": "benefit_3",
+      "label": "Benefit 3",
+      "default": "Free shipping on every order"
+    },
+    {
+      "type": "text",
+      "id": "frequency_label",
+      "label": "Frequency label",
+      "default": "Delivery every:"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purchase options",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
