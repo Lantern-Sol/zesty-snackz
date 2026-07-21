@@ -1224,8 +1224,12 @@
        placement (grid-area: auto) so its containing block becomes .header__row
        (position:relative, spanning the pill symmetrically) rather than its grid
        cell; inset:0 + margin:auto then centers it on both axes, aligned with the
-       icons. #header-component raises specificity above the data-menu-style rules. */
-    #header-component .header__columns .header-logo {
+       icons. The doubled class beats the (1,3,0) [data-menu-style='drawer']
+       rule above — without it, that rule's grid-area: logo re-applies on touch
+       devices (where JS sets drawer mode) and, with no 'logo' area usable by
+       an abs-positioned item, drops the logo into an implicit row below the
+       pill. */
+    #header-component .header__columns .header-logo.header-logo {
       position: absolute;
       grid-area: auto;
       inset: 0;

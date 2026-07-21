@@ -30,6 +30,11 @@
   per item: stickers/images an explicit px size, text chips a font size, and
   buttons font size + padding (width stays fit-content). 0 = fall back to the
   global mobile item scale. The engine re-collects on breakpoint change.
+
+  Performance: when every mobile-visible block is pinned, the section gets
+  .gravity-fall--static-mobile — CSS places the pinned items and the physics
+  engine (observers, rAF, collisions) never boots on mobile. Adding any
+  falling mobile-visible item automatically re-enables the engine.
 {% endcomment %}
 
 <script
@@ -44,13 +49,24 @@
   endif
 
   assign item_scale_mobile = section.settings.mobile_scale | divided_by: 100.0
+
+  # When every mobile-visible block is pinned there is nothing to simulate:
+  # the static class lets CSS place the pinned items and the engine skips
+  # booting on mobile entirely (see gravity-section.js).
+  assign all_pinned_mobile = true
+  for block in section.blocks
+    unless block.settings.hide_mobile or block.settings.pinned_mobile
+      assign all_pinned_mobile = false
+      break
+    endunless
+  endfor
 %}
 
 <div
   class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
 ></div>
 <gravity-section
-  class="gravity-fall section section--full-width spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+  class="gravity-fall section section--full-width spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}{% if all_pinned_mobile %} gravity-fall--static-mobile{% endif %}"
   style="
     {%- render 'spacing-style', settings: section.settings %};
     --gravity-height: {{ section.settings.height }}px;
@@ -96,6 +112,16 @@
     </div>
   {%- endif -%}
   {%- for block in section.blocks -%}
+    {%- liquid
+      # inline vars for the static CSS placement of mobile-pinned items
+      assign pin_vars = ''
+      if block.settings.pinned_mobile
+        assign pin_x = block.settings.position_mobile | default: block.settings.position | default: 50
+        assign pin_y = block.settings.position_y_mobile | default: block.settings.position_y | default: 50
+        assign pin_rot = block.settings.rotation_mobile | default: 0
+        assign pin_vars = ' --pin-x-mobile: ' | append: pin_x | append: '%; --pin-y-mobile: ' | append: pin_y | append: '%; --pin-rot-mobile: ' | append: pin_rot | append: 'deg;'
+      endif
+    -%}
     {%- case block.type -%}
       {%- when 'sticker' -%}
         <div
@@ -116,7 +142,7 @@
             data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
             data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
           {% endif %}
-          style="--item-size: {{ block.settings.size }}px;{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}"
+          style="--item-size: {{ block.settings.size }}px;{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}{{ pin_vars }}"
           {{ block.shopify_attributes }}
         >
           <div class="gravity-bubble{% if block.settings.style == 'bare' %} gravity-bubble--bare{% endif %}">
@@ -157,7 +183,7 @@
             data-y-mobile="{{ block.settings.position_y_mobile | default: block.settings.position_y | default: 50 }}"
             data-rotation-mobile="{{ block.settings.rotation_mobile | default: 0 }}"
           {% endif %}
-          style="--item-size: {{ block.settings.size }}px; --item-ratio: {{ image_ratio }};{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}"
+          style="--item-size: {{ block.settings.size }}px; --item-ratio: {{ image_ratio }};{% if block.settings.size_mobile > 0 %} --item-size-mobile: {{ block.settings.size_mobile }}px;{% endif %}{{ pin_vars }}"
           {{ block.shopify_attributes }}
         >
           {%- if block.settings.image != blank -%}
@@ -195,13 +221,14 @@
             {% if block.settings.text_color != blank %}--item-text-color: {{ block.settings.text_color }};{% endif %}
             {% if block.settings.chip_color != blank %}--item-chip-color: {{ block.settings.chip_color }};{% endif %}
             {% if block.settings.font_size_mobile > 0 %}--item-font-size-mobile: {{ block.settings.font_size_mobile }}px;{% endif %}
+            {{ pin_vars }}
           "
           {{ block.shopify_attributes }}
         >
           <div class="gravity-chip gravity-chip--{{ block.settings.shape }}">
             <div class="gravity-chip__text rte">{{ block.settings.text }}</div>
           </div>
-        </div> 
+        </div>
 
       {%- when 'button' -%}
         <div
@@ -226,6 +253,7 @@
             {% if block.settings.font_size_mobile > 0 %}--button-font-size-mobile: {{ block.settings.font_size_mobile }}px;{% endif %}
             {% if block.settings.padding_vertical_mobile > 0 %}--button-padding-block-mobile: {{ block.settings.padding_vertical_mobile }}px;{% endif %}
             {% if block.settings.padding_horizontal_mobile > 0 %}--button-padding-inline-mobile: {{ block.settings.padding_horizontal_mobile }}px;{% endif %}
+            {{ pin_vars }}
           "
           {{ block.shopify_attributes }}
         >
@@ -307,6 +335,18 @@
     .gravity-item--mobile-size .gravity-chip,
     .gravity-item--mobile-size .gravity-chip :is(h1, h2, h3, h4, h5, h6, p) {
       font-size: var(--item-font-size-mobile);
+    }
+
+    /* All-pinned mobile layouts skip the physics engine entirely (see
+       gravity-section.js); these rules place the pinned items instead.
+       Scoped to the static class so the engine's transform positioning is
+       never double-offset when it does run. */
+    .gravity-fall--static-mobile .gravity-item[data-pinned-mobile] {
+      top: var(--pin-y-mobile, 50%);
+      left: var(--pin-x-mobile, 50%);
+      translate: -50% -50%;
+      rotate: var(--pin-rot-mobile, 0deg);
+      transform: none;
     }
   }
 

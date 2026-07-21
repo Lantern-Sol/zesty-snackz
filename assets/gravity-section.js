@@ -40,6 +40,34 @@ const mobileMedia = window.matchMedia('(max-width: 749px)');
 class GravitySection extends HTMLElement {
   connectedCallback() {
     this.bodies = [];
+    this.staticMode = false;
+    this.engineInited = false;
+
+    this.onBreakpointChange = this.onBreakpointChange.bind(this);
+    mobileMedia.addEventListener('change', this.onBreakpointChange);
+
+    // All-pinned mobile layouts are positioned by CSS alone (see the
+    // .gravity-fall--static-mobile rules); the physics engine and all its
+    // observers never boot, so the section costs nothing on mobile.
+    if (this.isStaticLayout()) {
+      this.staticMode = true;
+      return;
+    }
+    this.initEngine();
+  }
+
+  // On mobile, a layout where every visible item is pinned has nothing to
+  // simulate. (Hidden items have no offsetParent; an empty section counts.)
+  isStaticLayout() {
+    if (!mobileMedia.matches) return false;
+    const items = [...this.querySelectorAll('[data-gravity-item]')].filter(
+      (el) => el.offsetParent !== null
+    );
+    return items.every((el) => el.hasAttribute('data-pinned-mobile'));
+  }
+
+  initEngine() {
+    this.engineInited = true;
     this.rafId = 0;
     this.running = false;
     this.started = false;
@@ -62,10 +90,18 @@ class GravitySection extends HTMLElement {
     this.resizeObserver = new ResizeObserver(() => this.onResize());
     this.resizeObserver.observe(this);
 
-    // crossing the mobile breakpoint changes which items exist/are pinned,
-    // so rebuild the simulation from the current DOM state
-    this.onBreakpointChange = this.onBreakpointChange.bind(this);
-    mobileMedia.addEventListener('change', this.onBreakpointChange);
+    // pause the physics loop while offscreen; resume (if unsettled) on return
+    this.onscreen = true;
+    this.viewObserver = new IntersectionObserver((entries) => {
+      this.onscreen = entries.some((entry) => entry.isIntersecting);
+      if (this.onscreen) {
+        if (this.started && !this.everyoneAsleep()) this.run();
+      } else {
+        this.running = false;
+        cancelAnimationFrame(this.rafId);
+      }
+    });
+    this.viewObserver.observe(this);
 
     // text items size from their content, so re-measure once webfonts land
     document.fonts?.ready?.then(() => {
@@ -108,6 +144,7 @@ class GravitySection extends HTMLElement {
     this.running = false;
     this.resizeObserver?.disconnect();
     this.intersectionObserver?.disconnect();
+    this.viewObserver?.disconnect();
     mobileMedia.removeEventListener('change', this.onBreakpointChange);
     if (this.onBlockSelect) {
       document.removeEventListener('shopify:block:select', this.onBlockSelect);
@@ -189,6 +226,22 @@ class GravitySection extends HTMLElement {
   }
 
   onBreakpointChange() {
+    // crossed INTO an all-pinned mobile layout: stop simulating and hand
+    // positioning to the static CSS rules
+    if (this.isStaticLayout()) {
+      this.enterStaticMode();
+      return;
+    }
+
+    // crossed OUT of static mode: boot (or re-arm) the engine
+    if (this.staticMode) {
+      this.staticMode = false;
+      if (!this.engineInited) {
+        this.initEngine();
+        return;
+      }
+    }
+
     this.collectBodies();
     if (reducedMotion.matches) {
       this.settleInstantly();
@@ -198,6 +251,17 @@ class GravitySection extends HTMLElement {
       this.wakeAll();
       this.run();
     }
+  }
+
+  enterStaticMode() {
+    if (this.staticMode) return;
+    this.staticMode = true;
+    this.running = false;
+    cancelAnimationFrame(this.rafId);
+    // clear engine transforms so the static CSS placement isn't double-offset
+    for (const body of this.bodies) body.el.style.transform = '';
+    this.bodies = [];
+    this.isMobileLayout = true;
   }
 
   // Deterministic jitter so the editor doesn't reshuffle on every re-render
@@ -221,7 +285,7 @@ class GravitySection extends HTMLElement {
   }
 
   run() {
-    if (this.running) return;
+    if (this.running || !this.onscreen) return;
     this.running = true;
     this.lastTime = performance.now();
     const tick = (now) => {
