@@ -158,7 +158,14 @@
         this.originals = Array.from(this.disc.children);
         this.handleResize = () => {
           clearTimeout(this.resizeTimer);
-          this.resizeTimer = setTimeout(() => this.layout(), 150);
+          this.resizeTimer = setTimeout(() => {
+            // Mobile browsers fire resize when the URL bar collapses/expands
+            // while scrolling — a height-only change. Relaying out would
+            // restart the spin animation, and the arc geometry only depends
+            // on width, so skip those.
+            if (window.innerWidth === this.layoutWidth) return;
+            this.layout();
+          }, 150);
         };
         window.addEventListener('resize', this.handleResize);
         requestAnimationFrame(() => this.layout());
@@ -170,6 +177,8 @@
       }
 
       layout() {
+        this.layoutWidth = window.innerWidth;
+
         // Pick the radius for the current viewport; layout() reruns on resize,
         // so crossing the breakpoint re-resolves it. The CSS transforms read
         // --arc-radius, so the inline value set here must stay in sync with

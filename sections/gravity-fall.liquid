@@ -348,6 +348,17 @@
       rotate: var(--pin-rot-mobile, 0deg);
       transform: none;
     }
+
+    /* Abs-positioned fit-content items shrink to the space right of their
+       `left` offset, wrapping chip/button text. max-content sizes them to
+       their content like the engine's transform placement did; the cap keeps
+       long unbroken text wrapping at the section width. Circles and images
+       keep their explicit widths. */
+    .gravity-fall--static-mobile .gravity-item--text[data-pinned-mobile],
+    .gravity-fall--static-mobile .gravity-item--button[data-pinned-mobile] {
+      width: max-content;
+      max-width: 100%;
+    }
   }
 
   .gravity-item {
