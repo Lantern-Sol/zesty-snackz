@@ -2363,8 +2363,8 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>Bundles auto-enroll in the subscription. Cancel anytime, coward.</p>",
-                "mobile_text": "<p>Bundles auto-enroll in the subscription. <br/>Cancel anytime, coward.</p>",
+                "text": "<p>Bundles auto-enroll in the subscription. Cancel anytime!</p>",
+                "mobile_text": "<p>Bundles auto-enroll in the subscription. <br/>Cancel anytime!</p>",
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "center",
