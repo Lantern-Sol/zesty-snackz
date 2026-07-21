@@ -648,7 +648,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<p>Sour candy re-engineered by two guys with a boat, a camera, and millions of witnesses. Sliced paper-thin so it hits hard and never gets stuck in your teeth.</p>",
+            "text": "<p>Snackz re-engineered by a group of friends with a camera and millions of witnesses. Sliced paper-thin so it hits hard and never gets stuck in your teeth.</p>",
             "mobile_text": "",
             "width": "100%",
             "max_width": "normal",
@@ -926,7 +926,7 @@
             "image_i3RRQH": {
               "type": "image",
               "settings": {
-                "image": "shopify://shop_images/eb2f3b030b1b936adf47931ed0dcc7fd084e8411.webp",
+                "image": "shopify://shop_images/A55089B3-005D-4F55-B651-91627D1646E8.png",
                 "link": "shopify://products/cherry",
                 "hide_on_mobile": false,
                 "hide_on_desktop": false,
@@ -1058,7 +1058,7 @@
           "type": "text",
           "name": "t:names.heading",
           "settings": {
-            "text": "<h4>Find Us In Stores</h4>",
+            "text": "<h4>Find Us In some Stores...</h4>",
             "mobile_text": "",
             "width": "100%",
             "max_width": "normal",
