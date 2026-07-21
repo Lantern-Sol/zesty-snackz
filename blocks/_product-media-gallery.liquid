@@ -12,6 +12,9 @@
   assign selected_variant_media = selected_product.selected_or_first_available_variant.featured_media
   assign first_3d_model = selected_product.media | where: 'media_type', 'model' | first
 
+  # Same media background the product cards use (custom.color_light metafield)
+  assign media_metafield_background = selected_product.metafields.custom.color_light.value
+
   if block_settings.hide_variants
     assign variant_images = selected_product.images | where: 'attached_to_variant?', true | map: 'src'
   endif
@@ -285,8 +288,11 @@
     {% if block_settings.extend_media %}
       media-gallery--extend
     {% endif %}
+    {% if media_metafield_background != blank %}
+      media-gallery--tinted
+    {% endif %}
   "
-  style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}"
+  style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}{% if media_metafield_background != blank %} --media-metafield-background: {{ media_metafield_background }}; --card-media-background: {{ media_metafield_background }};{% endif %}"
   data-presentation="{{ block_settings.media_presentation }}"
   {{ block.shopify_attributes }}
 >
@@ -570,6 +576,27 @@
 </media-gallery>
 
 {% stylesheet %}
+  /* Media background pulled from the product's custom.color_light metafield —
+     same treatment as the product cards' card-gallery background. Excludes the
+     zoomed gallery dialog, which stays on white. */
+  .media-gallery--tinted :not(.dialog-zoomed-gallery) > .product-media-container {
+    background-color: var(--media-metafield-background, transparent);
+    border-radius: var(--media-radius, 0);
+    overflow: clip;
+    padding: 20px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .media-gallery--tinted :not(.dialog-zoomed-gallery) > .product-media-container {
+      padding: 32px;
+    }
+  }
+
+  .media-gallery--tinted .slideshow-controls__thumbnail {
+    background-color: var(--media-metafield-background, transparent);
+    padding: 4px;
+  }
+
   .dialog-zoomed-gallery {
     cursor: zoom-out;
   }
