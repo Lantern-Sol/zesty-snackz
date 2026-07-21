@@ -412,6 +412,22 @@
     cursor: grabbing;
   }
 
+  /* Touch: leave vertical pans to the browser so visitors can scroll past
+     the section — horizontal drags still grab and throw items. Static-mobile
+     layouts have no engine, so nothing is draggable at all. */
+  @media screen and (max-width: 749px) {
+    gravity-section[data-drag] .gravity-item {
+      touch-action: pan-y;
+    }
+
+    gravity-section[data-drag].gravity-fall--static-mobile .gravity-item {
+      touch-action: auto;
+      cursor: auto;
+      user-select: auto;
+      -webkit-user-select: auto;
+    }
+  }
+
   /* Pinned items: the engine owns the wrapper transform, so the entrance
      wobble and hover tilt live on the inner element where they compose
      with the pinned rotation */
