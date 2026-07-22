@@ -12,6 +12,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["shopify", "theme", "dev", "--store", "d07ecc-e6", "--port", "9294"],
       "port": 9294
+    },
+    {
+      "name": "shopify-theme-dev-4",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["shopify", "theme", "dev", "--store", "d07ecc-e6", "--port", "9295"],
+      "port": 9295
     }
   ]
 }

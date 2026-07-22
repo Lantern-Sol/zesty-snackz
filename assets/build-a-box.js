@@ -118,6 +118,12 @@ class BuildABoxSection extends Component {
    * @type {number | null}
    */
   #bundleSellingPlanId = null;
+  /**
+   * Signature of the boat cargo currently painted, so the pop-in animation only
+   * replays when the set of products changes — not on every quantity step.
+   * @type {string}
+   */
+  #boatSig = '';
 
   get minQty() {
     return Number(this.dataset.minQty) || 3;
@@ -460,6 +466,9 @@ class BuildABoxSection extends Component {
       el.toggleAttribute('data-reached', total >= qty);
     });
 
+    // Boat banner cargo: stack the selected product images into the hull.
+    this.#renderBoat(items);
+
     // Picks strips (inline + floating). Empty slots pad up to the next tier.
     const targetQty = next ? next.quantity : this.maxQty;
     const emptySlots = Math.max(targetQty - total, 0);
@@ -501,6 +510,43 @@ class BuildABoxSection extends Component {
     });
     this.#syncFloatVisibility();
   };
+
+  /**
+   * Fill the boat banner's cargo well with the selected products' main images.
+   * One chip per distinct product (newest last) so the boat visibly "loads up"
+   * as the shopper picks flavours; a "+N" chip absorbs any overflow beyond the
+   * well's capacity. Only re-renders when the product set changes so the pop-in
+   * animation doesn't replay on every quantity step.
+   *
+   * @param {Array<Record<string, any>>} items
+   */
+  #renderBoat(items) {
+    const cargo = this.querySelector('[data-bab-boat-cargo]');
+    if (!(cargo instanceof HTMLElement)) return;
+
+    const MAX_CHIPS = 6;
+    const withImage = items.filter((item) => item.image);
+    const shown = withImage.slice(0, MAX_CHIPS);
+    const overflow = withImage.length - shown.length;
+
+    const sig = `${shown.map((i) => i.variant_id).join(',')}|${overflow}`;
+    if (sig === this.#boatSig) return;
+    this.#boatSig = sig;
+
+    const chips = shown.map(
+      (item, index) => `
+        <div class="bab-cargo" style="--pick-accent: ${escapeAttr(item.accent || '')}; z-index: ${index + 1};">
+          <img src="${escapeAttr(item.image)}" alt="" loading="lazy">
+        </div>
+      `
+    );
+    if (overflow > 0) {
+      chips.push(
+        `<div class="bab-cargo bab-cargo--more" style="z-index: ${shown.length + 1};">+${overflow}</div>`
+      );
+    }
+    cargo.innerHTML = chips.join('');
+  }
 
   /**
    * @param {Array<Record<string, any>>} items

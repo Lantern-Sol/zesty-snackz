@@ -60,10 +60,16 @@
         "tier_4"
       ],
       "settings": {
-        "appstle_bundle_handle": "elmxoqxy",
+        "banner_title": "Subscribe now for your chance to win.",
+        "banner_perk_1": "Take home the boat of your dreams.",
+        "banner_perk_2": "Free Zesty Bitez delivered for an entire year.",
+        "banner_perk_3": "Own the most exclusive Zesty merch ever made.",
+        "boat_image": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_at_07_06_04_PM_1.webp",
         "plan_group_name": "Single Bag Plans",
+        "single_variant_title": "1 Pack",
         "max_products": 24,
         "mobile_initial_products": 6,
+        "appstle_bundle_handle": "elmxoqxy",
         "enable_subscribe": true,
         "subscribe_default_on": true,
         "subscribe_title": "SUBSCRIBE & SAVE",
@@ -75,7 +81,6 @@
         "card_cta_label": "ADD TO BUNDLE +",
         "cta_label": "ADD TO CART",
         "see_more_label": "SEE MORE",
-        "sour_label": "SOUR",
         "float_title": "PACKS SELECTED",
         "float_details_label": "[See details]",
         "accent_color": "#5b8def",
@@ -90,9 +95,83 @@
         "padding-inline-start": 0,
         "padding-inline-end": 0
       }
+    },
+    "blocks_9jRB9K": {
+      "type": "_blocks",
+      "blocks": {
+        "judge_me_reviews_cards_carousel_P7qPnX": {
+          "type": "shopify://apps/judge-me-reviews/blocks/cards_carousel/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {
+            "show_sample_reviews": true,
+            "reviews_selection": "all",
+            "products": [],
+            "star_rating": "all",
+            "show_review_media": true,
+            "display_order": "media_first",
+            "no_image_fallback": "review_text_only",
+            "max_reviews": 20,
+            "review_length": "medium",
+            "text_size": "medium",
+            "image_ratio": "1",
+            "reviews_shown": 4,
+            "show_reviewer_name": true,
+            "show_product_name": true,
+            "hide_arrows_mobile": true,
+            "arrows_position": "sides",
+            "max_width": 1100,
+            "corner_styling": "soft",
+            "header_text_color": "#000000",
+            "text_color": "#000000",
+            "card_color": "#f9f9f9",
+            "stars_color": "",
+            "arrows_color": "#000000",
+            "transition_speed": 5,
+            "header_text": "Our customers can't get enough",
+            "show_average_rating": true,
+            "rating_display": "default"
+          }
+        },
+        "judge_me_reviews_medals_HydQ6p": {
+          "type": "shopify://apps/judge-me-reviews/blocks/medals/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "judge_me_reviews_cards_carousel_P7qPnX",
+        "judge_me_reviews_medals_HydQ6p"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 60,
+        "padding-block-end": 100
+      }
     }
   },
   "order": [
-    "build_a_box"
+    "build_a_box",
+    "blocks_9jRB9K"
   ]
 }

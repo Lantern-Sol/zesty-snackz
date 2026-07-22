@@ -76,11 +76,94 @@
 
   <div class="bab__top">
     <div class="bab__main">
-      {%- if section.settings.banner_image != blank -%}
-        <div class="bab__banner">
-          {{ section.settings.banner_image | image_url: width: 1600 | image_tag: class: 'bab__banner-image', alt: section.settings.banner_image.alt }}
+      {%- liquid
+        # Boat banner: a layered, gently-rocking scene (topo → back water → boat
+        # → front water) whose cargo well is filled at runtime with the shopper's
+        # selected product images (see build-a-box.js #renderBoat). Each layer can
+        # be overridden in the editor; otherwise the bundled Figma assets are used.
+        assign topo_src = 'bab-boat-topo.png' | asset_url
+        if section.settings.topo_image != blank
+          assign topo_src = section.settings.topo_image | image_url: width: 1600
+        endif
+        assign water_back_src = 'bab-boat-water-back.png' | asset_url
+        if section.settings.water_back_image != blank
+          assign water_back_src = section.settings.water_back_image | image_url: width: 1600
+        endif
+        assign water_front_src = 'bab-boat-water-front.png' | asset_url
+        if section.settings.water_front_image != blank
+          assign water_front_src = section.settings.water_front_image | image_url: width: 1600
+        endif
+        assign boat_src = 'bab-boat.png' | asset_url
+        if section.settings.boat_image != blank
+          assign boat_src = section.settings.boat_image | image_url: width: 820
+        endif
+      -%}
+      <div class="bab__banner" data-bab-boat-scene style="--bab-badge: url('{{ 'bab-badge.svg' | asset_url }}');">
+        <div class="bab__scene">
+          <div class="bab__scene-topo" style="background-image: url('{{ topo_src }}');"></div>
+
+          <img
+            class="bab__scene-water bab__scene-water--back"
+            src="{{ water_back_src }}"
+            alt=""
+            role="presentation"
+            width="798"
+            height="151"
+            loading="lazy"
+          >
+
+          <div class="bab__boat" data-bab-boat>
+            <img
+              class="bab__boat-img"
+              src="{{ boat_src }}"
+              alt=""
+              role="presentation"
+              width="410"
+              height="216"
+              loading="lazy"
+            >
+            <div class="bab__boat-cargo" data-bab-boat-cargo aria-hidden="true"></div>
+          </div>
+
+          <img
+            class="bab__scene-water bab__scene-water--front"
+            src="{{ water_front_src }}"
+            alt=""
+            role="presentation"
+            width="798"
+            height="63"
+            loading="lazy"
+          >
         </div>
-      {%- endif -%}
+
+        {%- if section.settings.banner_title != blank or section.settings.banner_perk_1 != blank -%}
+          <div class="bab__scene-copy">
+            {%- if section.settings.banner_title != blank -%}
+              <p class="bab__scene-title">{{ section.settings.banner_title }}</p>
+            {%- endif -%}
+            <ul class="bab__scene-perks" role="list">
+              {%- for i in (1..3) -%}
+                {%- liquid
+                  case i
+                    when 1
+                      assign perk = section.settings.banner_perk_1
+                    when 2
+                      assign perk = section.settings.banner_perk_2
+                    when 3
+                      assign perk = section.settings.banner_perk_3
+                  endcase
+                -%}
+                {%- if perk != blank -%}
+                  <li class="bab__scene-perk">
+                    <span class="bab__scene-perk-num">{{ i }}</span>
+                    <span class="bab__scene-perk-text">{{ perk }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
 
       {% comment %} Tier selector {% endcomment %}
       <div class="bab__tiers" data-bab-tier-list role="list">
@@ -322,13 +405,13 @@
             echo ']'
           endcapture
 
-          assign sourness = product.metafields.custom.flavor_sourness.value
+          assign sour_level = product.metafields.custom.sour_level.value
           assign card_badge = product.metafields.custom.card_badge.value
         -%}
         <div
           class="bab-card"
           data-bab-card
-          style="--pc-accent: {{ card_accent }};"
+          style="--pc-accent: {{ card_accent }}; --card-accent: {{ card_accent }};"
           {% if shown > section.settings.mobile_initial_products %}
             data-bab-overflow
           {% endif %}
@@ -337,17 +420,26 @@
             {%- if product.featured_media -%}
               {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', class: 'bab-card__image', widths: '300, 450, 600' }}
             {%- endif -%}
-            {%- if sourness != blank -%}
-              {%- assign dots = sourness | plus: 12 | divided_by: 25 -%}
-              <span class="bab-card__sour">
-                {{ section.settings.sour_label | default: 'SOUR' }}
-                {%- for i in (1..4) -%}
-                  {%- if i <= dots %}&#9679;{% else %}&#9675;{% endif -%}
-                {%- endfor -%}
-              </span>
+            {%- comment -%} Sour meter + card badge — shared with the storefront product cards (blocks/_product-card-gallery.liquid + snippets/product-badges-styles). {%- endcomment -%}
+            {%- if sour_level != blank and sour_level > 0 -%}
+              <div class="sour-meter" aria-label="{{ 'content.sour_level' | t: level: sour_level }}">
+                <span class="sour-meter__label">{{ 'content.sour_label' | t }}</span>
+                <span class="sour-meter__dots" aria-hidden="true">
+                  {%- for i in (1..4) -%}
+                    <span class="sour-meter__dot{% if i <= sour_level %} sour-meter__dot--filled{% endif %}"></span>
+                  {%- endfor -%}
+                </span>
+              </div>
             {%- endif -%}
             {%- if card_badge != blank -%}
-              <span class="bab-card__flag">{{ card_badge }}</span>
+              <div
+                class="product-badges product-badges--{{ settings.badge_position }}"
+                style="--badge-border-radius: {{ settings.badge_corner_radius }}px; --badge-font-family: var(--font-{{ settings.badge_font_family }}--family); --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight); --badge-text-transform: {{ settings.badge_text_transform }};"
+              >
+                <div class="product-badges__badge product-badges__badge--rectangle product-badges__badge--{{ card_badge | handleize }}">
+                  {{ card_badge }}
+                </div>
+              </div>
             {%- endif -%}
           </div>
           <div class="bab-card__info">
@@ -423,6 +515,9 @@
   </div>
 </build-a-box-section>
 
+{%- comment -%} Shared card-badge styles (fan-fave / chaos-pick colour variants, positioning). {%- endcomment -%}
+{% render 'product-badges-styles' %}
+
 {% stylesheet %}
   .section-build-a-box {
     --bab-navy: #0b1b2b;
@@ -432,6 +527,12 @@
     --bab-body-font: var(--font-body--family);
 
     color: var(--bab-navy);
+
+    /* Query container so the layout responds to the section's own width — not
+       just the viewport — and reflows correctly when the cart drawer opens and
+       squeezes the page. */
+    container-type: inline-size;
+    container-name: babwrap;
   }
 
   .section-build-a-box .bab__top {
@@ -449,18 +550,241 @@
     min-width: 0;
   }
 
-  /* --- Banner ------------------------------------------------------------- */
+  /* --- Banner: rocking boat scene ----------------------------------------- */
+  /* The scene keeps the Figma artboard's 798×216 ratio at any width; every
+     layer is positioned as a % of that box and text scales with container
+     query units (cqw), so the composition is pixel-faithful at any size. */
   .section-build-a-box .bab__banner {
-    border-radius: 30px;
-    overflow: hidden;
-    height: 216px;
+    position: relative;
+    width: 100%;
+    container-type: inline-size;
   }
 
-  .section-build-a-box .bab__banner-image {
+  .section-build-a-box .bab__scene {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 798 / 216;
+    border-radius: 30px;
+    overflow: hidden;
+    background-color: #dff1d8;
+    isolation: isolate;
+  }
+
+  .section-build-a-box .bab__scene-topo {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 1;
+  }
+
+  .section-build-a-box .bab__scene-water {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Back water starts 65/216 down; front wave lip at 153/216. */
+  .section-build-a-box .bab__scene-water--back {
+    top: 30.09%;
+    z-index: 2;
+    animation: bab-water-back 6.5s ease-in-out infinite;
+  }
+
+  .section-build-a-box .bab__scene-water--front {
+    top: 70.83%;
+    z-index: 4;
+    animation: bab-water-front 5s ease-in-out infinite;
+  }
+
+  /* Boat box = 410/798 wide, offset 288/798 from the left, full scene height. */
+  .section-build-a-box .bab__boat {
+    position: absolute;
+    left: 36.09%;
+    top: 0;
+    width: 51.38%;
+    height: 100%;
+    z-index: 3;
+    transform-origin: 50% 82%;
+    animation: bab-boat-rock 4.2s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .section-build-a-box .bab__boat-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Cargo well: selected product images stack down inside the hull bowl, so
+     they read as snacks loaded into the boat (the front wave laps their base). */
+  .section-build-a-box .bab__boat-cargo {
+    position: absolute;
+    left: 25%;
+    right: 20%;
+    bottom: 27%;
+    height: 34%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .section-build-a-box .bab-cargo {
+    position: relative;
+    flex: 0 0 auto;
+    width: 15%;
+    aspect-ratio: 1;
+    margin-inline: -2.4%;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0.3cqw 0.8cqw rgba(11, 27, 43, 0.3);
+    overflow: hidden;
+    border: 0.35cqw solid #fff;
+    animation: bab-cargo-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .section-build-a-box .bab-cargo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  .section-build-a-box .bab-cargo--more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b1b2b;
+    color: #fff;
+    font-family: var(--bab-heading-font);
+    font-size: 4cqw;
+    line-height: 1;
+  }
+
+  /* --- Banner copy panel --------------------------------------------------- */
+  .section-build-a-box .bab__scene-copy {
+    position: absolute;
+    left: 0.9%;
+    top: 3.7%;
+    width: 30%;
+    height: 92.6%;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75cqw;
+    padding: 2.6cqw 1.6cqw 1.9cqw;
+    background: #0b1b2b;
+    border: 2px dashed #fff;
+    border-radius: 3.25cqw;
+  }
+
+  .section-build-a-box .bab__scene-title {
+    margin: 0;
+    align-self: flex-start;
+    font-family: var(--bab-heading-font);
+    font-weight: 400;
+    font-size: 4cqw;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .section-build-a-box .bab__scene-perks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75cqw;
+    width: 100%;
+  }
+
+  .section-build-a-box .bab__scene-perk {
+    display: flex;
+    align-items: center;
+    gap: 0.7cqw;
+  }
+
+  .section-build-a-box .bab__scene-perk-num {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 3.6cqw;
+    height: 3.6cqw;
+    background: var(--bab-badge, #63b944) center / contain no-repeat;
+    border-radius: 50%;
+    font-family: var(--bab-heading-font);
+    font-weight: 400;
+    font-size: 1.85cqw;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .section-build-a-box .bab__scene-perk-text {
+    font-family: var(--bab-body-font);
+    font-size: 1.5cqw;
+    line-height: 1.15;
+    color: #fff;
+  }
+
+  /* --- Banner animations --------------------------------------------------- */
+  @keyframes bab-boat-rock {
+    0%,
+    100% {
+      transform: translateY(0.6%) rotate(-1.5deg);
+    }
+    50% {
+      transform: translateY(-1.6%) rotate(1.5deg);
+    }
+  }
+
+  @keyframes bab-water-back {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(0.7%);
+    }
+  }
+
+  @keyframes bab-water-front {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1%);
+    }
+  }
+
+  @keyframes bab-cargo-pop {
+    from {
+      transform: translateY(30%) scale(0.4);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-build-a-box .bab__boat,
+    .section-build-a-box .bab__scene-water,
+    .section-build-a-box .bab-cargo {
+      animation: none !important;
+    }
   }
 
   /* --- Tier selector ------------------------------------------------------ */
@@ -982,31 +1306,62 @@
     object-fit: contain;
   }
 
-  .section-build-a-box .bab-card__sour {
+  /* Sour meter — mirrors the storefront product cards
+     (blocks/_product-card-gallery.liquid). Kept in sync intentionally. */
+  .section-build-a-box .sour-meter {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: var(--pc-accent, var(--bab-accent));
-    color: #fff;
-    font-family: var(--bab-heading-font);
-    font-size: 12px;
-    letter-spacing: -0.01em;
-    padding: 5px 10px 6px;
-    border-radius: 999px;
+    top: var(--padding-sm);
+    left: var(--padding-sm);
+    z-index: var(--layer-flat);
+    display: flex;
+    align-items: start;
+    gap: var(--gap-2xs);
+    padding: 0.3125rem 0.625rem 0.05rem;
+    background-color: var(--card-accent, var(--color-foreground));
+    border-radius: 100px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
   }
 
-  .section-build-a-box .bab-card__flag {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--bab-cta-bg);
-    color: var(--bab-navy);
-    font-family: var(--bab-heading-font);
-    font-size: 12px;
-    letter-spacing: -0.01em;
-    padding: 5px 10px 6px;
-    border-radius: 999px;
-    max-width: 45%;
+  .section-build-a-box .sour-meter__label {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(255 255 255);
+    line-height: 1;
+  }
+
+  .section-build-a-box .sour-meter__dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1875rem;
+  }
+
+  .section-build-a-box .sour-meter__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 1.5px solid rgb(255 255 255);
+  }
+
+  .section-build-a-box .sour-meter__dot--filled {
+    background-color: rgb(255 255 255);
+  }
+
+  @media only screen and (max-width: 749px) {
+    .section-build-a-box .sour-meter {
+      padding: 0.25rem 0.5rem 0.125rem;
+      gap: 0.125rem;
+    }
+
+    .section-build-a-box .sour-meter__label {
+      font-size: 0.625rem;
+    }
+
+    .section-build-a-box .sour-meter__dots {
+      gap: 0.1rem;
+    }
   }
 
   .section-build-a-box .bab-card__info {
@@ -1212,6 +1567,107 @@
   }
 
   /* --- Mobile ------------------------------------------------------------- */
+  /* Container-driven reflow: when the section itself gets narrow — a small
+     screen OR the cart drawer squeezing the page — collapse the two-column
+     layout so the boat banner and content keep full width instead of being
+     crushed into a sliver. Mirrors the viewport breakpoints below. */
+  @container babwrap (max-width: 900px) {
+    .section-build-a-box .bab__top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .section-build-a-box .bab__rail {
+      position: static;
+      order: 3;
+    }
+
+    .section-build-a-box .bab__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  /* Boat banner layout switches on the banner's OWN width (it is a container),
+     so it adopts the compact overlay whether the page is a phone or the cart
+     drawer has narrowed it. Below ~600px the copy panel goes in-flow (driving
+     the banner height) with the boat floating at the lower-right waterline. */
+  @container (max-width: 600px) {
+    .section-build-a-box .bab__scene {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* Widen + centre the water so it always spans the full banner. max-width
+       must be reset — the theme's global `img { max-width: 100% }` otherwise
+       clamps this back to 100%, which (with the negative offset) left the right
+       side of the scene bare. */
+    .section-build-a-box .bab__scene-water--back,
+    .section-build-a-box .bab__scene-water--front {
+      top: auto;
+      bottom: 0;
+      left: -25%;
+      width: 150%;
+      max-width: none;
+    }
+
+    .section-build-a-box .bab__boat {
+      left: auto;
+      top: auto;
+      right: -1%;
+      bottom: 15%;
+      width: 48%;
+      height: auto;
+      transform-origin: 55% 78%;
+    }
+
+    .section-build-a-box .bab__boat-img {
+      position: static;
+      width: 100%;
+      height: auto;
+    }
+
+    .section-build-a-box .bab__scene-copy {
+      position: relative;
+      z-index: 2;
+      width: 60%;
+      height: auto;
+      margin: 12px 0 12px 12px;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 7px;
+      padding: 13px 14px 14px;
+      border-radius: 18px;
+    }
+
+    .section-build-a-box .bab__scene-title {
+      font-size: clamp(15px, 5.6cqw, 22px);
+      line-height: 1;
+    }
+
+    .section-build-a-box .bab__scene-perks {
+      gap: 7px;
+    }
+
+    .section-build-a-box .bab__scene-perk {
+      gap: 7px;
+      align-items: flex-start;
+    }
+
+    .section-build-a-box .bab__scene-perk-num {
+      width: clamp(18px, 6.5cqw, 24px);
+      height: clamp(18px, 6.5cqw, 24px);
+      font-size: clamp(10px, 3.4cqw, 13px);
+    }
+
+    .section-build-a-box .bab__scene-perk-text {
+      font-size: clamp(10.5px, 3.5cqw, 13px);
+      line-height: 1.15;
+    }
+  }
+
   @media screen and (max-width: 989px) {
     .section-build-a-box .bab__top {
       grid-template-columns: minmax(0, 1fr);
@@ -1229,11 +1685,6 @@
   }
 
   @media screen and (max-width: 749px) {
-    .section-build-a-box .bab__banner {
-      height: auto;
-      aspect-ratio: 2 / 1;
-    }
-
     .section-build-a-box .bab__tiers {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 6px;
@@ -1440,15 +1891,60 @@
       "content": "Content"
     },
     {
+      "type": "header",
+      "content": "Boat banner",
+      "info": "A gently-rocking boat that fills with the shopper's selected snack images as they build their box. Leave the image overrides empty to use the built-in artwork."
+    },
+    {
+      "type": "text",
+      "id": "banner_title",
+      "label": "Banner title",
+      "default": "Subscribe now for your chance to win."
+    },
+    {
+      "type": "text",
+      "id": "banner_perk_1",
+      "label": "Perk 1",
+      "default": "Take home the boat of your dreams."
+    },
+    {
+      "type": "text",
+      "id": "banner_perk_2",
+      "label": "Perk 2",
+      "default": "Free Zesty Bitez delivered for an entire year."
+    },
+    {
+      "type": "text",
+      "id": "banner_perk_3",
+      "label": "Perk 3",
+      "default": "Own the most exclusive Zesty merch ever made."
+    },
+    {
       "type": "image_picker",
-      "id": "banner_image",
-      "label": "Banner image"
+      "id": "boat_image",
+      "label": "Boat image",
+      "info": "Transparent PNG of the empty boat. Selected product images stack in its cargo well."
+    },
+    {
+      "type": "image_picker",
+      "id": "water_back_image",
+      "label": "Back water layer"
+    },
+    {
+      "type": "image_picker",
+      "id": "water_front_image",
+      "label": "Front wave layer"
+    },
+    {
+      "type": "image_picker",
+      "id": "topo_image",
+      "label": "Background texture"
     },
     {
       "type": "text",
       "id": "plan_group_name",
       "label": "Appstle plan group",
-      "info": "Products come straight from the Build-a-Box: any product whose single-bag variant is in this Appstle selling plan group appears in the grid. Cards use product metafields: custom.color, custom.card_flavor_notes, custom.flavor_sourness, custom.card_badge.",
+      "info": "Products come straight from the Build-a-Box: any product whose single-bag variant is in this Appstle selling plan group appears in the grid. Cards use product metafields: custom.color, custom.card_flavor_notes, custom.sour_level, custom.card_badge.",
       "default": "Single Bag Plans"
     },
     {
@@ -1556,12 +2052,6 @@
       "id": "see_more_label",
       "label": "See more label",
       "default": "SEE MORE"
-    },
-    {
-      "type": "text",
-      "id": "sour_label",
-      "label": "Sour badge label",
-      "default": "SOUR"
     },
     {
       "type": "text",
