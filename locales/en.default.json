@@ -172,6 +172,8 @@
     "cart_estimated_total": "Estimated total",
     "cart_title": "Cart",
     "cart_subtotal": "Subtotal",
+    "one_time_purchase": "One-time purchase",
+    "delivery_frequency": "Delivery frequency",
     "cart_total": "Cart total",
     "checkout": "Check out",
     "collection_placeholder": "Collection title",

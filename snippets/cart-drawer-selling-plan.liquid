@@ -1,0 +1,79 @@
+{% doc %}
+  Cart Drawer Selling Plan Selector
+
+  Renders the delivery-frequency pill for a cart line as a native <select>
+  wrapped in a <cart-line-selling-plan> element (see cart-drawer-extras.js).
+  Options come from the product's selling plan groups, so any app that
+  registers standard selling plans (e.g. Appstle) is supported automatically.
+
+  Renders nothing when the product has no selling plan groups.
+
+  @param {object} item - The cart line item.
+{% enddoc %}
+
+{%- liquid
+  assign plan_allocations = item.variant.selling_plan_allocations
+  assign current_plan_id = ''
+  if item.selling_plan_allocation
+    assign current_plan_id = item.selling_plan_allocation.selling_plan.id
+  endif
+-%}
+
+{%- if plan_allocations.size > 0 -%}
+  <cart-line-selling-plan
+    class="cart-line-plan"
+    data-line="{{ item.index | plus: 1 }}"
+    data-key="{{ item.key }}"
+    data-quantity="{{ item.quantity }}"
+    data-current="{{ current_plan_id }}"
+  >
+    <label
+      class="visually-hidden"
+      for="CartLinePlan-{{ item.index }}"
+    >
+      {{- 'content.delivery_frequency' | t -}}
+    </label>
+    <select
+      id="CartLinePlan-{{ item.index }}"
+      class="cart-line-plan__select"
+    >
+      {%- unless item.product.requires_selling_plan -%}
+        <option
+          value=""
+          {% if current_plan_id == '' or current_plan_id == blank %}
+            selected
+          {% endif %}
+        >
+          {{ 'content.one_time_purchase' | t }}
+        </option>
+      {%- endunless -%}
+      {%- liquid
+        # Dedupe: multiple groups can allocate the same selling plan to a variant.
+        assign seen_plan_ids = ''
+      -%}
+      {%- for allocation in plan_allocations -%}
+        {%- liquid
+          assign plan = allocation.selling_plan
+          assign plan_id_string = plan.id | append: ''
+          assign seen_check = ',' | append: seen_plan_ids | append: ','
+          assign plan_id_token = ',' | append: plan_id_string | append: ','
+          if seen_check contains plan_id_token
+            continue
+          endif
+          assign seen_plan_ids = seen_plan_ids | append: ',' | append: plan_id_string
+        -%}
+        <option
+          value="{{ plan.id }}"
+          {% if plan.id == current_plan_id %}
+            selected
+          {% endif %}
+        >
+          {{ plan.name }}
+        </option>
+      {%- endfor -%}
+    </select>
+    <span class="cart-line-plan__chevron svg-wrapper">
+      {{- 'icon-caret.svg' | inline_asset_content -}}
+    </span>
+  </cart-line-selling-plan>
+{%- endif -%}

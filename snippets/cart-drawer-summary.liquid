@@ -1,0 +1,70 @@
+{% doc %}
+  Cart Drawer Summary
+
+  Dark sticky footer for the redesigned cart drawer: subtotal (pre-discount),
+  cart-level discount rows, tax note, checkout button carrying the payable
+  total, and a trust line. The checkout button submits the #cart-form in
+  cart-drawer-line-items.liquid. `ref="cartTotal"` stays on the total
+  text-component so component-cart-items.js can shimmer it during updates.
+{% enddoc %}
+
+{%- liquid
+  assign subtotal = cart.original_total_price
+  assign total = cart.total_price | money
+-%}
+
+<div class="cart-drawer-summary__totals">
+  <div class="cart-drawer-summary__subtotal">
+    <span>{{ 'content.cart_subtotal' | t }}</span>
+    <span data-testid="cart-subtotal-value">{{ subtotal | money }}</span>
+  </div>
+
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    <ul
+      class="cart-drawer-summary__discounts list-unstyled"
+      role="list"
+      aria-label="{{ 'content.discounts' | t }}"
+    >
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <li class="cart-drawer-summary__discount">
+          <span class="cart-drawer-summary__discount-label">
+            {{- 'icon-discount.svg' | inline_asset_content -}}
+            {{ discount.title | escape }}
+          </span>
+          <span>-{{ discount.total_allocated_amount | money }}</span>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <div class="cart-drawer-summary__tax-note">
+    {% render 'tax-info', has_discounts_enabled: false %}
+  </div>
+</div>
+
+<button
+  type="submit"
+  id="checkout"
+  class="cart-drawer-summary__checkout"
+  name="checkout"
+  form="cart-form"
+  {% if cart == empty %}
+    disabled
+  {% endif %}
+>
+  <span class="button-text">
+    {{ 'content.checkout' | t }} –
+    <text-component
+      ref="cartTotal"
+      value="{{ total | strip_html }}"
+      data-testid="cart-total-value"
+      data-cart-subtotal
+    >
+      {{- total -}}
+    </text-component>
+  </span>
+</button>
+
+{%- if settings.cart_trust_text != blank -%}
+  <p class="cart-drawer-summary__trust">{{ settings.cart_trust_text }}</p>
+{%- endif -%}

@@ -2752,15 +2752,53 @@
         "visible_if": "{{ settings.cart_free_shipping_enabled == true }}"
       },
       {
+        "type": "text",
+        "id": "cart_free_shipping_text",
+        "label": "Progress message",
+        "info": "Use [amount] as a placeholder for the remaining amount.",
+        "default": "You’re [amount] from FREE SHIPPING!",
+        "visible_if": "{{ settings.cart_free_shipping_enabled == true }}"
+      },
+      {
+        "type": "text",
+        "id": "cart_free_shipping_unlocked_text",
+        "label": "Unlocked message",
+        "default": "You’ve unlocked FREE SHIPPING!",
+        "visible_if": "{{ settings.cart_free_shipping_enabled == true }}"
+      },
+      {
         "type": "header",
         "content": "Cart upsell"
       },
       {
         "type": "checkbox",
         "id": "cart_upsell_enabled",
-        "label": "Show \"You might also like\" upsell",
-        "info": "Recommends a related product based on the first item in the cart. Refreshes when cart changes.",
+        "label": "Show \"Toss in more\" upsell",
+        "info": "Suggests products from the upsell collection, hiding ones already in the cart. Refreshes when the cart changes.",
         "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_upsell_heading",
+        "label": "Upsell heading",
+        "default": "Toss in more",
+        "visible_if": "{{ settings.cart_upsell_enabled == true }}"
+      },
+      {
+        "type": "collection",
+        "id": "cart_upsell_collection",
+        "label": "Upsell collection",
+        "info": "Products suggested in the cart drawer. Falls back to the All collection when unset."
+      },
+      {
+        "type": "header",
+        "content": "Checkout footer"
+      },
+      {
+        "type": "text",
+        "id": "cart_trust_text",
+        "label": "Trust text",
+        "default": "Secure checkout  |  100% Satisfaction guarantee"
       },
       {
         "type": "header",

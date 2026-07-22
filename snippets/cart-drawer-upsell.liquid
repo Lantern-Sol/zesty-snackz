@@ -1,0 +1,115 @@
+{% doc %}
+  Cart Drawer Upsell ("Toss in more")
+
+  Scroll-snap slider of add-to-cart suggestions rendered server-side, so it
+  refreshes with every cart morph (products already in the cart drop out).
+  Products come from settings.cart_upsell_collection, falling back to the
+  "All" collection. Products that require a selling plan are skipped because
+  the one-tap ADD+ button posts a plain /cart/add.js request.
+{% enddoc %}
+
+{%- liquid
+  assign upsell_products = settings.cart_upsell_collection.products
+  if upsell_products == blank or upsell_products.size == 0
+    assign upsell_products = collections.all.products
+  endif
+
+  assign cart_product_ids = cart.items | map: 'product_id'
+  assign max_cards = 6
+  assign shown = 0
+-%}
+
+{%- capture upsell_cards -%}
+  {%- for product in upsell_products limit: 24 -%}
+    {%- liquid
+      if shown >= max_cards
+        break
+      endif
+      if cart_product_ids contains product.id
+        continue
+      endif
+      unless product.available
+        continue
+      endunless
+      if product.requires_selling_plan or product.gift_card?
+        continue
+      endif
+      assign upsell_variant = product.first_available_variant
+      if upsell_variant == blank
+        continue
+      endif
+      assign shown = shown | plus: 1
+    -%}
+    <div class="cart-upsell__card">
+      <a
+        href="{{ product.url }}"
+        class="cart-upsell__media"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        {%- if product.featured_image -%}
+          {{ product.featured_image | image_url: width: 250 | image_tag: class: 'cart-upsell__image', alt: product.title }}
+        {%- endif -%}
+      </a>
+      <div class="cart-upsell__info">
+        <a
+          href="{{ product.url }}"
+          class="cart-upsell__title"
+        >
+          {{- product.title -}}
+        </a>
+        <p class="cart-upsell__subtitle">
+          {%- if product.has_only_default_variant -%}
+            {{- upsell_variant.price | money -}}
+          {%- else -%}
+            {{- upsell_variant.title -}}
+          {%- endif -%}
+        </p>
+      </div>
+      <cart-upsell-add data-variant-id="{{ upsell_variant.id }}">
+        <button
+          type="button"
+          class="cart-upsell__add"
+          aria-label="{{ 'actions.add_to_cart' | t }}: {{ product.title | escape }}"
+        >
+          {{ 'actions.add' | t }} +
+        </button>
+      </cart-upsell-add>
+    </div>
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign upsell_cards = upsell_cards | strip -%}
+{%- if upsell_cards != blank -%}
+  <cart-upsell-slider class="cart-upsell">
+    <div class="cart-upsell__header">
+      <h3 class="cart-upsell__heading">
+        {{- settings.cart_upsell_heading | default: 'Toss in more' -}}
+      </h3>
+      <div class="cart-upsell__nav">
+        <button
+          type="button"
+          class="cart-upsell__arrow button-unstyled"
+          data-slider-prev
+          aria-label="{{ 'content.pagination.previous' | t }}"
+        >
+          {{- 'icon-chevron-left.svg' | inline_asset_content -}}
+        </button>
+        <button
+          type="button"
+          class="cart-upsell__arrow button-unstyled"
+          data-slider-next
+          aria-label="{{ 'content.pagination.next' | t }}"
+        >
+          {{- 'icon-chevron-right.svg' | inline_asset_content -}}
+        </button>
+      </div>
+    </div>
+    <div
+      class="cart-upsell__track"
+      data-slider-track
+    >
+      {{ upsell_cards }}
+    </div>
+  </cart-upsell-slider>
+{%- endif -%}

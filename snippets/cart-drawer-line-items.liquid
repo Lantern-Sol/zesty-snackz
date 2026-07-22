@@ -1,0 +1,223 @@
+{% doc %}
+  Cart Drawer Line Items
+
+  Card-style cart lines for the redesigned cart drawer. Keeps the same refs
+  and data attributes that `component-cart-items.js` relies on
+  (cartItemCount, cartItemRows[], quantitySelectors[], cartItemError-N),
+  so quantity updates, removals and morphing keep working unchanged.
+
+  Bundle lines (parent/child via parent_relationship) render as one visual
+  card: the parent is the card top, each child a middle row, and a closing
+  row (holding the parent's selling-plan selector) caps the card. The DOM
+  stays flat and in cart order so `refs.cartItemRows[line - 1]` stays valid.
+{% enddoc %}
+
+<span
+  class="visually-hidden"
+  ref="cartItemCount"
+  aria-hidden="true"
+>
+  {{- cart.item_count -}}
+</span>
+
+<form
+  action="{{ routes.cart_url }}"
+  class="cart-form"
+  id="cart-form"
+  method="post"
+>
+  <div class="cart-drawer-cards">
+    {%- for item in cart.items -%}
+      {%- liquid
+        assign next_item = cart.items[forloop.index]
+
+        assign is_child = false
+        if item.parent_relationship.parent != null
+          assign is_child = true
+        endif
+
+        assign has_children = false
+        if next_item.parent_relationship.parent.key == item.key
+          assign has_children = true
+        endif
+
+        assign is_last_child = false
+        if is_child
+          if forloop.last
+            assign is_last_child = true
+          elsif next_item.parent_relationship.parent.key != item.parent_relationship.parent.key
+            assign is_last_child = true
+          endif
+        endif
+
+        assign can_update_quantity = item.instructions.can_update_quantity | default: true, allow_false: true
+        assign can_remove = item.instructions.can_remove | default: true, allow_false: true
+
+        # Reference price for the discount badge: line discounts, selling-plan
+        # deltas (via compare_at) or variant compare-at price, whichever applies.
+        assign compare_total = item.original_line_price
+        if item.selling_plan_allocation.compare_at_price > item.selling_plan_allocation.price
+          assign compare_total = item.selling_plan_allocation.compare_at_price | times: item.quantity
+        elsif item.variant.compare_at_price > item.original_price
+          assign compare_total = item.variant.compare_at_price | times: item.quantity
+        endif
+        assign discount_pct = 0
+        if compare_total > item.final_line_price and compare_total > 0
+          assign saved = compare_total | minus: item.final_line_price
+          assign discount_pct = saved | times: 100.0 | divided_by: compare_total | round
+        endif
+      -%}
+
+      <div
+        id="CartItem-{{ item.key }}"
+        class="cart-line{% if is_child %} cart-line--child{% elsif has_children %} cart-line--card-top{% else %} cart-line--card{% endif %}"
+        ref="cartItemRows[]"
+        data-parent-key="{{ item.parent_relationship.parent.key }}"
+        data-key="{{ item.key }}"
+      >
+        {%- if is_child -%}
+          <div class="cart-line__child-row">
+            <a
+              href="{{ item.url }}"
+              class="cart-line__child-title"
+              aria-label="{{ 'accessibility.nested_product' | t: product_title: item.product.title, parent_title: item.parent_relationship.parent.title | escape }}"
+            >
+              {{- item.product.title -}}
+            </a>
+            {% render 'quantity-selector',
+              product: item.product,
+              variant: item.variant,
+              in_cart_quantity: item.quantity,
+              line_index: item.index,
+              can_update_quantity: can_update_quantity
+            %}
+            {%- if item.final_line_price > 0 -%}
+              <span class="cart-line__child-price">{{ item.final_line_price | money }}</span>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          <div class="cart-line__main">
+            {%- if item.image -%}
+              <a
+                href="{{ item.url }}"
+                class="cart-line__media"
+              >
+                {{ item.image | image_url: width: 250 | image_tag: class: 'cart-line__image', alt: item.title }}
+              </a>
+            {%- else -%}
+              <div class="cart-line__media cart-line__media--placeholder"></div>
+            {%- endif -%}
+
+            <div class="cart-line__info">
+              <a
+                href="{{ item.url }}"
+                class="cart-line__title"
+              >
+                {{- item.product.title -}}
+              </a>
+              {%- if item.product.has_only_default_variant == false and item.item_components.size == 0 -%}
+                <p class="cart-line__variant">{{ item.variant.title }}</p>
+              {%- endif -%}
+
+              {%- if item.item_components.size > 0 -%}
+                <ul class="cart-line__components list-unstyled">
+                  {%- for component in item.item_components -%}
+                    <li>
+                      {{- component.title -}}
+                      {%- if component.quantity > 1 %} × {{ component.quantity }}{% endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+              {%- liquid
+                assign has_visible_properties = false
+                for property in item.properties
+                  assign property_first_char = property.first | slice: 0
+                  if property.last != blank and property_first_char != '_'
+                    assign has_visible_properties = true
+                    break
+                  endif
+                endfor
+              -%}
+              {%- if has_visible_properties -%}
+                <dl class="cart-line__properties">
+                  {%- for property in item.properties -%}
+                    {%- assign property_first_char = property.first | slice: 0 -%}
+                    {%- if property.last != blank and property_first_char != '_' -%}
+                      <div class="cart-line__property">
+                        <dt>{{ property.first }}:</dt>
+                        <dd>{{ property.last }}</dd>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </dl>
+              {%- endif -%}
+
+              {%- unless has_children -%}
+                <div class="cart-line__quantity">
+                  {% render 'quantity-selector',
+                    product: item.product,
+                    variant: item.variant,
+                    in_cart_quantity: item.quantity,
+                    line_index: item.index,
+                    can_update_quantity: can_update_quantity
+                  %}
+                </div>
+              {%- endunless -%}
+            </div>
+
+            <div class="cart-line__aside">
+              <div class="cart-line__price-box">
+                <span class="visually-hidden">{{ 'content.product_total' | t }}</span>
+                <text-component
+                  class="cart-line__price"
+                  value="{{ item.final_line_price | money | strip_html }}"
+                >
+                  {{- item.final_line_price | money -}}
+                </text-component>
+                {%- if discount_pct > 0 -%}
+                  <span class="cart-line__discount-badge">{{ discount_pct }}% OFF</span>
+                {%- endif -%}
+              </div>
+              <button
+                class="cart-line__remove button-unstyled"
+                type="button"
+                aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                {% if can_remove == false %}
+                  hidden
+                {% endif %}
+              >
+                {{- 'icon-delete.svg' | inline_asset_content -}}
+              </button>
+            </div>
+          </div>
+
+          {%- unless has_children -%}
+            {% render 'cart-drawer-selling-plan', item: item %}
+          {%- endunless -%}
+        {%- endif -%}
+
+        <div
+          class="cart-line__error hidden"
+          ref="cartItemErrorContainer-{{ item.index | plus: 1 }}"
+        >
+          <div role="alert">
+            <span class="svg-wrapper">
+              {{- 'icon-error.svg' | inline_asset_content -}}
+            </span>
+            <small ref="cartItemError-{{ item.index | plus: 1 }}"></small>
+          </div>
+        </div>
+      </div>
+
+      {%- if is_last_child -%}
+        {%- # Closing row caps the bundle card and hosts the parent's plan selector. -%}
+        <div class="cart-line cart-line--card-bottom">
+          {% render 'cart-drawer-selling-plan', item: item.parent_relationship.parent %}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</form>
