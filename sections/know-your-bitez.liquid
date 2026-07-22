@@ -56,6 +56,8 @@
   endif
 
   assign arch_image = kyb_product.featured_image
+
+  assign counter_number = shop.metafields.custom.bitez_enjoyed.value | default: section.settings.counter_number
 %}
 
 <div
@@ -341,10 +343,10 @@
               </div>
             {%- endif -%}
 
-            {%- if section.settings.counter_number != blank or section.settings.counter_label != blank -%}
+            {%- if counter_number != blank or section.settings.counter_label != blank -%}
               <div class="kyb__counter" data-kyb-reveal>
-                {%- if section.settings.counter_number != blank -%}
-                  <span class="kyb__counter-number">{{ section.settings.counter_number }}</span>
+                {%- if counter_number != blank -%}
+                  <span class="kyb__counter-number">{{ counter_number }}</span>
                 {%- endif -%}
                 {%- if section.settings.counter_label != blank -%}
                   <span class="kyb__counter-label">{{ section.settings.counter_label }}</span>
@@ -1245,7 +1247,8 @@
       "type": "text",
       "id": "counter_number",
       "label": "Counter number",
-      "default": "37,500,000+"
+      "default": "37,500,000+",
+      "info": "Uses the shop metafield custom.bitez_enjoyed when set — edit it in admin so the number stays in one place."
     },
     {
       "type": "text",
