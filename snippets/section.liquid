@@ -35,7 +35,7 @@
 
 <div class="section-background color-custom-{{ section_id }}"></div>
 <div
-  class="section section--{{ section.settings.section_width }} color-custom-{{ section_id }}{% if has_floating_media %} section--has-floating-media{% endif %}{% if section.settings.floating_media_hide_mobile %} section--floating-media-hide-mobile{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-custom-{{ section_id }}{% if has_floating_media %} section--has-floating-media{% endif %}{% if section.settings.floating_media_hide_mobile %} section--floating-media-hide-mobile{% endif %}{% if section.settings.hide_on_mobile %} hidden--mobile{% endif %}{% if section.settings.hide_on_desktop %} hidden--desktop{% endif %}"
   data-testid="ui-test-section"
 
   {% if request.visual_preview_mode %}
