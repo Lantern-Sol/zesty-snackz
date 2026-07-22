@@ -15,6 +15,21 @@
   background_color: section.settings.background_color
 %}
 
+{% stylesheet %}
+  /* App blocks (e.g. the Judge.me review widget) are direct children of the
+     flex column, where align-items: flex-start shrinks them to min-content
+     width and everything wraps into a narrow strip. Let them span the section. */
+  .section-wrapper .layout-panel-flex > .shopify-block:has(.jdgm-widget),
+  .section-wrapper .layout-panel-flex > .jdgm-widget {
+    width: 100%;
+  }
+
+  .section-wrapper .jdgm-widget.jdgm-rev-widg {
+    width: 100%;
+    max-width: 100%;
+  }
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "t:names.section",

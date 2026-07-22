@@ -27,6 +27,26 @@
   assign filters = filters | default: results.filters
   assign total_active_values = 0
 
+  # Tag filter rendered as inline pills (desktop and mobile); every other filter stays in the drawer
+  assign tag_pills_filter = false
+  if block_settings.enable_tag_pills
+    for f in filters
+      if f.param_name == 'filter.p.tag'
+        assign tag_pills_filter = f
+        break
+      endif
+    endfor
+  endif
+
+  assign drawer_filters_size = filters | size
+  if tag_pills_filter
+    assign drawer_filters_size = drawer_filters_size | minus: 1
+  endif
+  assign has_drawer_filters = false
+  if drawer_filters_size > 0
+    assign has_drawer_filters = true
+  endif
+
   # Calculate facets margin style
   capture facets_margin_style
     echo '--facets-margin: 0px '
@@ -39,6 +59,9 @@
   endcapture
 
   for filter in filters
+    if tag_pills_filter and filter.param_name == tag_pills_filter.param_name
+      continue
+    endif
     case filter.type
       when 'price_range'
         if filter.min_value.value != null or filter.max_value.value != null
@@ -103,14 +126,62 @@
   section_id: block.id
 %}
 
+{%- capture products_count_text -%}
+  {%- if products_count > 25000 -%}
+    {{ 'content.item_count_cutoff' | t: count: 25000 }}
+  {%- elsif block_settings.results_count_label != blank -%}
+    {{ products_count }} {{ block_settings.results_count_label | escape }}
+  {%- else -%}
+    {{ 'content.item_count' | t: count: products_count }}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture tag_pills_html -%}
+  {%- if tag_pills_filter -%}
+    <nav
+      class="facet-pills"
+      aria-label="{{ tag_pills_filter.label | escape }}"
+      style="--facet-pill-accent: {{ block_settings.pills_accent_color | default: '#FF3D9A' }};"
+    >
+      {%- liquid
+        assign all_pill_active = false
+        if tag_pills_filter.active_values.size == 0
+          assign all_pill_active = true
+        endif
+      -%}
+      <a
+        class="facet-pill{% if all_pill_active %} facet-pill--active{% endif %}"
+        href="{{ tag_pills_filter.url_to_remove }}"
+        {% if all_pill_active %}
+          aria-current="true"
+        {% endif %}
+      >
+        {{- block_settings.tag_pills_all_label | default: 'All' | escape -}}
+      </a>
+      {%- for value in tag_pills_filter.values -%}
+        <a
+          class="facet-pill{% if value.active %} facet-pill--active{% endif %}"
+          href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+          {% if value.active %}
+            aria-current="true"
+          {% endif %}
+        >
+          {{- value.label | escape -}}
+        </a>
+      {%- endfor -%}
+    </nav>
+  {%- endif -%}
+{%- endcapture -%}
+
 {% if block_settings.enable_filtering or block_settings.enable_sorting or block_settings.enable_grid_density %}
   {% if block_settings.filter_style == 'vertical' %}
     {% # These elements are always rendered in the horizontal bar that's why we apply the .facets--horizontal class %}
     <div
-      class="facets facets--horizontal facets-controls-wrapper spacing-style{{ desktop_drawer_class }}"
+      class="facets facets--horizontal facets-controls-wrapper spacing-style{{ desktop_drawer_class }}{% if tag_pills_html != blank %} facets--with-pills{% endif %}"
       style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}"
     >
-      {% if block_settings.enable_filtering %}
+      {{ tag_pills_html }}
+      {% if block_settings.enable_filtering and has_drawer_filters %}
         {% if desktop_drawer %}
           <div class="facets-desktop-toggle">
             <button
@@ -144,13 +215,7 @@
         class="products-count-wrapper"
         data-testid="products-count"
       >
-        <span role="status">
-          {% if products_count > 25000 %}
-            {{- 'content.item_count_cutoff' | t: count: 25000 -}}
-          {% else %}
-            {{- 'content.item_count' | t: count: products_count -}}
-          {% endif %}
-        </span>
+        <span role="status">{{ products_count_text }}</span>
       </div>
 
       {% if block_settings.enable_sorting %}
@@ -196,7 +261,7 @@
     {{ block.shopify_attributes }}
   >
     <div
-      class="facets facets--{{ block_settings.filter_style }} spacing-style"
+      class="facets facets--{{ block_settings.filter_style }} spacing-style{% if tag_pills_html != blank %} facets--with-pills{% endif %}"
       style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}"
       aria-label="{{ 'accessibility.filters' | t }}"
     >
@@ -220,14 +285,22 @@
               filters: filters,
               results_url: results_url,
               show_filter_label: block_settings.show_filter_label,
-              should_show_clear_all: true
+              should_show_clear_all: true,
+              exclude_param_name: tag_pills_filter.param_name
             %}
+
+            {% if block_settings.filter_style == 'horizontal' %}
+              {{ tag_pills_html }}
+            {% endif %}
 
             {% if block_settings.enable_filtering %}
               {% assign total_active_values = 0 %}
 
               {% capture rendered_filters %}
                 {%- for filter in filters -%}
+                  {% if tag_pills_filter and filter.param_name == tag_pills_filter.param_name %}
+                    {% continue %}
+                  {% endif %}
                   {% case filter.type %}
                     {% when 'price_range' %}
                       {%- liquid
@@ -263,7 +336,7 @@
                 {%- endfor -%}
               {% endcapture %}
 
-              {% if desktop_drawer and block_settings.filter_style == 'horizontal' %}
+              {% if desktop_drawer and has_drawer_filters and block_settings.filter_style == 'horizontal' %}
                 <div class="facets-desktop-toggle">
                   <button
                     class="button facets-desktop-toggle__button button-unstyled button-unstyled--with-icon"
@@ -333,13 +406,7 @@
                 class="products-count-wrapper"
                 data-testid="products-count"
               >
-                <span role="status">
-                  {% if products_count > 25000 %}
-                    {{- 'content.item_count_cutoff' | t: count: 25000 -}}
-                  {% else %}
-                    {{- 'content.item_count' | t: count: products_count -}}
-                  {% endif %}
-                </span>
+                <span role="status">{{ products_count_text }}</span>
               </div>
 
               {% if block_settings.enable_sorting %}
@@ -364,18 +431,8 @@
     </div>
   </div>
 
-  <div
-    class="
-      facets-toggle
-      {%- if block_settings.enable_filtering == false %} facets-toggle--no-filters{% endif %}
-      {%- if block_settings.filter_style == 'horizontal' and has_custom_color %} color-custom-{{ block.id }}{% endif %}
-    "
-    style="
-      --facets-inner-padding-block: {{ block_settings.padding-block-start }}px {{ block_settings.padding-block-end }}px; --facets-inner-padding-inline: var(--padding-lg);
-      {{ facets_margin_style }}
-    "
-  >
-    {% if block_settings.enable_filtering %}
+  {% capture mobile_filter_toggle %}
+    {% if block_settings.enable_filtering and has_drawer_filters %}
       <div class="facets-toggle__wrapper">
         <button
           class="button facets-toggle__button button-unstyled button-unstyled--with-icon"
@@ -409,17 +466,19 @@
         </button>
       </div>
     {% endif %}
+  {% endcapture %}
 
-    {% liquid
-      assign child_count = 0
-      if block_settings.enable_sorting
-        assign child_count = child_count | plus: 1
-      endif
-      if block_settings.enable_grid_density
-        assign child_count = child_count | plus: 1
-      endif
-    %}
+  {% liquid
+    assign child_count = 0
+    if block_settings.enable_sorting
+      assign child_count = child_count | plus: 1
+    endif
+    if block_settings.enable_grid_density
+      assign child_count = child_count | plus: 1
+    endif
+  %}
 
+  {% capture mobile_controls %}
     <div class="facets-mobile-wrapper facets-controls-wrapper{% if child_count > 1 %} facets-mobile-wrapper--multiple-controls{% endif %}">
       {% if block_settings.enable_sorting %}
         <facets-form-component
@@ -451,12 +510,44 @@
         {% render 'grid-density-controls', viewport: 'mobile' %}
       {% endif %}
     </div>
+  {% endcapture %}
+
+  <div
+    class="
+      facets-toggle
+      {%- if block_settings.enable_filtering == false or has_drawer_filters == false %} facets-toggle--no-filters{% endif %}
+      {%- if tag_pills_html != blank %} facets-toggle--with-pills{% endif %}
+      {%- if block_settings.filter_style == 'horizontal' and has_custom_color %} color-custom-{{ block.id }}{% endif %}
+    "
+    style="
+      --facets-inner-padding-block: {{ block_settings.padding-block-start }}px {{ block_settings.padding-block-end }}px; --facets-inner-padding-inline: var(--padding-lg);
+      {{ facets_margin_style }}
+    "
+  >
+    {% if tag_pills_html != blank %}
+      {{ tag_pills_html }}
+      <div class="facets-toggle__controls">
+        <div class="facets-toggle__meta">
+          {{ mobile_filter_toggle }}
+          <div
+            class="products-count-wrapper products-count-wrapper--pills"
+            data-testid="products-count"
+          >
+            <span role="status">{{ products_count_text }}</span>
+          </div>
+        </div>
+        {{ mobile_controls }}
+      </div>
+    {% else %}
+      {{ mobile_filter_toggle }}
+      {{ mobile_controls }}
+    {% endif %}
   </div>
 {% else %}
   <div></div>
 {% endif %}
 
-{% if block_settings.enable_filtering %}
+{% if block_settings.enable_filtering and has_drawer_filters %}
   <theme-drawer
     id="filters-drawer"
     data-skip-node-update
@@ -516,7 +607,8 @@
                 filters: filters,
                 results_url: results_url,
                 show_filter_label: block_settings.show_filter_label,
-                should_show_clear_all: false
+                should_show_clear_all: false,
+                exclude_param_name: tag_pills_filter.param_name
               %}
 
               <div class="facets__filters-wrapper">
@@ -524,6 +616,9 @@
                 {% assign is_active = false %}
 
                 {%- for filter in filters -%}
+                  {% if tag_pills_filter and filter.param_name == tag_pills_filter.param_name %}
+                    {% continue %}
+                  {% endif %}
                   {% case filter.type %}
                     {% when 'price_range' %}
                       {%- liquid
@@ -1423,6 +1518,174 @@
   scroll-hint.facets-drawer__filters summary {
     padding-block: 1rem;
   }
+
+  /* Tag filter pills — inline pill links for the Search & Discovery tag filter */
+  .facet-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 9px;
+    align-items: center;
+  }
+
+  .facet-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px 5px;
+    border: 2px solid var(--color-foreground);
+    border-radius: 999px;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-h6--family);
+    font-style: var(--font-h6--style);
+    font-weight: var(--font-h6--weight);
+    font-size: var(--font-h6--size);
+    line-height: 1.2;
+    letter-spacing: var(--font-h6--letter-spacing);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 0 rgb(var(--color-foreground-rgb) / 14%);
+    transition: transform var(--animation-speed) var(--animation-easing),
+      box-shadow var(--animation-speed) var(--animation-easing);
+
+    @media screen and (min-width: 750px) {
+      padding: 10px 20px 8px;
+    }
+  }
+
+  .facet-pill:hover {
+    transform: translateY(-1px);
+  }
+
+  .facet-pill--active {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    box-shadow: 0 4px 0 var(--facet-pill-accent, #ff3d9a);
+  }
+
+  /* Desktop bar with pills: pills left, count + sort pushed right, dashed divider below */
+  .facets--horizontal.facets--with-pills {
+    @media screen and (min-width: 750px) {
+      border-bottom: 2px dashed rgb(var(--color-foreground-rgb) / 14%);
+      padding-block-end: 24px;
+    }
+  }
+
+  .facets--with-pills .facets__form {
+    @media screen and (min-width: 750px) {
+      flex-flow: row wrap;
+      align-items: center;
+      row-gap: var(--gap-sm);
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    /* Pills replace the count-hiding behavior of drawer mode — the count is part of the design */
+    .facets-block-wrapper--horizontal.facets--desktop-drawer .facets--with-pills .products-count-wrapper,
+    .facets.facets-controls-wrapper.facets--desktop-drawer.facets--with-pills .products-count-wrapper {
+      display: flex;
+      margin-left: auto;
+    }
+
+    .facets--with-pills .facets-desktop-toggle {
+      margin-inline-start: auto;
+    }
+
+    /* When the drawer toggle is present it owns the auto margin — keep count snug beside sort */
+    .facets--with-pills .facets-desktop-toggle ~ .products-count-wrapper {
+      margin-left: 0;
+    }
+  }
+
+  .facets--with-pills .products-count-wrapper,
+  .facets-toggle--with-pills .products-count-wrapper {
+    font-size: var(--font-paragraph--size);
+    font-weight: 700;
+    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 60%));
+  }
+
+  /* Sort control styled as a pill to match the tag pills */
+  .facets--with-pills .sorting-filter .facets__summary,
+  .facets-toggle--with-pills .sorting-filter .facets__summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: auto;
+    min-height: 0;
+    padding: 4px 5px 4px 17px;
+    border: 2px solid var(--color-foreground);
+    border-radius: 999px;
+    background-color: var(--color-background);
+  }
+
+  .facets--with-pills .sorting-filter .facets__summary .facets__label,
+  .facets-toggle--with-pills .sorting-filter .facets__summary .facets__label {
+    margin: 0;
+    color: rgb(var(--color-foreground-rgb) / 45%);
+  }
+
+  .facets--with-pills .sorting-filter .facets__summary .facets__status,
+  .facets-toggle--with-pills .sorting-filter .facets__summary .facets__status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px 4px;
+    border-radius: 999px;
+    background-color: var(--facet-sort-chip-bg, #eaf7fe);
+    color: var(--color-foreground);
+    font-family: var(--font-h6--family);
+    font-style: var(--font-h6--style);
+    font-weight: var(--font-h6--weight);
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .facets--with-pills .sorting-filter .facets__summary .sorting-filter__chevron,
+  .facets-toggle--with-pills .sorting-filter .facets__summary .sorting-filter__chevron {
+    display: none;
+  }
+
+  /* Mobile layout with pills: pills row on top, count + controls row below */
+  .facets-toggle--with-pills {
+    @media screen and (max-width: 749px) {
+      flex-direction: column;
+      align-items: stretch;
+      height: auto;
+      gap: var(--gap-md, 16px);
+      /* stylelint-disable-next-line declaration-no-important */
+      justify-content: flex-start !important;
+    }
+  }
+
+  .facets-toggle__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gap-sm);
+    width: 100%;
+  }
+
+  .facets-toggle__controls > .facets-mobile-wrapper {
+    width: auto;
+  }
+
+  .facets-toggle__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    margin-left: var(--icon-offset);
+  }
+
+  .products-count-wrapper--pills {
+    display: flex;
+    align-items: center;
+
+    @media screen and (min-width: 750px) {
+      display: none;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -1495,6 +1758,39 @@
       ],
       "default": "default",
       "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tag filter pills"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_tag_pills",
+      "label": "Show tag filter as inline pills",
+      "info": "Renders the Search & Discovery tag filter as pill links on desktop and mobile. All other filters stay in the drawer.",
+      "default": false,
+      "visible_if": "{{ block.settings.enable_filtering == true }}"
+    },
+    {
+      "type": "text",
+      "id": "tag_pills_all_label",
+      "label": "\"All\" pill label",
+      "info": "Shown as the first pill, clears the tag filter. E.g. \"All flavors\" or \"All products\".",
+      "default": "All",
+      "visible_if": "{{ block.settings.enable_tag_pills == true }}"
+    },
+    {
+      "type": "color",
+      "id": "pills_accent_color",
+      "label": "Active pill shadow color",
+      "default": "#FF3D9A",
+      "visible_if": "{{ block.settings.enable_tag_pills == true }}"
+    },
+    {
+      "type": "text",
+      "id": "results_count_label",
+      "label": "Results count label",
+      "info": "Replaces \"products\" in the results count, e.g. \"flavors\" shows \"11 flavors\". Leave blank for the default."
     },
     {
       "type": "checkbox",

@@ -7,6 +7,7 @@
   @param {boolean} show_filter_label - Whether to show the filter label
   @param {string} results_url - The results URL
   @param {boolean} should_show_clear_all - Whether to show the clear all button
+  @param {string} [exclude_param_name] - param_name of a filter to skip (e.g. a tag filter rendered as inline pills)
 {%- enddoc -%}
 
 <div class="facets-remove facets-remove--mobile-and-vertical">
@@ -15,6 +16,9 @@
   {%- endif -%}
 
   {%- for filter in filters -%}
+    {%- if exclude_param_name != blank and filter.param_name == exclude_param_name -%}
+      {%- continue -%}
+    {%- endif -%}
     {% if filter.type == 'price_range' and filter.min_value.value != null or filter.max_value.value != null %}
       {%- liquid
         assign is_active = true

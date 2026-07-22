@@ -12,6 +12,11 @@
       assign classes = 'resource-list__carousel'
   endcase
 
+  assign has_background_media = false
+  if section.settings.background_media != blank and section.settings.background_media != 'none'
+    assign has_background_media = true
+  endif
+
   capture styles
     echo '--column-count-mobile: ' | append: section.settings.mobile_columns | append: ';'
     echo '--resource-list-column-gap-desktop: ' | append: section.settings.columns_gap | append: 'px;'
@@ -21,6 +26,10 @@
     echo '--resource-list-column-gap-desktop: ' | append: section.settings.columns_gap | append: 'px;'
     echo '--column-count: ' | append: section.settings.columns | append: ';'
     echo '--column-count-mobile: ' | append: section.settings.mobile_columns | append: ';'
+    if section.settings.use_mobile_gaps
+      echo '--resource-list-column-gap-mobile: ' | append: section.settings.columns_gap_mobile | append: 'px;'
+      echo '--resource-list-row-gap-mobile: ' | append: section.settings.rows_gap_mobile | append: 'px;'
+    endif
   endcapture
 %}
 
@@ -42,7 +51,7 @@
 >
   {% liquid
     if section.settings.background_color != blank
-      render 'contrast-override', background_color: section.settings.background_color, section_id: section.id
+      render 'contrast-override', background_color: section.settings.background_color, section_id: section.id, skip_contrast: has_background_media
     endif
   %}
 
@@ -61,9 +70,31 @@
     style="
       {%  render 'spacing-style', settings: section.settings %}
       {%  render 'gap-style', value: section.settings.gap %}
+      {% if section.settings.use_mobile_gaps %}
+        {% render 'gap-style', name: 'mobile-gap', value: section.settings.gap_mobile, disable_scaling: true %}
+      {% endif %}
       {{ styles }}
     "
   >
+    {%- if has_background_media or section.settings.toggle_overlay -%}
+      <div class="custom-section-background">
+        {%- if has_background_media -%}
+          {% render 'background-media',
+            background_media: section.settings.background_media,
+            background_video: section.settings.video,
+            background_video_position: section.settings.video_position,
+            background_image: section.settings.background_image,
+            background_image_mobile: section.settings.background_image_mobile,
+            background_image_position: section.settings.background_image_position,
+            section: section
+          %}
+        {%- endif -%}
+        {%- if section.settings.toggle_overlay -%}
+          {% render 'overlay', settings: section.settings, layer: '0' %}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
     <div class="section-resource-list__content">
       {% content_for 'blocks' %}
     </div>
@@ -334,6 +365,34 @@
       "visible_if": "{{ section.settings.layout_type == 'grid' }}"
     },
     {
+      "type": "checkbox",
+      "id": "use_mobile_gaps",
+      "label": "Use mobile gaps",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_mobile",
+      "label": "Mobile horizontal gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
+    },
+    {
+      "type": "range",
+      "id": "rows_gap_mobile",
+      "label": "Mobile vertical gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
+    },
+    {
       "type": "header",
       "content": "t:content.carousel_navigation",
       "visible_if": "{{ section.settings.layout_type == 'carousel' or section.settings.carousel_on_mobile == true }}"
@@ -419,10 +478,146 @@
       "default": 12
     },
     {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Mobile gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ section.settings.use_mobile_gaps }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "select",
+      "id": "background_media",
+      "label": "t:settings.background_media",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "image",
+          "label": "t:options.image"
+        },
+        {
+          "value": "video",
+          "label": "t:options.video"
+        }
+      ],
+      "default": "none"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "t:settings.background_color",
-      "placeholder": "t:settings.default"
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.background_media == 'none' }}"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:settings.video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}"
+    },
+    {
+      "type": "select",
+      "id": "video_position",
+      "label": "t:settings.video_position",
+      "options": [
+        {
+          "value": "cover",
+          "label": "t:options.cover"
+        },
+        {
+          "value": "contain",
+          "label": "t:options.contain"
+        }
+      ],
+      "default": "cover",
+      "visible_if": "{{ section.settings.background_media == 'video' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "t:settings.image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "t:settings.background_image_mobile",
+      "info": "t:info.background_image_mobile",
+      "visible_if": "{{ section.settings.background_media == 'image' }}"
+    },
+    {
+      "type": "select",
+      "id": "background_image_position",
+      "label": "t:settings.image_position",
+      "options": [
+        {
+          "value": "cover",
+          "label": "t:options.cover"
+        },
+        {
+          "value": "fit",
+          "label": "t:options.fit"
+        }
+      ],
+      "default": "cover",
+      "visible_if": "{{ section.settings.background_media == 'image' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "toggle_overlay",
+      "label": "t:settings.background_overlay"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "t:settings.overlay_color",
+      "alpha": true,
+      "default": "#00000026",
+      "visible_if": "{{ section.settings.toggle_overlay }}"
+    },
+    {
+      "type": "select",
+      "id": "overlay_style",
+      "label": "t:settings.overlay_style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        },
+        {
+          "value": "gradient",
+          "label": "t:options.gradient"
+        }
+      ],
+      "default": "solid",
+      "visible_if": "{{ section.settings.toggle_overlay }}"
+    },
+    {
+      "type": "select",
+      "id": "gradient_direction",
+      "label": "t:settings.gradient_direction",
+      "options": [
+        {
+          "value": "to top",
+          "label": "t:options.up"
+        },
+        {
+          "value": "to bottom",
+          "label": "t:options.down"
+        }
+      ],
+      "default": "to top",
+      "visible_if": "{{ section.settings.toggle_overlay and section.settings.overlay_style == 'gradient' }}"
     },
     {
       "type": "header",
