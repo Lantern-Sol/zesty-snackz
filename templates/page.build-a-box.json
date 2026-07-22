@@ -60,7 +60,8 @@
         "tier_4"
       ],
       "settings": {
-        "collection": "all-flavor-bags",
+        "appstle_bundle_handle": "elmxoqxy",
+        "plan_group_name": "Single Bag Plans",
         "max_products": 24,
         "mobile_initial_products": 6,
         "enable_subscribe": true,

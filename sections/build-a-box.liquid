@@ -25,7 +25,10 @@
     assign min_qty = 3
   endif
 
-  assign bundle_collection = section.settings.collection
+  # Products come directly from the Appstle Build-a-Box: its product set is the
+  # selling plan group configured on the bundle (default "Single Bag Plans"),
+  # so any product whose single-bag variant belongs to that group is shown.
+  assign plan_group_name = section.settings.plan_group_name | default: 'Single Bag Plans'
   assign accent = section.settings.accent_color | default: '#5B8DEF'
 -%}
 
@@ -49,6 +52,9 @@
   data-min-qty="{{ min_qty }}"
   data-max-qty="{{ max_qty }}"
   data-subscribe-default="{{ section.settings.subscribe_default_on }}"
+  {% if section.settings.appstle_bundle_handle != blank %}
+    data-appstle-bundle-handle="{{ section.settings.appstle_bundle_handle }}"
+  {% endif %}
   data-mobile-limit="{{ section.settings.mobile_initial_products }}"
   data-testid="build-a-box"
 >
@@ -242,9 +248,17 @@
 
   {% comment %} Product grid {% endcomment %}
   <div class="bab__grid" data-bab-grid>
-    {%- if bundle_collection != blank -%}
-      {%- for product in bundle_collection.products limit: section.settings.max_products -%}
+    {%- liquid
+      # No collection picker: membership in the bundle's selling plan group is
+      # the source of truth, scanned across the catalog (auto "all" collection).
+      assign shown = 0
+    -%}
+    {%- for product in collections['all'].products limit: 50 -%}
         {%- liquid
+          if shown >= section.settings.max_products
+            break
+          endif
+
           # The bundle is built from single bags: price, availability and the
           # selling plan all come from the single-bag variant (default "1 Pack").
           assign single_title = section.settings.single_variant_title | default: '1 Pack'
@@ -252,12 +266,61 @@
           if variant == blank
             assign variant = product.selected_or_first_available_variant
           endif
+
+          # Only products whose single-bag variant belongs to the bundle's plan
+          # group are part of the Build-a-Box.
+          assign bundle_group_id = ''
+          for group in product.selling_plan_groups
+            if group.name == plan_group_name
+              assign bundle_group_id = group.id
+              break
+            endif
+          endfor
+          if bundle_group_id == ''
+            continue
+          endif
+          assign in_bundle = false
+          for alloc in variant.selling_plan_allocations
+            if alloc.selling_plan_group_id == bundle_group_id
+              assign in_bundle = true
+              break
+            endif
+          endfor
+          unless in_bundle
+            continue
+          endunless
+          assign shown = shown | plus: 1
+
           assign card_accent = product.metafields.custom.color.value | default: accent
           assign notes = product.metafields.custom.card_flavor_notes.value | default: product.description | strip_html | truncatewords: 8
 
-          # First Appstle selling plan allocated to the single-bag variant (the
-          # "Single Bag Plans" group on this store; 4 Weeks delivery).
-          assign plan_allocation = variant.selling_plan_allocations | first
+          # All Appstle selling plans allocated to the single-bag variant, one
+          # per group (first plan = default delivery frequency). Group names
+          # match tier names ("Mini Munch - 3 Bags" → 5%...), which is how JS
+          # picks the tier plan for the achieved quantity. Today only "Single
+          # Bag Plans" (0%) is allocated to 1 Pack — once the tier groups are
+          # assigned to the single-bag variants in Appstle, the tiered prices
+          # flow through here automatically.
+          capture plans_json
+            assign first_plan = true
+            echo '['
+            for group in product.selling_plan_groups
+              assign group_plan = group.selling_plans | first
+              for alloc in variant.selling_plan_allocations
+                if alloc.selling_plan.id == group_plan.id
+                  unless first_plan
+                    echo ','
+                  endunless
+                  assign first_plan = false
+                  echo '{"id":' | append: group_plan.id | append: ',"group":'
+                  echo group.name | json
+                  echo ',"price":' | append: alloc.price | append: '}'
+                  break
+                endif
+              endfor
+            endfor
+            echo ']'
+          endcapture
 
           assign sourness = product.metafields.custom.flavor_sourness.value
           assign card_badge = product.metafields.custom.card_badge.value
@@ -266,7 +329,7 @@
           class="bab-card"
           data-bab-card
           style="--pc-accent: {{ card_accent }};"
-          {% if forloop.index > section.settings.mobile_initial_products %}
+          {% if shown > section.settings.mobile_initial_products %}
             data-bab-overflow
           {% endif %}
         >
@@ -294,7 +357,10 @@
             {%- endif -%}
           </div>
           <div class="bab-card__footer">
-            <span class="bab-card__price">{{ variant.price | money }}</span>
+            <span class="bab-card__price" data-bab-card-price data-base="{{ variant.price }}">
+              <span data-bab-card-price-now>{{ variant.price | money }}</span>
+              <s class="bab-card__price-compare" data-bab-card-price-compare hidden></s>
+            </span>
             <button
               type="button"
               class="bab-card__add"
@@ -306,10 +372,7 @@
               data-price="{{ variant.price }}"
               data-image="{% if product.featured_media %}{{ product.featured_media | image_url: width: 300 }}{% endif %}"
               data-accent="{{ card_accent }}"
-              {% if plan_allocation %}
-                data-plan-id="{{ plan_allocation.selling_plan.id }}"
-                data-plan-price="{{ plan_allocation.price }}"
-              {% endif %}
+              data-plans="{{ plans_json | strip_newlines | escape }}"
               {% unless variant.available %}disabled{% endunless %}
             >
               {%- if variant.available -%}
@@ -321,7 +384,7 @@
           </div>
         </div>
       {%- endfor -%}
-    {%- else -%}
+    {%- if shown == 0 -%}
       <div class="bab__empty">{{ 'onboarding.no_content' | t }}</div>
     {%- endif -%}
   </div>
@@ -373,7 +436,7 @@
 
   .section-build-a-box .bab__top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 414px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 414px);
     gap: 32px;
     align-items: start;
     margin-bottom: 48px;
@@ -401,9 +464,10 @@
   }
 
   /* --- Tier selector ------------------------------------------------------ */
+  /* auto-fit lets the cards wrap 2×2 when the cart drawer squeezes the page */
   .section-build-a-box .bab__tiers {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
   }
 
@@ -877,9 +941,11 @@
   }
 
   /* --- Product grid ------------------------------------------------------- */
+  /* auto-fit: 4 columns at full page width, gracefully drops to 3 when the
+     cart drawer squeezes the page */
   .section-build-a-box .bab__grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px;
   }
 
@@ -984,6 +1050,14 @@
     font-family: var(--bab-heading-font);
     font-size: 24px;
     letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .section-build-a-box .bab-card__price-compare {
+    font-size: 17px;
+    opacity: 0.35;
   }
 
   .section-build-a-box .bab-card__add {
@@ -1161,6 +1235,7 @@
     }
 
     .section-build-a-box .bab__tiers {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 6px;
     }
 
@@ -1370,10 +1445,11 @@
       "label": "Banner image"
     },
     {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection",
-      "info": "Products shown in the grid. Cards use product metafields: custom.color (accent), custom.card_flavor_notes (tagline), custom.flavor_sourness (sour dots), custom.card_badge (corner flag)."
+      "type": "text",
+      "id": "plan_group_name",
+      "label": "Appstle plan group",
+      "info": "Products come straight from the Build-a-Box: any product whose single-bag variant is in this Appstle selling plan group appears in the grid. Cards use product metafields: custom.color, custom.card_flavor_notes, custom.flavor_sourness, custom.card_badge.",
+      "default": "Single Bag Plans"
     },
     {
       "type": "text",
@@ -1403,6 +1479,12 @@
     {
       "type": "header",
       "content": "Subscribe & save"
+    },
+    {
+      "type": "text",
+      "id": "appstle_bundle_handle",
+      "label": "Appstle Build-a-Box handle",
+      "info": "Handle of the Build-a-Box created in Appstle (Build-A-Box → your bundle). When set, its quantity tiers and selling plan override the tier blocks' discounts so checkout matches the page."
     },
     {
       "type": "checkbox",

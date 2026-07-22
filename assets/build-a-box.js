@@ -1,6 +1,6 @@
 import { Component } from '@theme/component';
 import { fetchConfig } from '@theme/utilities';
-import { CartLinesUpdateEvent } from '@shopify/events';
+import { CartLinesUpdateEvent, StandardEvents } from '@shopify/events';
 
 const COOKIE_NAME = 'zs_bundle';
 const COOKIE_DAYS = 30;
@@ -104,6 +104,20 @@ class BuildABoxSection extends Component {
   #railObserver = null;
   /** @type {Array<{name: string, quantity: number, discount: number, perks: string, freeShipping: boolean}>} */
   #tiers = [];
+  /**
+   * variantId → Appstle selling plans allocated to that (single-bag) variant,
+   * one per plan group: [{id, group, price}]. Built from the product cards'
+   * data-plans so the cookie stays small and plans are always fresh.
+   * @type {Map<string, Array<{id: number, group: string, price: number}>>}
+   */
+  #planMap = new Map();
+  /**
+   * Selling plan id from the Appstle Build-a-Box config (get-bundle API).
+   * When present it is attached to every subscribed line — Appstle's
+   * Build-a-Box applies the tiered discount for that plan at checkout.
+   * @type {number | null}
+   */
+  #bundleSellingPlanId = null;
 
   get minQty() {
     return Number(this.dataset.minQty) || 3;
@@ -129,6 +143,17 @@ class BuildABoxSection extends Component {
     }
     this.#tiers.sort((a, b) => a.quantity - b.quantity);
 
+    this.querySelectorAll('[data-bab-add][data-plans]').forEach((btn) => {
+      try {
+        this.#planMap.set(
+          String(/** @type {HTMLElement} */ (btn).dataset.variantId),
+          JSON.parse(/** @type {HTMLElement} */ (btn).dataset.plans || '[]')
+        );
+      } catch (_) {
+        /* card without valid plan data simply has no subscription option */
+      }
+    });
+
     this.addEventListener('click', this.#onClick, { signal });
     document.addEventListener(STORE_EVENT, this.#render, { signal });
 
@@ -145,6 +170,8 @@ class BuildABoxSection extends Component {
       );
       this.#railObserver.observe(rail);
     }
+
+    this.#loadAppstleBundle();
 
     // "See more" starts collapsed only when there are overflow cards.
     if (this.querySelector('[data-bab-overflow]')) {
@@ -224,8 +251,6 @@ class BuildABoxSection extends Component {
       title: btn.dataset.title || '',
       image: btn.dataset.image || '',
       price: Number(btn.dataset.price) || 0,
-      plan_id: btn.dataset.planId ? Number(btn.dataset.planId) : null,
-      plan_price: btn.dataset.planPrice ? Number(btn.dataset.planPrice) : null,
       accent: btn.dataset.accent || '',
     });
   }
@@ -239,6 +264,130 @@ class BuildABoxSection extends Component {
     setTimeout(() => {
       pill.style.transform = '';
     }, 180);
+  }
+
+  /* --- Appstle Build-a-Box config ------------------------------------------ */
+
+  /**
+   * Appstle's Build-a-Box (unlike plain subscription plans) supports quantity
+   * thresholds. When the section is given the bundle handle, pull its config
+   * from the public get-bundle endpoint and let it override the theme's tier
+   * discounts + selling plan, so the page always mirrors what Appstle will
+   * charge. Any failure (no bundle yet, auth, network) keeps the theme's tier
+   * block settings as the source of truth.
+   */
+  async #loadAppstleBundle() {
+    const handle = this.dataset.appstleBundleHandle;
+    if (!handle) return;
+    const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
+    try {
+      // The /bb/ app-proxy route is the one Appstle's own Build-a-Box app uses
+      // (its axios baseURL is `{origin}/{proxy_prefix}/bb/`); unlike /cp/, it
+      // requires no extra auth.
+      const res = await fetch(`/${prefix}/bb/api/v3/subscription-bundlings/external/get-bundle/${encodeURIComponent(handle)}`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this.#applyBundleConfig(await res.json());
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[build-a-box] Appstle bundle config unavailable — using theme tier settings.', err);
+    }
+  }
+
+  /** @param {Record<string, any>} payload - get-bundle response ({bundle, subscription, ...}) */
+  #applyBundleConfig(payload) {
+    const bundle = payload?.bundle || payload || {};
+
+    // tieredDiscount is a JSON string:
+    // [{"discountBasedOn":"QUANTITY","quantity":3,"discount":"5"},...] —
+    // parse defensively and merge into the theme tiers by quantity so
+    // names/perks from the editor are kept while Appstle owns the numbers.
+    let tiers = bundle.tieredDiscount;
+    if (typeof tiers === 'string') {
+      try {
+        tiers = JSON.parse(tiers);
+      } catch (_) {
+        tiers = null;
+      }
+    }
+    if (Array.isArray(tiers)) {
+      for (const t of tiers) {
+        const qty = Number(t.quantity ?? t.minQuantity ?? t.qty);
+        const pct = Number(t.discount ?? t.percentage ?? t.value);
+        if (!qty || Number.isNaN(pct)) continue;
+        const match = this.#tiers.find((x) => x.quantity === qty);
+        if (match) match.discount = pct;
+        else this.#tiers.push({ name: `${qty} bags`, quantity: qty, discount: pct, perks: '', freeShipping: false });
+      }
+      this.#tiers.sort((a, b) => a.quantity - b.quantity);
+
+      // Reflect Appstle's numbers on the Liquid-rendered tier badges.
+      this.querySelectorAll('[data-bab-tier]').forEach((el) => {
+        const qty = Number(/** @type {HTMLElement} */ (el).dataset.quantity);
+        const tier = this.#tiers.find((x) => x.quantity === qty);
+        const badge = el.querySelector('.bab__badge--success');
+        if (tier && badge) badge.textContent = `${tier.discount}% OFF`;
+      });
+    }
+
+    if (Number(bundle.minProductCount) > 0) this.dataset.minQty = String(bundle.minProductCount);
+
+    const planIds = String(bundle.sellingPlanIds || '')
+      .split(',')
+      .map((s) => Number(s.trim()))
+      .filter(Boolean);
+    if (planIds.length) this.#bundleSellingPlanId = planIds[0];
+
+    this.#render();
+  }
+
+  /* --- Selling plan matching ----------------------------------------------- */
+
+  /** @param {string|number} variantId */
+  #plansFor(variantId) {
+    return this.#planMap.get(String(variantId)) || [];
+  }
+
+  /**
+   * Appstle plan groups are named after the tiers ("Mini Munch - 3 Bags"…), so
+   * the plan for the achieved tier is the group whose name starts with it.
+   *
+   * @param {string|number} variantId
+   * @param {{name: string}|null} tier
+   */
+  #tierPlan(variantId, tier) {
+    if (!tier) return null;
+    const name = tier.name.trim().toLowerCase();
+    return this.#plansFor(variantId).find((p) => (p.group || '').trim().toLowerCase().startsWith(name)) || null;
+  }
+
+  /** Plan from the group matching no tier (e.g. "Single Bag Plans"), else the first. */
+  #defaultPlan(variantId) {
+    const plans = this.#plansFor(variantId);
+    const tierNames = this.#tiers.map((t) => t.name.trim().toLowerCase());
+    return (
+      plans.find((p) => !tierNames.some((n) => (p.group || '').trim().toLowerCase().startsWith(n))) ||
+      plans[0] ||
+      null
+    );
+  }
+
+  /**
+   * Subscription unit price at the achieved tier: the real Appstle allocation
+   * price when the tier plan is assigned to the single-bag variant, otherwise
+   * the advertised tier % off base (matches what checkout will charge once the
+   * tier groups include the single-bag variants in Appstle).
+   *
+   * @param {{variant_id: string|number, price: number}} item
+   * @param {{name: string, discount: number}|null} active
+   */
+  #subscribeUnitPrice(item, active) {
+    const tierPlan = this.#tierPlan(item.variant_id, active);
+    if (tierPlan) return tierPlan.price;
+    if (active) return Math.round(item.price * (1 - active.discount / 100));
+    const plan = this.#defaultPlan(item.variant_id);
+    return plan ? plan.price : item.price;
   }
 
   /* --- Tier math ----------------------------------------------------------- */
@@ -319,6 +468,25 @@ class BuildABoxSection extends Component {
       el.innerHTML = picksHTML;
     });
 
+    // Card prices reflect the achieved tier's subscription price.
+    this.querySelectorAll('[data-bab-card-price]').forEach((el) => {
+      const base = Number(/** @type {HTMLElement} */ (el).dataset.base) || 0;
+      const vid = /** @type {HTMLElement | null} */ (
+        el.closest('.bab-card')?.querySelector('[data-bab-add]')
+      )?.dataset.variantId;
+      let now = base;
+      if (subscribe && active && vid) {
+        now = this.#subscribeUnitPrice({ variant_id: vid, price: base }, active);
+      }
+      const nowEl = el.querySelector('[data-bab-card-price-now]');
+      if (nowEl) nowEl.textContent = formatMoney(now);
+      const compareEl = el.querySelector('[data-bab-card-price-compare]');
+      if (compareEl instanceof HTMLElement) {
+        compareEl.hidden = now >= base;
+        compareEl.textContent = formatMoney(base);
+      }
+    });
+
     // Summary + totals.
     this.#renderSummary(items, total, active, subscribe);
 
@@ -374,9 +542,10 @@ class BuildABoxSection extends Component {
     // Prices come from each product's single-bag variant (rendered by Liquid).
     const baseSubtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
     // Subscription savings only exist while the toggle is on: the payable unit
-    // price switches to the variant's selling-plan (Appstle) allocation price.
+    // price switches to the tier's Appstle selling-plan price for the achieved
+    // quantity (see #subscribeUnitPrice).
     const payableSubtotal = items.reduce((sum, i) => {
-      const unit = subscribe && i.plan_price != null ? i.plan_price : i.price;
+      const unit = subscribe ? this.#subscribeUnitPrice(i, active) : i.price;
       return sum + unit * i.qty;
     }, 0);
 
@@ -395,13 +564,16 @@ class BuildABoxSection extends Component {
     };
 
     setText('[data-bab-summary-count]', String(total));
-    setText('[data-bab-summary-per-pack]', total > 0 ? formatMoney(Math.round(baseSubtotal / total)) : '—');
+    // Price per Pack shows what the shopper actually pays per bag at the
+    // current tier (discounted while Subscribe & Save is on).
+    setText('[data-bab-summary-per-pack]', total > 0 ? formatMoney(Math.round(payableSubtotal / total)) : '—');
 
     const planRow = this.querySelector('[data-bab-summary-plan-row]');
     if (planRow instanceof HTMLElement) {
       planRow.hidden = !(subscribe && planSavings > 0);
       if (!planRow.hidden) {
-        setText('[data-bab-summary-plan-label]', 'Subscription Savings');
+        const pct = active ? ` (${active.discount}%)` : '';
+        setText('[data-bab-summary-plan-label]', `Subscription Savings${pct}`);
         setText('[data-bab-summary-plan-value]', `- ${formatMoney(planSavings)}`);
       }
     }
@@ -465,11 +637,23 @@ class BuildABoxSection extends Component {
     });
 
     const subscribe = this.subscribeOn;
+    const active = this.#activeTier(BundleStore.totalQty());
+    const bundleRef = this.dataset.appstleBundleHandle || '';
     const payload = {
       items: items.map((item) => {
         /** @type {Record<string, any>} */
         const line = { id: item.variant_id, quantity: item.qty };
-        if (subscribe && item.plan_id) line.selling_plan = item.plan_id;
+        if (subscribe) {
+          // Appstle Build-a-Box plan first (its tiered discount fires at
+          // checkout); else the tier's plan when allocated to the single-bag
+          // variant; else the variant's default (single-bag) plan.
+          const plan = this.#tierPlan(item.variant_id, active) || this.#defaultPlan(item.variant_id);
+          const planId = this.#bundleSellingPlanId || plan?.id;
+          if (planId) line.selling_plan = planId;
+          // Marks the line as part of the Build-a-Box — Appstle's discount
+          // endpoint only counts lines carrying this property.
+          if (bundleRef) line.properties = { '_appstle-bb-id': bundleRef };
+        }
         return line;
       }),
       sections: this.#getCartSectionIds(),
@@ -493,15 +677,46 @@ class BuildABoxSection extends Component {
       const data = await res.json();
       if (data.status) throw new Error(data.description || data.message || 'Add to cart failed');
 
-      const cart = await fetch(`${Theme.routes.cart_url}.json`, {
+      let cart = await fetch(`${Theme.routes.cart_url}.json`, {
         headers: { Accept: 'application/json' },
         credentials: 'same-origin',
       }).then((r) => r.json());
 
+      // Appstle applies the Build-a-Box tiered discount by minting a discount
+      // code for the current cart (same flow its own cart-page script runs):
+      // PUT the cart to its discount endpoint, then hit /discount/{code} so
+      // the code is attached to the checkout session.
+      let sections = data.sections;
+      if (subscribe && bundleRef) {
+        const applied = await this.#applyAppstleBundleDiscount(bundleRef, cart);
+        if (applied) {
+          // The sections in the cart/add response were rendered BEFORE the
+          // code existed — re-render them (and the cart payload) so the
+          // drawer's first paint shows the discounted prices and the
+          // "Bundle discount" summary row.
+          try {
+            const sectionIds = this.#getCartSectionIds();
+            const [freshSections, freshCart] = await Promise.all([
+              sectionIds
+                ? fetch(`${window.location.pathname}?sections=${encodeURIComponent(sectionIds)}`).then((r) => r.json())
+                : null,
+              fetch(`${Theme.routes.cart_url}.json`, {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+              }).then((r) => r.json()),
+            ]);
+            if (freshSections) sections = freshSections;
+            if (freshCart) cart = freshCart;
+          } catch (_) {
+            /* keep the pre-discount render — checkout still gets the code */
+          }
+        }
+      }
+
       deferred.resolve({
         cart: CartLinesUpdateEvent.createCartFromAjaxResponse(cart),
         detail: {
-          sections: data.sections,
+          sections,
           items: cart.items,
           itemCount: cart.item_count,
           source: 'build-a-box',
@@ -524,6 +739,35 @@ class BuildABoxSection extends Component {
     }
   }
 
+  /**
+   * @param {string} bundleRef
+   * @param {Record<string, any>} cart - /cart.json payload (its lines carry _appstle-bb-id)
+   * @returns {Promise<boolean>} whether a discount code was applied
+   */
+  async #applyAppstleBundleDiscount(bundleRef, cart) {
+    const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
+    try {
+      const res = await fetch(`/${prefix}/bb/api/subscription-bundlings/discount/${encodeURIComponent(bundleRef)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ cart }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data?.discountCode) {
+        const applied = await fetch(
+          `${/** @type {any} */ (window).Shopify?.routes?.root || '/'}discount/${encodeURIComponent(data.discountCode)}`
+        );
+        return applied.ok;
+      }
+      return false;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[build-a-box] Could not apply Appstle bundle discount — checkout will show full price.', err);
+      return false;
+    }
+  }
+
   /** @returns {string} */
   #getCartSectionIds() {
     const ids = [];
@@ -536,6 +780,97 @@ class BuildABoxSection extends Component {
 
 if (!customElements.get('build-a-box-section')) {
   customElements.define('build-a-box-section', BuildABoxSection);
+}
+
+/* ---------------------------------------------------------------------------
+ * Appstle bundle discount sync
+ *
+ * The minted Build-a-Box code is only valid for the exact cart it was created
+ * for — any later mutation (quantity change, removal, switching a line to
+ * one-time) invalidates it. Every cart mutation in this theme (drawer + cart
+ * page) resolves a CartLinesUpdateEvent, so one document-level listener can
+ * re-mint the code for the new cart state and repaint the cart sections.
+ *
+ * Runs on every page (this file is a global script). Appstle decides the new
+ * tier server-side — with "Allow one-time purchase" off, only subscription
+ * lines count, so e.g. switching 3 of 6 bags to one-time drops 10% → 5%.
+ * --------------------------------------------------------------------------- */
+
+const SYNC_SOURCE = 'build-a-box-discount-sync';
+const SYNC_FLAG = '__buildABoxDiscountSyncInstalled';
+if (!(/** @type {any} */ (window))[SYNC_FLAG]) {
+  /** @type {any} */ (window)[SYNC_FLAG] = true;
+
+  let syncRun = 0;
+
+  document.addEventListener(StandardEvents.cartLinesUpdate, (/** @type {any} */ event) => {
+    event.promise?.then(async (/** @type {any} */ result) => {
+      const source = result?.detail?.source;
+      // Skip our own events: the initial add already applies + repaints, and
+      // the sync's own repaint event must not re-trigger the sync.
+      if (source === SYNC_SOURCE || source === 'build-a-box') return;
+
+      const run = ++syncRun; // latest-wins guard for rapid stepper clicks
+
+      const cart = await fetch(`${Theme.routes.cart_url}.json`, {
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      }).then((r) => r.json());
+
+      const bundleRef = cart?.items?.find(
+        (/** @type {any} */ i) => i.properties?.['_appstle-bb-id']
+      )?.properties?.['_appstle-bb-id'];
+      if (!bundleRef || run !== syncRun) return;
+
+      const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
+      try {
+        const res = await fetch(`/${prefix}/bb/api/subscription-bundlings/discount/${encodeURIComponent(bundleRef)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ cart }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // Below the minimum tier Appstle mints nothing (discountNeeded:false);
+        // the previously applied code simply stops validating at checkout.
+        if (!data?.discountCode) return;
+        const applied = await fetch(
+          `${/** @type {any} */ (window).Shopify?.routes?.root || '/'}discount/${encodeURIComponent(data.discountCode)}`
+        );
+        if (!applied.ok || run !== syncRun) return;
+
+        // Repaint cart sections with the fresh code baked in.
+        const ids = [];
+        document.querySelectorAll('cart-items-component').forEach((el) => {
+          if (el instanceof HTMLElement && el.dataset.sectionId) ids.push(el.dataset.sectionId);
+        });
+        if (!ids.length) return;
+        const [sections, freshCart] = await Promise.all([
+          fetch(`${window.location.pathname}?sections=${encodeURIComponent(ids.join(','))}`).then((r) => r.json()),
+          fetch(`${Theme.routes.cart_url}.json`, { headers: { Accept: 'application/json' }, credentials: 'same-origin' }).then((r) => r.json()),
+        ]);
+        if (run !== syncRun) return;
+
+        const deferred = CartLinesUpdateEvent.createPromise();
+        document.dispatchEvent(
+          new CartLinesUpdateEvent({ action: 'update', context: 'cart', lines: [], promise: deferred.promise })
+        );
+        deferred.resolve({
+          cart: CartLinesUpdateEvent.createCartFromAjaxResponse(freshCart),
+          detail: {
+            sections,
+            items: freshCart.items,
+            itemCount: freshCart.item_count,
+            source: SYNC_SOURCE,
+            didError: false,
+          },
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[build-a-box] Bundle discount re-sync failed — checkout may show a stale discount.', err);
+      }
+    }).catch(() => {});
+  });
 }
 
 /* ---------------------------------------------------------------------------
