@@ -2148,7 +2148,7 @@
           "name": "t:names.button",
           "settings": {
             "label": "Build Your Bundle",
-            "link": "shopify://collections/all",
+            "link": "shopify://pages/build-a-bag",
             "open_in_new_tab": false,
             "style_class": "button-secondary",
             "custom_button_background": "{{ settings.color_palette.foreground }}",
@@ -2318,7 +2318,7 @@
               "name": "t:names.button",
               "settings": {
                 "label": "MIX THEM ALL — BUILD A BUNDLE",
-                "link": "shopify://collections/all",
+                "link": "shopify://pages/build-a-bag",
                 "open_in_new_tab": false,
                 "style_class": "button",
                 "custom_button_background": "{{ settings.color_palette.foreground }}",
@@ -8501,7 +8501,7 @@
                   "name": "t:names.button",
                   "settings": {
                     "label": "BUILD YOUR BUNDLE",
-                    "link": "shopify://collections/all",
+                    "link": "shopify://pages/build-a-bag",
                     "open_in_new_tab": false,
                     "style_class": "button-custom",
                     "custom_button_background": "{{ settings.color_palette.color3 }}",

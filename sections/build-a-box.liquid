@@ -1,5 +1,34 @@
 {% render 'contrast-override', background_color: section.settings.background_color, section_id: section.id %}
 <div class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"></div>
+
+{%- liquid
+  # ---------------------------------------------------------------------------
+  # Tier data (blocks of type "tier", ordered by quantity in the editor).
+  # max_qty drives milestone positions and the hard cap on bundle size.
+  # ---------------------------------------------------------------------------
+  assign max_qty = 0
+  assign min_qty = 0
+  for block in section.blocks
+    if block.type == 'tier'
+      if block.settings.quantity > max_qty
+        assign max_qty = block.settings.quantity
+      endif
+      if min_qty == 0 or block.settings.quantity < min_qty
+        assign min_qty = block.settings.quantity
+      endif
+    endif
+  endfor
+  if max_qty == 0
+    assign max_qty = 12
+  endif
+  if min_qty == 0
+    assign min_qty = 3
+  endif
+
+  assign bundle_collection = section.settings.collection
+  assign accent = section.settings.accent_color | default: '#5B8DEF'
+-%}
+
 <build-a-box-section
   class="
     section
@@ -7,189 +36,1273 @@
     {% if section.settings.background_color != blank %}color-custom-{{ section.id }}{% endif %}
     section-build-a-box
     spacing-style
-    gap-style
   "
   style="
     {% render 'spacing-style', settings: section.settings %}
-    {% render 'gap-style', value: section.settings.gap %}
-    {% if section.settings.use_mobile_gap %}
-      {% render 'gap-style', name: 'mobile-gap', value: section.settings.mobile_gap %}
-    {% else %}
-      {% render 'gap-style', name: 'mobile-gap', value: section.settings.gap %}
-    {% endif %}
+    --bab-accent: {{ accent }};
+    --bab-accent-soft: {{ section.settings.accent_soft_color | default: '#DBE6FB' }};
+    --bab-cta-bg: {{ section.settings.cta_color | default: '#FFD23F' }};
+    --bab-cta-shadow: {{ section.settings.cta_shadow_color | default: '#E0A800' }};
+    --bab-success: {{ section.settings.success_color | default: '#3FA34D' }};
   "
   data-section-id="{{ section.id }}"
-  data-min-items="{{ section.settings.min_items }}"
-  data-max-items="{{ section.settings.max_items }}"
-  data-bar-title="{{ section.settings.bar_title | escape }}"
-  data-bar-cta="{{ section.settings.bar_cta | escape }}"
-  data-bar-empty-slot-text="{{ section.settings.bar_empty_slot_text | escape }}"
+  data-min-qty="{{ min_qty }}"
+  data-max-qty="{{ max_qty }}"
+  data-subscribe-default="{{ section.settings.subscribe_default_on }}"
+  data-mobile-limit="{{ section.settings.mobile_initial_products }}"
   data-testid="build-a-box"
 >
-  <collection-tabs-component
-    class="collection-tabs"
-    data-section-id="{{ section.id }}"
-    style="
-      --collection-tabs-alignment: {{ section.settings.tabs_alignment }};
-      --collection-tabs-header-alignment: {{ section.settings.header_alignment }};
-    "
-  >
-    <div class="collection-tabs__header">
-      {% content_for 'block', type: 'text', id: 'static-heading' %}
-      {% content_for 'block', type: 'text', id: 'static-description' %}
+  <script type="application/json" data-bab-tiers>
+    [
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'tier' -%}
+          {
+            "name": {{ block.settings.name | json }},
+            "quantity": {{ block.settings.quantity | json }},
+            "discount": {{ block.settings.discount | json }},
+            "perks": {{ block.settings.perks | json }},
+            "freeShipping": {{ block.settings.free_shipping | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  </script>
+
+  <div class="bab__top">
+    <div class="bab__main">
+      {%- if section.settings.banner_image != blank -%}
+        <div class="bab__banner">
+          {{ section.settings.banner_image | image_url: width: 1600 | image_tag: class: 'bab__banner-image', alt: section.settings.banner_image.alt }}
+        </div>
+      {%- endif -%}
+
+      {% comment %} Tier selector {% endcomment %}
+      <div class="bab__tiers" data-bab-tier-list role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tier' -%}
+            <div
+              class="bab__tier"
+              data-bab-tier
+              data-quantity="{{ block.settings.quantity }}"
+              role="listitem"
+              {{ block.shopify_attributes }}
+            >
+              <div class="bab__tier-head">
+                <span class="bab__tier-name">{{ block.settings.name }}</span>
+                {%- if block.settings.discount > 0 -%}
+                  <span class="bab__badge bab__badge--success">{{ block.settings.discount }}% OFF</span>
+                {%- endif -%}
+              </div>
+              <span class="bab__tier-qty">{{ block.settings.quantity }} BAGS</span>
+              {%- if block.settings.perks != blank -%}
+                <span class="bab__tier-perks">{{ block.settings.perks }}</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {% comment %} Selected count + unlock pill + progress bar {% endcomment %}
+      <div class="bab__status">
+        <span class="bab__selected-label">
+          {{- section.settings.selected_label | default: 'SELECTED:' }}
+          <span data-bab-selected-count>0</span>
+        </span>
+        <span class="bab__unlock-pill" data-bab-unlock-pill hidden></span>
+      </div>
+
+      <div class="bab__progress">
+        <div class="bab__progress-track">
+          <div class="bab__progress-fill" data-bab-progress-fill></div>
+        </div>
+        {%- liquid
+          assign free_shipping_marked = false
+          assign tier_count = 0
+          for block in section.blocks
+            if block.type == 'tier'
+              assign tier_count = tier_count | plus: 1
+            endif
+          endfor
+        -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tier' -%}
+            {%- assign pos = block.settings.quantity | times: 100.0 | divided_by: max_qty -%}
+            <div
+              class="bab__milestone"
+              data-bab-milestone
+              data-quantity="{{ block.settings.quantity }}"
+              style="--milestone-pos: {{ pos }}%;"
+            >
+              <span class="bab__milestone-dot">
+                <svg class="bab__milestone-check" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59z"/></svg>
+              </span>
+              {%- if block.settings.free_shipping and free_shipping_marked == false -%}
+                {%- assign free_shipping_marked = true -%}
+                <span class="bab__milestone-label bab__badge bab__badge--success" data-bab-milestone-label>
+                  {{- section.settings.free_shipping_label | default: 'FREE SHIPPING' -}}
+                </span>
+              {%- elsif forloop.last -%}
+                <span class="bab__milestone-label bab__badge bab__badge--muted" data-bab-milestone-label>
+                  {{- section.settings.max_savings_label | default: 'MAX SAVINGS' -}}
+                </span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {% comment %} Selected picks strip {% endcomment %}
+      <div class="bab__picks-wrap">
+        <button type="button" class="bab__picks-arrow bab__picks-arrow--prev" data-bab-picks-prev aria-label="{{ 'content.pagination.previous' | t }}">&lsaquo;</button>
+        <div class="bab__picks" data-bab-picks aria-live="polite"></div>
+        <button type="button" class="bab__picks-arrow bab__picks-arrow--next" data-bab-picks-next aria-label="{{ 'content.pagination.next' | t }}">&rsaquo;</button>
+      </div>
     </div>
 
-    <div
-      class="collection-tabs__nav"
-      role="tablist"
-      ref="tablist"
-    ></div>
+    {% comment %} Right rail: subscribe & save, order summary, CTA {% endcomment %}
+    <aside class="bab__rail" data-bab-rail>
+      {%- if section.settings.enable_subscribe -%}
+        <div class="bab__subscribe">
+          <div class="bab__subscribe-head">
+            <span class="bab__subscribe-title">{{ section.settings.subscribe_title }}</span>
+            <button
+              type="button"
+              class="bab__toggle"
+              data-bab-subscribe-toggle
+              role="switch"
+              aria-checked="false"
+              aria-label="{{ section.settings.subscribe_title | escape }}"
+            >
+              <span class="bab__toggle-knob"></span>
+            </button>
+          </div>
+          {%- if section.settings.subscribe_badge != blank -%}
+            <span class="bab__badge bab__badge--accent">{{ section.settings.subscribe_badge }}</span>
+          {%- endif -%}
+          <ul class="bab__subscribe-benefits">
+            {%- assign benefits = section.settings.subscribe_benefits | newline_to_br | split: '<br />' -%}
+            {%- for benefit in benefits -%}
+              {%- assign benefit_stripped = benefit | strip -%}
+              {%- if benefit_stripped != blank -%}
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59z"/></svg>
+                  {{ benefit_stripped }}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
 
-    {% content_for 'blocks' %}
+      <div class="bab__summary">
+        <div class="bab__summary-row">
+          <span>{{ section.settings.summary_packs_label | default: 'Packs Selected' }}</span>
+          <span data-bab-summary-count>0</span>
+        </div>
+        <div class="bab__summary-row">
+          <span>{{ section.settings.summary_price_label | default: 'Price per Pack' }}</span>
+          <span data-bab-summary-per-pack>—</span>
+        </div>
+        {% comment %}
+          Bundle Savings row — permanently hidden for now: this version has no
+          bundle-level discount mechanism (Appstle tier plans are only allocated
+          to the pack-size variants, not the single bag). Kept in the markup so
+          a future quantity-discount implementation can re-enable it from JS.
+        {% endcomment %}
+        <div class="bab__summary-row" data-bab-summary-tier-row hidden>
+          <span data-bab-summary-tier-label></span>
+          <span data-bab-summary-tier-value></span>
+        </div>
+        <div class="bab__summary-row" data-bab-summary-plan-row hidden>
+          <span data-bab-summary-plan-label></span>
+          <span data-bab-summary-plan-value></span>
+        </div>
+        <div class="bab__summary-row">
+          <span>{{ section.settings.summary_shipping_label | default: 'Shipping' }}</span>
+          <span data-bab-summary-shipping>&mdash;</span>
+        </div>
+        <hr class="bab__summary-divider">
+        <div class="bab__summary-row bab__summary-row--total">
+          <span>{{ section.settings.summary_total_label | default: 'Total' }}</span>
+          <span class="bab__summary-total">
+            <span class="bab__summary-total-prices">
+              <strong data-bab-summary-total>$0.00</strong>
+              <s data-bab-summary-compare hidden></s>
+            </span>
+            <span class="bab__badge bab__badge--success" data-bab-summary-save hidden></span>
+          </span>
+        </div>
+      </div>
 
-    <div
-      class="collection-tabs__empty"
-      ref="emptyState"
-      hidden
-    >
-      {{- 'onboarding.no_content' | t -}}
+      <button type="button" class="bab__cta" data-bab-add-to-cart disabled>
+        <span data-bab-cta-text>{{ section.settings.cta_label | default: 'ADD TO CART' }}</span>
+      </button>
+    </aside>
+  </div>
+
+  {% comment %} Product grid {% endcomment %}
+  <div class="bab__grid" data-bab-grid>
+    {%- if bundle_collection != blank -%}
+      {%- for product in bundle_collection.products limit: section.settings.max_products -%}
+        {%- liquid
+          # The bundle is built from single bags: price, availability and the
+          # selling plan all come from the single-bag variant (default "1 Pack").
+          assign single_title = section.settings.single_variant_title | default: '1 Pack'
+          assign variant = product.variants | where: 'title', single_title | first
+          if variant == blank
+            assign variant = product.selected_or_first_available_variant
+          endif
+          assign card_accent = product.metafields.custom.color.value | default: accent
+          assign notes = product.metafields.custom.card_flavor_notes.value | default: product.description | strip_html | truncatewords: 8
+
+          # First Appstle selling plan allocated to the single-bag variant (the
+          # "Single Bag Plans" group on this store; 4 Weeks delivery).
+          assign plan_allocation = variant.selling_plan_allocations | first
+
+          assign sourness = product.metafields.custom.flavor_sourness.value
+          assign card_badge = product.metafields.custom.card_badge.value
+        -%}
+        <div
+          class="bab-card"
+          data-bab-card
+          style="--pc-accent: {{ card_accent }};"
+          {% if forloop.index > section.settings.mobile_initial_products %}
+            data-bab-overflow
+          {% endif %}
+        >
+          <div class="bab-card__media">
+            {%- if product.featured_media -%}
+              {{ product.featured_media | image_url: width: 600 | image_tag: loading: 'lazy', class: 'bab-card__image', widths: '300, 450, 600' }}
+            {%- endif -%}
+            {%- if sourness != blank -%}
+              {%- assign dots = sourness | plus: 12 | divided_by: 25 -%}
+              <span class="bab-card__sour">
+                {{ section.settings.sour_label | default: 'SOUR' }}
+                {%- for i in (1..4) -%}
+                  {%- if i <= dots %}&#9679;{% else %}&#9675;{% endif -%}
+                {%- endfor -%}
+              </span>
+            {%- endif -%}
+            {%- if card_badge != blank -%}
+              <span class="bab-card__flag">{{ card_badge }}</span>
+            {%- endif -%}
+          </div>
+          <div class="bab-card__info">
+            <h3 class="bab-card__title">{{ product.title }}</h3>
+            {%- if notes != blank -%}
+              <p class="bab-card__notes">{{ notes }}</p>
+            {%- endif -%}
+          </div>
+          <div class="bab-card__footer">
+            <span class="bab-card__price">{{ variant.price | money }}</span>
+            <button
+              type="button"
+              class="bab-card__add"
+              data-bab-add
+              data-variant-id="{{ variant.id }}"
+              data-product-id="{{ product.id }}"
+              data-handle="{{ product.handle }}"
+              data-title="{{ product.title | escape }}"
+              data-price="{{ variant.price }}"
+              data-image="{% if product.featured_media %}{{ product.featured_media | image_url: width: 300 }}{% endif %}"
+              data-accent="{{ card_accent }}"
+              {% if plan_allocation %}
+                data-plan-id="{{ plan_allocation.selling_plan.id }}"
+                data-plan-price="{{ plan_allocation.price }}"
+              {% endif %}
+              {% unless variant.available %}disabled{% endunless %}
+            >
+              {%- if variant.available -%}
+                {{ section.settings.card_cta_label | default: 'ADD TO BUNDLE +' }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t | upcase }}
+              {%- endif -%}
+            </button>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- else -%}
+      <div class="bab__empty">{{ 'onboarding.no_content' | t }}</div>
+    {%- endif -%}
+  </div>
+
+  <button type="button" class="bab__see-more button" data-bab-see-more hidden>
+    {{ section.settings.see_more_label | default: 'SEE MORE' }}
+  </button>
+
+  {% comment %} Floating picks bar — shown when the rail is off-screen {% endcomment %}
+  <div class="bab__float" data-bab-float hidden>
+    <div class="bab__float-picks-col">
+      <div class="bab__float-head">
+        <span class="bab__float-title">{{ section.settings.float_title | default: 'PACKS SELECTED' }}</span>
+        <span class="bab__float-meta">
+          <span class="bab__float-count" data-bab-float-count>0</span>
+          <button type="button" class="bab__float-details" data-bab-float-details>
+            {{ section.settings.float_details_label | default: '[See details]' }}
+          </button>
+        </span>
+      </div>
+      <div class="bab__picks bab__picks--float" data-bab-float-picks></div>
     </div>
-  </collection-tabs-component>
-
-  {% render 'bundle-bar', section: section %}
+    <div class="bab__float-actions">
+      {%- if section.settings.enable_subscribe -%}
+        <button type="button" class="bab__float-subscribe" data-bab-float-subscribe>
+          <span data-bab-float-subscribe-label>{{ section.settings.subscribe_title }}</span>
+          <span class="bab__toggle" data-bab-float-toggle role="switch" aria-checked="false">
+            <span class="bab__toggle-knob"></span>
+          </span>
+        </button>
+      {%- endif -%}
+      <button type="button" class="bab__cta bab__cta--float" data-bab-float-add disabled>
+        <span data-bab-float-cta-text>{{ section.settings.cta_label | default: 'ADD TO CART' }}</span>
+      </button>
+    </div>
+  </div>
 </build-a-box-section>
 
 {% stylesheet %}
   .section-build-a-box {
-    row-gap: var(--gap);
-    padding-inline: 0;
+    --bab-navy: #0b1b2b;
+    --bab-slate: #5e7b93;
+    --bab-track: #e3eef5;
+    --bab-heading-font: var(--font-heading--family);
+    --bab-body-font: var(--font-body--family);
+
+    color: var(--bab-navy);
   }
 
-  .section-build-a-box .collection-tabs {
+  .section-build-a-box .bab__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 414px;
+    gap: 32px;
+    align-items: start;
+    margin-bottom: 48px;
+  }
+
+  .section-build-a-box .bab__main {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  /* --- Banner ------------------------------------------------------------- */
+  .section-build-a-box .bab__banner {
+    border-radius: 30px;
+    overflow: hidden;
+    height: 216px;
+  }
+
+  .section-build-a-box .bab__banner-image {
     width: 100%;
-    row-gap: var(--gap);
-    padding-inline: var(--padding-inline-start, 0) var(--padding-inline-end, 0);
-  }
-
-  @media screen and (max-width: 749px) {
-    .section-build-a-box {
-      padding-inline: 0;
-      row-gap: var(--mobile-gap, var(--gap));
-    }
-
-    .section-build-a-box .collection-tabs {
-      padding-inline:
-        var(--padding-inline-start-mobile, var(--padding-inline-start, 0))
-        var(--padding-inline-end-mobile, var(--padding-inline-end, 0));
-      row-gap: var(--mobile-gap, var(--gap));
-    }
-  }
-
-  .section-build-a-box .collection-tabs__header {
-    display: flex;
-    flex-direction: column;
-    align-items: var(--collection-tabs-header-alignment, center);
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .section-build-a-box .collection-tabs__header:empty {
-    display: none;
-  }
-
-  .section-build-a-box .collection-tabs > .collection-grid-block {
-    width: 100%;
-  }
-
-  .section-build-a-box .collection-tabs:not([data-hydrated]) > .collection-grid-block ~ .collection-grid-block {
-    display: none;
-  }
-
-  .section-build-a-box .collection-tabs[data-hydrated] > .collection-grid-block[hidden] {
-    display: none;
-  }
-
-  .section-build-a-box .collection-tabs__nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: var(--collection-tabs-alignment, center);
-    gap: clamp(1rem, 4vw, 2.5rem);
-    width: 100%;
-  }
-
-  .section-build-a-box .collection-tabs__tab {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    padding: 0.5rem 0;
-    cursor: pointer;
-    color: var(--color-foreground);
-    opacity: 0.55;
-    border-bottom: 2px solid transparent;
-    transition: opacity var(--animation-speed, 0.2s) ease, border-color var(--animation-speed, 0.2s) ease;
-  }
-
-  .section-build-a-box .collection-tabs__tab:hover,
-  .section-build-a-box .collection-tabs__tab:focus-visible {
-    opacity: 1;
-  }
-
-  .section-build-a-box .collection-tabs__tab[aria-selected='true'] {
-    opacity: 1;
-    border-bottom-color: currentColor;
-  }
-
-  @media screen and (max-width: 749px) {
-    .section-build-a-box .collection-tabs__tab.h6 {
-      font-family: var(--font-h7--family);
-      font-style: var(--font-h7--style);
-      font-weight: var(--font-h7--weight);
-      font-size: var(--font-h7--size);
-      line-height: var(--font-h7--line-height);
-      letter-spacing: var(--font-h7--letter-spacing);
-      text-transform: var(--font-h7--case);
-    }
-
-    .section-build-a-box .product-quick-add-block .quick-add__button {
-      padding-inline: 0;
-      white-space: nowrap;
-    }
-
-    .section-build-a-box .quick-add__button--choose .add-to-cart-text__content {
-      grid-template-columns: 1fr;
-    }
-
-    .section-build-a-box .quick-add__button--choose .add-to-cart-text__content span span {
-      opacity: 1;
-      filter: blur(0);
-      translate: 0 0;
-    }
-  }
-
-  .section-build-a-box .collection-tabs__empty {
-    color: var(--color-foreground);
-    opacity: 0.6;
-    text-align: center;
-    padding: 1.5rem 0;
-  }
-
-  .section-build-a-box .collection-grid-block__list {
-    width: 100%;
-  }
-
-  .section-build-a-box .resource-list__item [ref='productTitleLink'] {
+    height: 100%;
+    object-fit: cover;
     display: block;
-    min-height: 2lh;
-    @media screen and (max-width: 749px) {
-      min-height: 1lh;
+  }
+
+  /* --- Tier selector ------------------------------------------------------ */
+  .section-build-a-box .bab__tiers {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab__tier {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 2px dashed #c8daff;
+    border-radius: 15px;
+    padding: 10px 15px 13px;
+    background: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .section-build-a-box .bab__tier[data-active] {
+    background: var(--bab-accent);
+    color: #fff;
+  }
+
+  /* The stage currently being worked toward: half-strength highlight until
+     the required bag count is reached. */
+  .section-build-a-box .bab__tier[data-next] {
+    background: color-mix(in srgb, var(--bab-accent) 50%, transparent);
+    color: #fff;
+  }
+
+  /* Tier discounts are part of the subscription program — hide the % OFF
+     badges when Subscribe & Save is off. */
+  .section-build-a-box[data-subscribe='false'] .bab__tier .bab__badge--success {
+    display: none;
+  }
+
+  .section-build-a-box .bab__tier-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .section-build-a-box .bab__tier-name {
+    font-family: var(--bab-body-font);
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .section-build-a-box .bab__tier-qty {
+    font-family: var(--bab-heading-font);
+    font-size: 32px;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .section-build-a-box .bab__tier-perks {
+    font-family: var(--bab-body-font);
+    font-size: 12px;
+    line-height: 1.3;
+    opacity: 0.9;
+  }
+
+  /* --- Badges ------------------------------------------------------------- */
+  .section-build-a-box .bab__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-family: var(--bab-body-font);
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    width: fit-content;
+  }
+
+  .section-build-a-box .bab__badge--success {
+    background: var(--bab-success);
+    color: #fff;
+  }
+
+  .section-build-a-box .bab__badge--accent {
+    background: var(--bab-accent);
+    color: #fff;
+    padding: 5px 10px;
+    font-family: var(--bab-heading-font);
+    font-weight: 400;
+    font-size: 14px;
+  }
+
+  .section-build-a-box .bab__badge--muted {
+    background: #e8e8e8;
+    border: 1px solid #cfcfcf;
+    color: rgb(11 27 43 / 0.5);
+  }
+
+  /* --- Status + progress -------------------------------------------------- */
+  .section-build-a-box .bab__status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 22px;
+  }
+
+  .section-build-a-box .bab__selected-label {
+    font-family: var(--bab-body-font);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    flex: 0 0 auto;
+  }
+
+  .section-build-a-box .bab__unlock-pill {
+    background: var(--bab-navy);
+    color: #fff;
+    font-family: var(--bab-body-font);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .section-build-a-box .bab__progress {
+    position: relative;
+    margin-bottom: 34px;
+  }
+
+  .section-build-a-box .bab__progress-track {
+    height: 15px;
+    border-radius: 999px;
+    background: var(--bab-track);
+    box-shadow: inset 0 2px 4px rgb(11 27 43 / 0.08);
+    overflow: hidden;
+  }
+
+  .section-build-a-box .bab__progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--bab-success), #62e474);
+    transition: width 0.35s ease;
+  }
+
+  .section-build-a-box .bab__milestone {
+    position: absolute;
+    top: 50%;
+    left: var(--milestone-pos, 0%);
+    translate: -50% 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .section-build-a-box .bab__milestone-dot {
+    translate: 0 -50%;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid #d5e4ee;
+    box-shadow: 0 2px 6px rgb(11 27 43 / 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .section-build-a-box .bab__milestone[data-reached] .bab__milestone-dot {
+    background: var(--bab-success);
+    border-color: #80d48c;
+    color: #fff;
+  }
+
+  .section-build-a-box .bab__milestone-label {
+    position: absolute;
+    top: 18px;
+    white-space: nowrap;
+  }
+
+  .section-build-a-box .bab__milestone:last-child .bab__milestone-label {
+    translate: -30% 0;
+  }
+
+  /* --- Picks strip -------------------------------------------------------- */
+  .section-build-a-box .bab__picks-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-build-a-box .bab__picks {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-block: 4px;
+  }
+
+  .section-build-a-box .bab__picks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-build-a-box .bab__picks-arrow {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgb(126 211 255 / 0.5);
+    background: transparent;
+    color: #009eed;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .section-build-a-box .bab__picks-arrow[disabled] {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .section-build-a-box .bab-pick {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 105px;
+    flex: 0 0 auto;
+  }
+
+  .section-build-a-box .bab-pick__media {
+    aspect-ratio: 1;
+    border: 2px solid var(--pick-accent, var(--bab-accent));
+    border-radius: 10px;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--pick-accent, var(--bab-accent)) 13%, transparent),
+      color-mix(in srgb, var(--pick-accent, var(--bab-accent)) 27%, transparent)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .section-build-a-box .bab-pick__media img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+  }
+
+  .section-build-a-box .bab-pick__stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--pick-accent, var(--bab-accent));
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .section-build-a-box .bab-pick__step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 0;
+    background: #e5edfc;
+    color: var(--bab-navy);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .section-build-a-box .bab-pick__qty {
+    font-family: var(--bab-heading-font);
+    font-size: 15px;
+    color: #e5edfd;
+  }
+
+  .section-build-a-box .bab-pick--empty {
+    aspect-ratio: 1;
+    width: 105px;
+    border: 2px dashed #cfcfcf;
+    border-radius: 10px;
+    background: #f7f7f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9aa7b1;
+    font-size: 24px;
+  }
+
+  /* --- Right rail --------------------------------------------------------- */
+  .section-build-a-box .bab__rail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 24px;
+  }
+
+  .section-build-a-box .bab__subscribe {
+    background: var(--bab-accent-soft);
+    border: 3px solid var(--bab-accent);
+    border-radius: 26px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab__subscribe-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab__subscribe-title {
+    font-family: var(--bab-heading-font);
+    font-size: 32px;
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .section-build-a-box .bab__toggle {
+    flex: 0 0 auto;
+    width: 50px;
+    height: 28px;
+    border-radius: 999px;
+    border: 0;
+    background: #b8c9e8;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0;
+    display: inline-block;
+  }
+
+  .section-build-a-box .bab__toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    transition: translate 0.2s ease;
+  }
+
+  .section-build-a-box .bab__toggle[aria-checked='true'] {
+    background: var(--bab-accent);
+  }
+
+  .section-build-a-box .bab__toggle[aria-checked='true'] .bab__toggle-knob {
+    translate: 22px 0;
+  }
+
+  .section-build-a-box .bab__subscribe-benefits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .section-build-a-box .bab__subscribe-benefits li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--bab-body-font);
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .section-build-a-box .bab__subscribe-benefits svg {
+    color: var(--bab-accent);
+    flex: 0 0 auto;
+  }
+
+  .section-build-a-box .bab__summary {
+    background: var(--color-background, #fff);
+    border: 3px dashed color-mix(in srgb, var(--bab-accent) 30%, transparent);
+    border-radius: 26px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--bab-body-font);
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .section-build-a-box .bab__summary-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab__summary-divider {
+    border: 0;
+    border-top: 1px solid var(--bab-accent-soft);
+    margin: 0;
+    width: 100%;
+  }
+
+  .section-build-a-box .bab__summary-total {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+
+  .section-build-a-box .bab__summary-total-prices {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+
+  .section-build-a-box .bab__summary-total-prices strong {
+    font-family: var(--bab-heading-font);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+  }
+
+  .section-build-a-box .bab__summary-total-prices s {
+    font-family: var(--bab-heading-font);
+    font-size: 24px;
+    opacity: 0.2;
+  }
+
+  /* --- CTA ---------------------------------------------------------------- */
+  .section-build-a-box .bab__cta {
+    width: 100%;
+    background: var(--bab-cta-bg);
+    box-shadow: 0 6px 0 var(--bab-cta-shadow);
+    border: 0;
+    border-radius: 999px;
+    padding: 20px 34px 14px;
+    font-family: var(--bab-heading-font);
+    font-size: 20px;
+    color: var(--bab-navy);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+
+  .section-build-a-box .bab__cta:hover:not([disabled]) {
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 var(--bab-cta-shadow);
+  }
+
+  .section-build-a-box .bab__cta[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* --- Product grid ------------------------------------------------------- */
+  .section-build-a-box .bab__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .section-build-a-box .bab-card {
+    background: #fff;
+    border: 3px solid var(--pc-accent, var(--bab-accent));
+    border-radius: 28px;
+    box-shadow: 0 14px 15px color-mix(in srgb, var(--pc-accent, var(--bab-accent)) 22%, transparent);
+    padding: 15px 15px 19px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab-card__media {
+    position: relative;
+    border-radius: 20px;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--pc-accent, var(--bab-accent)) 13%, transparent),
+      color-mix(in srgb, var(--pc-accent, var(--bab-accent)) 27%, transparent)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+
+  .section-build-a-box .bab-card__image {
+    width: 85%;
+    max-width: 250px;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
+  }
+
+  .section-build-a-box .bab-card__sour {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--pc-accent, var(--bab-accent));
+    color: #fff;
+    font-family: var(--bab-heading-font);
+    font-size: 12px;
+    letter-spacing: -0.01em;
+    padding: 5px 10px 6px;
+    border-radius: 999px;
+  }
+
+  .section-build-a-box .bab-card__flag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--bab-cta-bg);
+    color: var(--bab-navy);
+    font-family: var(--bab-heading-font);
+    font-size: 12px;
+    letter-spacing: -0.01em;
+    padding: 5px 10px 6px;
+    border-radius: 999px;
+    max-width: 45%;
+  }
+
+  .section-build-a-box .bab-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-inline: 6px;
+  }
+
+  .section-build-a-box .bab-card__title {
+    font-family: var(--bab-heading-font);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--bab-navy);
+  }
+
+  .section-build-a-box .bab-card__notes {
+    font-family: var(--bab-body-font);
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    color: var(--bab-slate);
+    margin: 0;
+  }
+
+  .section-build-a-box .bab-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 8px;
+    padding-inline: 6px 0;
+  }
+
+  .section-build-a-box .bab-card__price {
+    font-family: var(--bab-heading-font);
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  .section-build-a-box .bab-card__add {
+    background: var(--pc-accent, var(--bab-accent));
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 16px 10px;
+    font-family: var(--bab-heading-font);
+    font-size: 20px;
+    line-height: 0.9;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .section-build-a-box .bab-card__add:hover:not([disabled]) {
+    filter: brightness(1.08);
+  }
+
+  .section-build-a-box .bab-card__add:active:not([disabled]) {
+    transform: scale(0.97);
+  }
+
+  .section-build-a-box .bab-card__add[disabled] {
+    filter: saturate(0.3);
+    cursor: not-allowed;
+  }
+
+  .section-build-a-box .bab__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    opacity: 0.6;
+    padding: 24px 0;
+  }
+
+  .section-build-a-box .bab__see-more {
+    display: none;
+  }
+
+  /* --- Floating bar ------------------------------------------------------- */
+  .section-build-a-box .bab__float {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--layer-overlay, 80);
+    background: var(--color-background, #fff);
+    border-top: 1px solid rgb(11 27 43 / 0.08);
+    box-shadow: 0 -6px 24px rgb(11 27 43 / 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 14px clamp(16px, 4vw, 48px);
+    transform: translateY(0);
+    transition: transform 0.25s ease;
+  }
+
+  .section-build-a-box .bab__float[hidden] {
+    display: none;
+  }
+
+  .section-build-a-box .bab__float-picks-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+    max-width: 560px;
+  }
+
+  .section-build-a-box .bab__float-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .section-build-a-box .bab__float-title {
+    font-family: var(--bab-heading-font);
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .section-build-a-box .bab__float-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-build-a-box .bab__float-count {
+    background: var(--bab-accent);
+    color: #fff;
+    font-family: var(--bab-body-font);
+    font-size: 11px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .section-build-a-box .bab__float-details {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: #009eed;
+    font-family: var(--bab-body-font);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .section-build-a-box .bab__picks--float .bab-pick,
+  .section-build-a-box .bab__picks--float .bab-pick--empty {
+    width: 84px;
+  }
+
+  .section-build-a-box .bab__picks--float .bab-pick__step {
+    width: 24px;
+    height: 24px;
+  }
+
+  .section-build-a-box .bab__float-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 0 0 auto;
+    width: 306px;
+  }
+
+  .section-build-a-box .bab__float-subscribe {
+    background: var(--bab-accent-soft);
+    border: 1px solid var(--bab-accent);
+    border-radius: 999px;
+    padding: 8px 12px 8px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--bab-heading-font);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    color: var(--bab-navy);
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .section-build-a-box .bab__cta--float {
+    padding-block: 16px 11px;
+  }
+
+  /* --- Mobile ------------------------------------------------------------- */
+  @media screen and (max-width: 989px) {
+    .section-build-a-box .bab__top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .section-build-a-box .bab__rail {
+      position: static;
+      order: 3;
+    }
+
+    .section-build-a-box .bab__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
     }
   }
 
-  .section-build-a-box .product-card__content > product-price {
-    margin-top: auto;
+  @media screen and (max-width: 749px) {
+    .section-build-a-box .bab__banner {
+      height: auto;
+      aspect-ratio: 2 / 1;
+    }
+
+    .section-build-a-box .bab__tiers {
+      gap: 6px;
+    }
+
+    .section-build-a-box .bab__tier {
+      padding: 8px 8px 10px;
+    }
+
+    .section-build-a-box .bab__tier-qty {
+      font-size: 22px;
+    }
+
+    .section-build-a-box .bab__tier-name,
+    .section-build-a-box .bab__tier-perks {
+      font-size: 11px;
+    }
+
+    .section-build-a-box .bab__tier .bab__badge {
+      font-size: 10px;
+    }
+
+    .section-build-a-box .bab__status {
+      justify-content: center;
+    }
+
+    .section-build-a-box .bab__selected-label {
+      display: none;
+    }
+
+    .section-build-a-box .bab__unlock-pill {
+      margin-inline: 0;
+    }
+
+    .section-build-a-box .bab__picks-arrow {
+      display: none;
+    }
+
+    .section-build-a-box .bab-pick,
+    .section-build-a-box .bab-pick--empty {
+      width: 84px;
+    }
+
+    .section-build-a-box .bab-pick__step {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Adjacent milestone labels collide on narrow screens — stagger the last
+       one onto a second row. */
+    .section-build-a-box .bab__progress {
+      margin-bottom: 56px;
+    }
+
+    .section-build-a-box .bab__milestone-label {
+      font-size: 10px;
+    }
+
+    .section-build-a-box .bab__milestone:last-child .bab__milestone-label {
+      top: 40px;
+      translate: -70% 0;
+    }
+
+    .section-build-a-box .bab-card {
+      border-radius: 20px;
+      border-width: 2px;
+      padding: 10px 10px 14px;
+    }
+
+    .section-build-a-box .bab-card__title {
+      font-size: 20px;
+    }
+
+    .section-build-a-box .bab-card__notes {
+      font-size: 13px;
+    }
+
+    .section-build-a-box .bab-card__price {
+      font-size: 18px;
+    }
+
+    .section-build-a-box .bab-card__add {
+      font-size: 14px;
+      padding: 8px 12px;
+      width: 100%;
+    }
+
+    .section-build-a-box .bab-card__footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .section-build-a-box .bab-card__price {
+      align-self: flex-start;
+    }
+
+    /* SEE MORE collapse */
+    .section-build-a-box[data-collapsed] .bab-card[data-bab-overflow] {
+      display: none;
+    }
+
+    .section-build-a-box[data-collapsed] .bab__see-more {
+      display: block;
+      margin-top: 20px;
+      width: 100%;
+      background: transparent;
+      border: 2px solid var(--bab-navy);
+      border-radius: 999px;
+      color: var(--bab-navy);
+      font-family: var(--bab-heading-font);
+      font-size: 18px;
+      padding: 14px 0 10px;
+    }
+
+    /* Floating bar condenses to actions only */
+    .section-build-a-box .bab__float {
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 16px;
+    }
+
+    .section-build-a-box .bab__float-picks-col {
+      display: none;
+    }
+
+    .section-build-a-box .bab__float-actions {
+      width: 100%;
+      flex-direction: row;
+      align-items: stretch;
+    }
+
+    .section-build-a-box .bab__float-subscribe {
+      flex: 1 1 auto;
+      font-size: 14px;
+      padding-block: 6px;
+    }
+
+    .section-build-a-box .bab__cta--float {
+      flex: 1 1 auto;
+      width: auto;
+      font-size: 16px;
+      padding: 12px 16px 9px;
+    }
   }
 {% endstylesheet %}
 
@@ -199,7 +1312,48 @@
   "class": "ui-test-build-a-box",
   "blocks": [
     {
-      "type": "_collection-grid"
+      "type": "tier",
+      "name": "Tier",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Mini Munch"
+        },
+        {
+          "type": "range",
+          "id": "quantity",
+          "label": "Bags required",
+          "min": 1,
+          "max": 24,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "range",
+          "id": "discount",
+          "label": "Discount",
+          "info": "Shown on the tier card and used for the estimated total. Configure the matching discount in Appstle / Shopify discounts so checkout charges the same amount.",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "%",
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "perks",
+          "label": "Perks",
+          "default": "Giveaway entry + early access"
+        },
+        {
+          "type": "checkbox",
+          "id": "free_shipping",
+          "label": "Unlocks free shipping",
+          "default": false
+        }
+      ]
     }
   ],
   "disabled_on": {
@@ -208,72 +1362,176 @@
   "settings": [
     {
       "type": "header",
-      "content": "Bundle"
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": "Banner image"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Products shown in the grid. Cards use product metafields: custom.color (accent), custom.card_flavor_notes (tagline), custom.flavor_sourness (sour dots), custom.card_badge (corner flag)."
+    },
+    {
+      "type": "text",
+      "id": "single_variant_title",
+      "label": "Single bag variant title",
+      "info": "The variant used for pricing and cart lines (bundles are built from single bags). Falls back to the first available variant when no match.",
+      "default": "1 Pack"
     },
     {
       "type": "range",
-      "id": "min_items",
-      "label": "Minimum items required",
-      "min": 1,
-      "max": 12,
+      "id": "max_products",
+      "label": "Maximum products",
+      "min": 4,
+      "max": 48,
       "step": 1,
-      "default": 4
+      "default": 24
     },
     {
       "type": "range",
-      "id": "max_items",
-      "label": "Maximum items",
-      "min": 1,
-      "max": 12,
-      "step": 1,
-      "default": 4
-    },
-    {
-      "type": "text",
-      "id": "bar_title",
-      "label": "Bundle bar title",
-      "default": "YOUR BUNDLE"
-    },
-    {
-      "type": "text",
-      "id": "bar_cta",
-      "label": "Bundle bar CTA",
-      "default": "ADD BUNDLE TO CART"
-    },
-    {
-      "type": "text",
-      "id": "bar_empty_slot_text",
-      "label": "Empty slot label"
+      "id": "mobile_initial_products",
+      "label": "Products shown before “See more” (mobile)",
+      "min": 2,
+      "max": 24,
+      "step": 2,
+      "default": 6
     },
     {
       "type": "header",
-      "content": "Header"
+      "content": "Subscribe & save"
     },
     {
-      "type": "select",
-      "id": "header_alignment",
-      "label": "t:settings.alignment",
-      "options": [
-        { "value": "flex-start", "label": "t:options.left" },
-        { "value": "center", "label": "t:options.center" },
-        { "value": "flex-end", "label": "t:options.right" }
-      ],
-      "default": "center"
+      "type": "checkbox",
+      "id": "enable_subscribe",
+      "label": "Show subscription toggle",
+      "info": "Adds items with their Appstle selling plan when the toggle is on.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "subscribe_default_on",
+      "label": "Toggle on by default",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "subscribe_title",
+      "label": "Title",
+      "default": "SUBSCRIBE & SAVE"
+    },
+    {
+      "type": "text",
+      "id": "subscribe_badge",
+      "label": "Badge",
+      "default": "+ 10% off every order"
+    },
+    {
+      "type": "textarea",
+      "id": "subscribe_benefits",
+      "label": "Benefits (one per line)",
+      "default": "100% satisfaction guarantee\nSkip, swap or cancel anytime\nFree shipping on every order"
     },
     {
       "type": "header",
-      "content": "Tabs"
+      "content": "Text"
     },
     {
-      "type": "select",
-      "id": "tabs_alignment",
-      "label": "t:settings.alignment",
-      "options": [
-        { "value": "flex-start", "label": "t:options.left" },
-        { "value": "center", "label": "t:options.center" },
-        { "value": "flex-end", "label": "t:options.right" }
-      ],
-      "default": "center"
+      "type": "text",
+      "id": "selected_label",
+      "label": "Selected label",
+      "default": "SELECTED:"
+    },
+    {
+      "type": "text",
+      "id": "free_shipping_label",
+      "label": "Free shipping milestone label",
+      "default": "FREE SHIPPING"
+    },
+    {
+      "type": "text",
+      "id": "max_savings_label",
+      "label": "Max savings milestone label",
+      "default": "MAX SAVINGS"
+    },
+    {
+      "type": "text",
+      "id": "card_cta_label",
+      "label": "Card button label",
+      "default": "ADD TO BUNDLE +"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Add to cart label",
+      "default": "ADD TO CART"
+    },
+    {
+      "type": "text",
+      "id": "see_more_label",
+      "label": "See more label",
+      "default": "SEE MORE"
+    },
+    {
+      "type": "text",
+      "id": "sour_label",
+      "label": "Sour badge label",
+      "default": "SOUR"
+    },
+    {
+      "type": "text",
+      "id": "float_title",
+      "label": "Floating bar title",
+      "default": "PACKS SELECTED"
+    },
+    {
+      "type": "text",
+      "id": "float_details_label",
+      "label": "Floating bar details label",
+      "default": "[See details]"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent",
+      "default": "#5B8DEF"
+    },
+    {
+      "type": "color",
+      "id": "accent_soft_color",
+      "label": "Accent (soft)",
+      "default": "#DBE6FB"
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "Button",
+      "default": "#FFD23F"
+    },
+    {
+      "type": "color",
+      "id": "cta_shadow_color",
+      "label": "Button shadow",
+      "default": "#E0A800"
+    },
+    {
+      "type": "color",
+      "id": "success_color",
+      "label": "Savings",
+      "default": "#3FA34D"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "placeholder": "t:settings.default"
     },
     {
       "type": "header",
@@ -288,39 +1546,6 @@
         { "value": "full-width", "label": "t:options.full" }
       ],
       "default": "page-width"
-    },
-    {
-      "type": "range",
-      "id": "gap",
-      "label": "t:settings.gap",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 28
-    },
-    {
-      "type": "checkbox",
-      "id": "use_mobile_gap",
-      "label": "Use mobile gap",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "mobile_gap",
-      "label": "Mobile gap",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 28,
-      "visible_if": "{{ section.settings.use_mobile_gap }}"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "t:settings.background_color",
-      "placeholder": "t:settings.default"
     },
     {
       "type": "header",
@@ -365,60 +1590,6 @@
       "step": 1,
       "unit": "px",
       "default": 0
-    },
-    {
-      "type": "header",
-      "content": "Mobile padding"
-    },
-    {
-      "type": "checkbox",
-      "id": "use_mobile_padding",
-      "label": "Use mobile padding",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "padding-block-start-mobile",
-      "label": "t:settings.top",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0,
-      "visible_if": "{{ section.settings.use_mobile_padding }}"
-    },
-    {
-      "type": "range",
-      "id": "padding-block-end-mobile",
-      "label": "t:settings.bottom",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0,
-      "visible_if": "{{ section.settings.use_mobile_padding }}"
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-start-mobile",
-      "label": "t:settings.left",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0,
-      "visible_if": "{{ section.settings.use_mobile_padding }}"
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-end-mobile",
-      "label": "t:settings.right",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0,
-      "visible_if": "{{ section.settings.use_mobile_padding }}"
     }
   ],
   "presets": [
@@ -426,100 +1597,53 @@
       "name": "Build a box",
       "category": "t:categories.collections",
       "settings": {
-        "min_items": 4,
-        "max_items": 4,
-        "bar_title": "YOUR BUNDLE",
-        "bar_cta": "ADD BUNDLE TO CART",
-        "header_alignment": "center",
-        "tabs_alignment": "center",
-        "section_width": "page-width",
-        "gap": 28,
-        "padding-block-start": 48,
-        "padding-block-end": 48
+        "max_products": 24,
+        "enable_subscribe": true,
+        "subscribe_default_on": true
       },
       "blocks": {
-        "static-heading": {
-          "type": "text",
-          "name": "t:names.heading",
-          "static": true,
+        "tier_1": {
+          "type": "tier",
           "settings": {
-            "text": "<h2>Pick your favorites & build your bundle</h2>",
-            "type_preset": "h2",
-            "font": "var(--font-body--family)",
-            "font_size": "",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "uppercase",
-            "wrap": "pretty",
-            "width": "fit-content",
-            "max_width": "normal",
-            "alignment": "center",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "name": "Mini Munch",
+            "quantity": 3,
+            "discount": 5,
+            "perks": "Giveaway entry + early access",
+            "free_shipping": false
           }
         },
-        "static-description": {
-          "type": "text",
-          "name": "t:names.description",
-          "static": true,
+        "tier_2": {
+          "type": "tier",
           "settings": {
-            "text": "",
-            "type_preset": "paragraph",
-            "font": "var(--font-body--family)",
-            "font_size": "",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "width": "fit-content",
-            "max_width": "narrow",
-            "alignment": "center",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "name": "Big Zest",
+            "quantity": 6,
+            "discount": 10,
+            "perks": "Most popular + save your favorite box",
+            "free_shipping": false
           }
         },
-        "grid_1": {
-          "type": "_collection-grid",
-          "name": "Infusion",
+        "tier_3": {
+          "type": "tier",
           "settings": {
-            "tab_label": "Infusion",
-            "max_products": 12,
-            "columns": 4,
-            "mobile_columns": "2",
-            "columns_gap": 16,
-            "rows_gap": 24
+            "name": "Mega Munch",
+            "quantity": 9,
+            "discount": 15,
+            "perks": "Priority fulfillment + subscriber-only products",
+            "free_shipping": true
           }
         },
-        "grid_2": {
-          "type": "_collection-grid",
-          "name": "Single Origin",
+        "tier_4": {
+          "type": "tier",
           "settings": {
-            "tab_label": "Single Origin",
-            "max_products": 12,
-            "columns": 4,
-            "mobile_columns": "2",
-            "columns_gap": 16,
-            "rows_gap": 24
-          }
-        },
-        "grid_3": {
-          "type": "_collection-grid",
-          "name": "Blends",
-          "settings": {
-            "tab_label": "Blends",
-            "max_products": 12,
-            "columns": 4,
-            "mobile_columns": "2",
-            "columns_gap": 16,
-            "rows_gap": 24
+            "name": "Giga Bundle",
+            "quantity": 12,
+            "discount": 20,
+            "perks": "Best value + surprise bonuses",
+            "free_shipping": true
           }
         }
       },
-      "block_order": ["grid_1", "grid_2", "grid_3"]
+      "block_order": ["tier_1", "tier_2", "tier_3", "tier_4"]
     }
   ]
 }

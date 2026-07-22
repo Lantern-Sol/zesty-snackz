@@ -1,0 +1,97 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "build_a_box": {
+      "type": "build-a-box",
+      "blocks": {
+        "tier_1": {
+          "type": "tier",
+          "settings": {
+            "name": "Mini Munch",
+            "quantity": 3,
+            "discount": 5,
+            "perks": "Giveaway entry + early access",
+            "free_shipping": false
+          }
+        },
+        "tier_2": {
+          "type": "tier",
+          "settings": {
+            "name": "Big Zest",
+            "quantity": 6,
+            "discount": 10,
+            "perks": "Most popular + save your favorite box",
+            "free_shipping": false
+          }
+        },
+        "tier_3": {
+          "type": "tier",
+          "settings": {
+            "name": "Mega Munch",
+            "quantity": 9,
+            "discount": 15,
+            "perks": "Priority fulfillment + subscriber-only products",
+            "free_shipping": true
+          }
+        },
+        "tier_4": {
+          "type": "tier",
+          "settings": {
+            "name": "Giga Bundle",
+            "quantity": 12,
+            "discount": 20,
+            "perks": "Best value + surprise bonuses",
+            "free_shipping": true
+          }
+        }
+      },
+      "block_order": [
+        "tier_1",
+        "tier_2",
+        "tier_3",
+        "tier_4"
+      ],
+      "settings": {
+        "collection": "all-flavor-bags",
+        "max_products": 24,
+        "mobile_initial_products": 6,
+        "enable_subscribe": true,
+        "subscribe_default_on": true,
+        "subscribe_title": "SUBSCRIBE & SAVE",
+        "subscribe_badge": "+ 10% off every order",
+        "subscribe_benefits": "100% satisfaction guarantee\nSkip, swap or cancel anytime\nFree shipping on every order",
+        "selected_label": "SELECTED:",
+        "free_shipping_label": "FREE SHIPPING",
+        "max_savings_label": "MAX SAVINGS",
+        "card_cta_label": "ADD TO BUNDLE +",
+        "cta_label": "ADD TO CART",
+        "see_more_label": "SEE MORE",
+        "sour_label": "SOUR",
+        "float_title": "PACKS SELECTED",
+        "float_details_label": "[See details]",
+        "accent_color": "#5b8def",
+        "accent_soft_color": "#dbe6fb",
+        "cta_color": "#ffd23f",
+        "cta_shadow_color": "#e0a800",
+        "success_color": "#3fa34d",
+        "background_color": "",
+        "section_width": "page-width",
+        "padding-block-start": 48,
+        "padding-block-end": 48,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0
+      }
+    }
+  },
+  "order": [
+    "build_a_box"
+  ]
+}
