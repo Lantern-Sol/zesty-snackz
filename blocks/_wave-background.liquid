@@ -1,0 +1,491 @@
+{%- doc -%}
+  A solid colour fill whose edge is a sine wave — the same wave shape the wave
+  marquee draws. Positioned like a floating sticker: it anchors to an x/y point
+  and tilts via rotation, so it can be lined up under a wave marquee to give the
+  text a coloured field to ride on.
+
+  The fill runs from the wave line either up to the top edge or down to the
+  bottom edge of the section. There is no motion; the companion
+  wave-background.js only measures the band and bakes the static wave path.
+
+  To make the wave coincide exactly with a wave marquee, give this block the
+  same Marquee text, Gap and Typography as that marquee: the script measures a
+  hidden copy of that text and reproduces the marquee's wavelength snapping.
+{%- enddoc -%}
+
+{%- liquid
+  assign s = block.settings
+  assign amplitude = s.amplitude | default: 24
+  assign frequency = s.frequency | default: 3
+  assign gap = s.gap | default: 40
+  assign width = s.width | default: 100
+  assign rotation = s.rotation | default: 0
+  assign fill = s.fill | default: 'down'
+
+  assign preset = s.type_preset
+  capture type_classes
+    if preset == 'custom'
+      echo 'custom-typography'
+      if s.font_size != ''
+        echo ' custom-font-size'
+      endif
+    else
+      echo preset
+    endif
+  endcapture
+-%}
+
+<script
+  src="{{ 'wave-background.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<wave-background
+  class="wave-background {{ type_classes }}{% if s.shadow %} wave-background--shadow{% endif %}{% if s.use_mobile_settings %} wave-background--mobile-settings{% endif %}{% if s.hide_on_mobile %} hidden--mobile{% endif %}{% if s.hide_on_desktop %} hidden--desktop{% endif %}"
+  aria-hidden="true"
+  data-amp="{{ amplitude }}"
+  data-freq="{{ frequency }}"
+  data-fill="{{ fill }}"
+  data-phase="{{ s.phase | default: 0 }}"
+  {% if s.text != blank %}data-text="{{ s.text | escape }}"{% endif %}
+  {% if s.use_mobile_settings %}
+    data-amp-mobile="{{ s.amplitude_mobile }}"
+    data-freq-mobile="{{ s.frequency_mobile }}"
+  {% endif %}
+  style="
+    --wb-x: {{ s.x_position }}%;
+    --wb-y: {{ s.y_position }}%;
+    --wb-width: {{ width }}%;
+    --wb-rotation: {{ rotation }}deg;
+    --wb-gap: {{ gap }}px;
+    {% if s.use_mobile_settings %}
+      --wb-x-mobile: {{ s.x_position_mobile }}%;
+      --wb-y-mobile: {{ s.y_position_mobile }}%;
+      --wb-width-mobile: {{ s.width_mobile }}%;
+      --wb-rotation-mobile: {{ s.rotation_mobile }}deg;
+    {% endif %}
+    {% render 'typography-style', settings: s %}
+    {%- if s.fill_color != blank -%}
+      --color: {{ s.fill_color }};
+    {%- endif -%}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="wave-background__band" data-wb-band>
+    <svg
+      class="wave-background__svg"
+      data-wb-svg
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+      focusable="false"
+    >
+      <path data-wb-path fill="currentColor"></path>
+    </svg>
+  </div>
+
+  {%- comment -%}
+    Off-screen node the script measures one text repeat in, to reproduce the
+    marquee's wavelength. Mirrors the marquee's unit/glyph layout so the
+    measured width matches. Only rendered when there is text to match.
+  {%- endcomment -%}
+  {% if s.text != blank %}
+    <div class="wave-background__measure" data-wb-measure aria-hidden="true"></div>
+  {% endif %}
+</wave-background>
+
+{% stylesheet %}
+  /* The host spans the whole floating-stickers overlay (the section content box)
+     and clips to it, so the fill can never spill into the sections above or
+     below. */
+  .wave-background {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    z-index: var(--layer-base);
+    color: var(--color, var(--color-foreground));
+    pointer-events: none;
+  }
+
+  /* The anchored, tiltable band: its vertical centre is the wave line, anchored
+     at the x/y point like a floating sticker. It is deliberately much taller
+     than the section so the fill, drawn up to the top or down to the bottom of
+     the band, always reaches the section edges even when rotated — the host
+     clips whatever overhangs. */
+  .wave-background__band {
+    position: absolute;
+    top: var(--wb-y, 50%);
+    left: var(--wb-x, 50%);
+    width: var(--wb-width, 100%);
+    height: 250vmax;
+    translate: -50% -50%;
+    rotate: var(--wb-rotation, 0deg);
+  }
+
+  .wave-background__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* drop-shadow (not box-shadow) so the shadow follows the wavy edge's alpha
+     silhouette rather than a rectangle. */
+  .wave-background--shadow .wave-background__band {
+    filter: drop-shadow(0 2.505px 2.505px #000);
+  }
+
+  /* Hidden measuring node: laid out (so offsetWidth is real) but never painted.
+     The unit/glyph pair mirrors the wave marquee's own layout — inline-flex
+     unit with the gap as trailing padding, per-character inline-block glyphs —
+     so one repeat measures to the same width the marquee derives its wavelength
+     from. Typography is inherited from the host's preset classes + vars. */
+  .wave-background__measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .wave-background__measure-unit {
+    display: inline-flex;
+    padding-inline-end: var(--wb-gap, 40px);
+    white-space: nowrap;
+  }
+
+  .wave-background__measure-glyph {
+    display: inline-block;
+  }
+
+  /* Optional mobile overrides: position, width and tilt. The JS re-reads
+     data-*-mobile (amplitude, frequency) and rebuilds when the breakpoint flips. */
+  @media screen and (max-width: 749px) {
+    .wave-background--mobile-settings .wave-background__band {
+      top: var(--wb-y-mobile, 50%);
+      left: var(--wb-x-mobile, 50%);
+      width: var(--wb-width-mobile, 100%);
+      rotate: var(--wb-rotation-mobile, 0deg);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wave background",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Wave"
+    },
+    {
+      "type": "select",
+      "id": "fill",
+      "label": "Fill",
+      "options": [
+        { "value": "down", "label": "Wave to bottom" },
+        { "value": "up", "label": "Wave to top" }
+      ],
+      "default": "down",
+      "info": "Which side of the wave line the colour fills toward."
+    },
+    {
+      "type": "range",
+      "id": "frequency",
+      "label": "Frequency",
+      "info": "Number of wave peaks across the band. Match the wave marquee to line them up.",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "amplitude",
+      "label": "Amplitude",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "phase",
+      "label": "Wave offset",
+      "info": "Shift the crests sideways to line the wave up with a marquee on top.",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "unit": "deg",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -4
+    },
+    {
+      "type": "color",
+      "id": "fill_color",
+      "label": "Fill color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "checkbox",
+      "id": "shadow",
+      "label": "Shadow",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Match wave marquee",
+      "info": "To make the wave coincide with a wave marquee, copy that marquee's text, gap and typography here. Leave the text empty to use the frequency on its own."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Marquee text",
+      "info": "The same text as the marquee you are matching."
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between repeats",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        { "value": "rte", "label": "t:options.default" },
+        { "value": "paragraph", "label": "t:options.paragraph" },
+        { "value": "h1", "label": "t:options.h1" },
+        { "value": "h2", "label": "t:options.h2" },
+        { "value": "h3", "label": "t:options.h3" },
+        { "value": "h4", "label": "t:options.h4" },
+        { "value": "h5", "label": "t:options.h5" },
+        { "value": "h6", "label": "t:options.h6" },
+        { "value": "h7", "label": "t:options.h7" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": "h2",
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        { "value": "var(--font-body--family)", "label": "t:options.body" },
+        { "value": "var(--font-subheading--family)", "label": "t:options.subheading" },
+        { "value": "var(--font-heading--family)", "label": "t:options.heading" },
+        { "value": "var(--font-accent--family)", "label": "t:options.accent" }
+      ],
+      "default": "var(--font-heading--family)",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.25rem", "label": "20px" },
+        { "value": "1.5rem", "label": "24px" },
+        { "value": "2rem", "label": "32px" },
+        { "value": "2.5rem", "label": "40px" },
+        { "value": "3rem", "label": "48px" },
+        { "value": "3.5rem", "label": "56px" },
+        { "value": "4.5rem", "label": "72px" },
+        { "value": "5.5rem", "label": "88px" },
+        { "value": "7.5rem", "label": "120px" }
+      ],
+      "default": "2.5rem",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        { "value": "tight", "label": "t:options.tight" },
+        { "value": "normal", "label": "t:options.normal" },
+        { "value": "loose", "label": "t:options.loose" }
+      ],
+      "default": "tight",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "options": [
+        { "value": "tight", "label": "t:options.tight" },
+        { "value": "normal", "label": "t:options.normal" },
+        { "value": "loose", "label": "t:options.loose" }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        { "value": "none", "label": "t:options.default" },
+        { "value": "uppercase", "label": "t:options.uppercase" }
+      ],
+      "default": "uppercase",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.position"
+    },
+    {
+      "type": "range",
+      "id": "x_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y_position",
+      "label": "Vertical position",
+      "info": "The height of the wave line within the section.",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "label": "Width",
+      "info": "Width of the band, relative to the section.",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_mobile_settings",
+      "label": "Use different settings on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "x_position_mobile",
+      "label": "Horizontal position (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "y_position_mobile",
+      "label": "Vertical position (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "width_mobile",
+      "label": "Width (mobile)",
+      "min": 20,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "rotation_mobile",
+      "label": "Rotation (mobile)",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -4,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "amplitude_mobile",
+      "label": "Amplitude (mobile)",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "range",
+      "id": "frequency_mobile",
+      "label": "Frequency (mobile)",
+      "info": "Number of wave peaks across the band.",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3,
+      "visible_if": "{{ block.settings.use_mobile_settings }}"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_desktop",
+      "label": "Hide on desktop",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Wave background",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

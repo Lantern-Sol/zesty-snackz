@@ -1,0 +1,227 @@
+{%- doc -%}
+  A decorative field of confetti pieces that fall from the top of the Floating
+  elements overlay to the bottom and loop forever. Pieces are squares,
+  rectangles and circles, each randomised in colour, size, speed, spin and drift
+  by the companion confetti.js. Density (Low / Medium / High) sets how many
+  pieces are generated.
+
+  Lives inside the Floating elements overlay: the host spans the whole section
+  and clips to it, so the confetti stays within the section it decorates.
+{%- enddoc -%}
+
+{%- liquid
+  assign s = block.settings
+
+  # Collect the colour swatches into a comma-separated pool; confetti.js splits
+  # it and drops any blanks, falling back to its own palette when all are empty.
+  assign palette = s.color_1 | append: ',' | append: s.color_2 | append: ',' | append: s.color_3 | append: ',' | append: s.color_4 | append: ',' | append: s.color_5 | append: ',' | append: s.color_6
+  assign swatches = palette | split: ','
+  assign colors = ''
+  for swatch in swatches
+    if swatch != blank
+      if colors == blank
+        assign colors = swatch
+      else
+        assign colors = colors | append: ',' | append: swatch
+      endif
+    endif
+  endfor
+-%}
+
+<script
+  src="{{ 'confetti.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<confetti-field
+  class="confetti{% if s.hide_on_mobile %} hidden--mobile{% endif %}{% if s.hide_on_desktop %} hidden--desktop{% endif %}"
+  aria-hidden="true"
+  data-density="{{ s.density | default: 'medium' }}"
+  data-colors="{{ colors | escape }}"
+  style="--confetti-opacity: {{ s.opacity | default: 100 | divided_by: 100.0 }};"
+  {{ block.shopify_attributes }}
+></confetti-field>
+
+{% stylesheet %}
+  /* The host spans the whole floating-elements overlay (the section content box)
+     and clips to it, so pieces can never spill into the sections above or below. */
+  .confetti {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    z-index: var(--layer-flat);
+    opacity: var(--confetti-opacity, 1);
+    pointer-events: none;
+  }
+
+  /* The faller: anchored at the top, drifts straight down over the section
+     height. Born just above the top edge (--confetti-size) and dying past the
+     bottom (--confetti-fall-distance, published by the script). The negative
+     delay spreads the pieces along the fall so the field looks settled at load. */
+  .confetti__piece {
+    position: absolute;
+    top: 0;
+    left: calc(var(--confetti-x, 50) * 1%);
+    will-change: transform;
+    animation: confetti-fall var(--confetti-duration, 6s) linear
+      calc(-1 * var(--confetti-delay, 0s)) infinite;
+  }
+
+  /* Side-to-side drift on its own wrapper so it composes with the fall without
+     fighting for the same transform. Alternating so it eases back and forth. */
+  .confetti__sway {
+    animation: confetti-sway var(--confetti-sway-duration, 3s) ease-in-out
+      calc(-1 * var(--confetti-sway-delay, 0s)) infinite alternate;
+  }
+
+  .confetti__shape {
+    width: var(--confetti-w, 10px);
+    height: var(--confetti-h, 10px);
+    background: var(--confetti-color, currentcolor);
+    animation: confetti-spin var(--confetti-spin-duration, 2.4s) linear infinite;
+    animation-direction: var(--confetti-spin-direction, normal);
+  }
+
+  .confetti__shape--circle {
+    border-radius: 50%;
+  }
+
+  @keyframes confetti-fall {
+    from {
+      transform: translateY(calc(-1 * var(--confetti-size, 12px)));
+    }
+
+    to {
+      transform: translateY(var(--confetti-fall-distance, 100vh));
+    }
+  }
+
+  @keyframes confetti-sway {
+    from {
+      transform: translateX(calc(-1 * var(--confetti-sway-distance, 12px)));
+    }
+
+    to {
+      transform: translateX(var(--confetti-sway-distance, 12px));
+    }
+  }
+
+  @keyframes confetti-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Reduced motion: hold a static scatter instead of a falling loop. The script
+     tags each piece --still and hands it a random --confetti-start-y to sit at. */
+  @media (prefers-reduced-motion: reduce) {
+    .confetti__piece--still {
+      top: calc(var(--confetti-start-y, 50) * 1%);
+    }
+
+    .confetti__piece--still,
+    .confetti__piece--still .confetti__sway,
+    .confetti__piece--still .confetti__shape {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Confetti",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Generates confetti pieces — squares, rectangles and circles — that fall and loop. Sizes, colours, speed and spin are randomised per piece."
+    },
+    {
+      "type": "select",
+      "id": "density",
+      "label": "Density",
+      "options": [
+        { "value": "low", "label": "Low" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "high", "label": "High" }
+      ],
+      "default": "medium",
+      "info": "How many pieces are generated."
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Pieces pick at random from the colours set below. Leave a swatch empty to skip it."
+    },
+    {
+      "type": "color",
+      "id": "color_1",
+      "label": "Color 1",
+      "default": "#ff5da2"
+    },
+    {
+      "type": "color",
+      "id": "color_2",
+      "label": "Color 2",
+      "default": "#2ec4ff"
+    },
+    {
+      "type": "color",
+      "id": "color_3",
+      "label": "Color 3",
+      "default": "#7ed957"
+    },
+    {
+      "type": "color",
+      "id": "color_4",
+      "label": "Color 4",
+      "default": "#ff8a3d"
+    },
+    {
+      "type": "color",
+      "id": "color_5",
+      "label": "Color 5",
+      "default": "#a06bff"
+    },
+    {
+      "type": "color",
+      "id": "color_6",
+      "label": "Color 6",
+      "default": "#ffd23f"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mobile",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_desktop",
+      "label": "Hide on desktop",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Confetti",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

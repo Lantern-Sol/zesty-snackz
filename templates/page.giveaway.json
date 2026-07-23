@@ -9,33 +9,725 @@
  */
 {
   "sections": {
-    "hero_EQnwXk": {
+    "hero_rprFhR": {
       "type": "hero",
       "blocks": {
-        "text_xNiTVy": {
-          "type": "text",
+        "floating_stickers_cCB8dQ": {
+          "type": "floating-stickers",
+          "name": "Floating elements",
           "settings": {
-            "text": "<h2>New arrivals</h2>",
-            "mobile_text": "",
+            "full_width": true,
+            "behind": true
+          },
+          "blocks": {
+            "floating_sticker_GxbcaK": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 30,
+                "shadow": true,
+                "x_position": 50,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_dPkqdf": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -30,
+                "shadow": true,
+                "x_position": 15,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_TyrUmP": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_QTrMEb": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 0,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_ApK8p4": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 75,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_QegpKX": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 9,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_VncChr": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 97,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_XiQWpR": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -15,
+                "shadow": true,
+                "x_position": 27,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 2.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fCzTyg": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 5,
+                "y_position": 91,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.6,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_9aCpHU": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 85,
+                "y_position": 92,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_TCcYzF": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 20,
+                "y_position": 96,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_iX3D4Y": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_jR6mXf": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 75,
+                "shadow": true,
+                "x_position": 100,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.7,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_EdRwjJ": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -75,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 2.8,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_VQTmMp": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 13,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_QBFdke": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Qbqyjk": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 4,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Xh4wR4": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 120,
+                "shadow": true,
+                "x_position": 95,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_FkeqJU": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 85,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "confetti_KLMrUx": {
+              "type": "_confetti",
+              "name": "Confetti",
+              "settings": {
+                "density": "medium",
+                "opacity": 100,
+                "color_1": "#ff5da2",
+                "color_2": "#2ec4ff",
+                "color_3": "#7ed957",
+                "color_4": "#ff8a3d",
+                "color_5": "#a06bff",
+                "color_6": "#ffd23f",
+                "hide_on_mobile": false,
+                "hide_on_desktop": false
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "floating_sticker_GxbcaK",
+            "floating_sticker_dPkqdf",
+            "floating_sticker_TyrUmP",
+            "floating_sticker_QTrMEb",
+            "floating_sticker_ApK8p4",
+            "floating_sticker_QegpKX",
+            "floating_sticker_VncChr",
+            "floating_sticker_XiQWpR",
+            "floating_sticker_fCzTyg",
+            "floating_sticker_9aCpHU",
+            "floating_sticker_TCcYzF",
+            "floating_sticker_iX3D4Y",
+            "floating_sticker_jR6mXf",
+            "floating_sticker_EdRwjJ",
+            "floating_sticker_VQTmMp",
+            "floating_sticker_QBFdke",
+            "floating_sticker_Qbqyjk",
+            "floating_sticker_Xh4wR4",
+            "floating_sticker_FkeqJU",
+            "confetti_KLMrUx"
+          ]
+        },
+        "spacer_rU6gaT": {
+          "type": "spacer",
+          "name": "t:names.spacer",
+          "settings": {
+            "size": "pixel",
+            "percent_size": 100,
+            "pixel_size": 60,
+            "custom_mobile_size": true,
+            "size_mobile": "pixel",
+            "percent_size_mobile": 100,
+            "pixel_size_mobile": 60
+          },
+          "blocks": {}
+        },
+        "group_NJJEYF": {
+          "type": "group",
+          "name": "t:names.group",
+          "settings": {
+            "content_direction": "row",
+            "vertical_on_mobile": false,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "wrap": false,
+            "mobile_wrap": true,
+            "horizontal_alignment_flex_direction_column": "center",
+            "vertical_alignment_flex_direction_column": "center",
+            "use_mobile_alignment": false,
+            "mobile_horizontal_alignment": "flex-start",
+            "mobile_vertical_alignment": "center",
+            "mobile_horizontal_alignment_flex_direction_column": "flex-start",
+            "mobile_vertical_alignment_flex_direction_column": "center",
+            "gap": 5,
+            "use_mobile_gap": false,
+            "mobile_gap": 12,
             "width": "fit-content",
-            "max_width": "narrow",
-            "alignment": "left",
+            "custom_width": 100,
+            "width_mobile": "fit-content",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "background_media": "none",
+            "background_color": "{{ settings.color_palette.foreground }}",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 100,
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "hide_on_mobile": false,
+            "hide_on_desktop": false,
+            "padding-block-start": 8,
+            "padding-block-end": 8,
+            "padding-inline-start": 10,
+            "padding-inline-end": 10,
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {
+            "icon_RPzhmf": {
+              "type": "icon",
+              "name": "t:names.icon",
+              "settings": {
+                "icon": "price_tag",
+                "image_upload": "shopify://shop_images/Ellipse_60.svg",
+                "width": 16,
+                "width-mobile": 16,
+                "link": "",
+                "open_in_new_tab": false,
+                "icon_color": ""
+              },
+              "blocks": {}
+            },
+            "text_fVWJdj": {
+              "type": "text",
+              "name": "t:names.text",
+              "settings": {
+                "text": "<p>THE SUMMER BOAT GIVEAWAY</p>",
+                "mobile_text": "",
+                "width": "fit-content",
+                "max_width": "none",
+                "alignment": "left",
+                "height_mode": "auto",
+                "desktop_height": "",
+                "mobile_height": "",
+                "type_preset": "custom",
+                "font": "var(--font-body--family)",
+                "enable_custom_font_weight": false,
+                "weight": "400",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "custom_line_height": 1.5,
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "nowrap",
+                "type_preset_mobile": "custom",
+                "mobile_font_size": "0.875rem",
+                "mobile_custom_line_height": 1.3,
+                "text_color": "",
+                "accent_color": "",
+                "enable_text_shadow": false,
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "icon_RPzhmf",
+            "text_fVWJdj"
+          ]
+        },
+        "group_jCarH8": {
+          "type": "group",
+          "name": "t:names.group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": false,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "wrap": false,
+            "mobile_wrap": false,
+            "horizontal_alignment_flex_direction_column": "center",
+            "vertical_alignment_flex_direction_column": "center",
+            "use_mobile_alignment": false,
+            "mobile_horizontal_alignment": "flex-start",
+            "mobile_vertical_alignment": "center",
+            "mobile_horizontal_alignment_flex_direction_column": "flex-start",
+            "mobile_vertical_alignment_flex_direction_column": "center",
+            "gap": 40,
+            "use_mobile_gap": false,
+            "mobile_gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "background_media": "none",
+            "background_color": "",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "hide_on_mobile": false,
+            "hide_on_desktop": false,
+            "padding-block-start": 10,
+            "padding-block-end": 10,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "use_mobile_padding": true,
+            "padding-block-start-mobile": 10,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {
+            "text_jtmmyH": {
+              "type": "text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<h1>WIN A DAY ON</h1>",
+                "mobile_text": "",
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "height_mode": "auto",
+                "desktop_height": "",
+                "mobile_height": "",
+                "type_preset": "h1",
+                "font": "var(--font-body--family)",
+                "enable_custom_font_weight": false,
+                "weight": "400",
+                "font_size": "1rem",
+                "line_height": "custom",
+                "custom_line_height": 1,
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "type_preset_mobile": "rte",
+                "mobile_font_size": "1rem",
+                "mobile_custom_line_height": 1.5,
+                "text_color": "{{ settings.color_palette.background }}",
+                "accent_color": "",
+                "enable_text_shadow": true,
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
+              },
+              "blocks": {}
+            },
+            "text_GcAEpC": {
+              "type": "text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<h1>THE BOAT!</h1>",
+                "mobile_text": "",
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "height_mode": "auto",
+                "desktop_height": "",
+                "mobile_height": "",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "enable_custom_font_weight": false,
+                "weight": "400",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "custom_line_height": 1.5,
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "type_preset_mobile": "rte",
+                "mobile_font_size": "1rem",
+                "mobile_custom_line_height": 1.5,
+                "text_color": "{{ settings.color_palette.color3 }}",
+                "accent_color": "",
+                "enable_text_shadow": true,
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "use_mobile_padding": false,
+                "padding-block-start-mobile": 0,
+                "padding-block-end-mobile": 0,
+                "padding-inline-start-mobile": 0,
+                "padding-inline-end-mobile": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "text_jtmmyH",
+            "text_GcAEpC"
+          ]
+        },
+        "text_4GkneE": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>On July 25 we're pulling one lucky snacker out on the water with the two guys who <br/>started it all — same boat, same cameras, way better snacks. Meet & greet, full day<br/>out, and a year of free Bitez.</p>",
+            "mobile_text": "<p>On July 25 we're pulling one lucky snacker out on the water with the two guys who  started it all — same boat, same cameras, way better snacks. Meet & greet, full day out, and a year of free Bitez.</p>",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "center",
             "height_mode": "auto",
             "desktop_height": "",
             "mobile_height": "",
-            "type_preset": "h1",
+            "type_preset": "custom",
             "font": "var(--font-body--family)",
             "enable_custom_font_weight": false,
             "weight": "400",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "custom_line_height": 1.5,
+            "font_size": "1.5rem",
+            "line_height": "custom",
+            "custom_line_height": 1.2,
             "letter_spacing": "normal",
             "case": "none",
-            "wrap": "pretty",
-            "type_preset_mobile": "rte",
-            "mobile_font_size": "1rem",
-            "mobile_custom_line_height": 1.5,
+            "wrap": "balance",
+            "type_preset_mobile": "custom",
+            "mobile_font_size": "0.875rem",
+            "mobile_custom_line_height": 1.3,
             "text_color": "",
             "accent_color": "",
             "enable_text_shadow": false,
@@ -54,57 +746,15 @@
           },
           "blocks": {}
         },
-        "text_gf9J7L": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Made with care and unconditionally loved by our customers.</p>",
-            "mobile_text": "",
-            "width": "fit-content",
-            "max_width": "narrow",
-            "alignment": "left",
-            "height_mode": "auto",
-            "desktop_height": "",
-            "mobile_height": "",
-            "type_preset": "rte",
-            "font": "var(--font-body--family)",
-            "enable_custom_font_weight": false,
-            "weight": "400",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "custom_line_height": 1.5,
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "type_preset_mobile": "rte",
-            "mobile_font_size": "1rem",
-            "mobile_custom_line_height": 1.5,
-            "text_color": "",
-            "accent_color": "",
-            "enable_text_shadow": false,
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 32,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0,
-            "use_mobile_padding": false,
-            "padding-block-start-mobile": 0,
-            "padding-block-end-mobile": 0,
-            "padding-inline-start-mobile": 0,
-            "padding-inline-end-mobile": 0
-          },
-          "blocks": {}
-        },
-        "button_kmcLgY": {
+        "button_hQkhKG": {
           "type": "button",
           "name": "t:names.button",
           "settings": {
-            "label": "Shop now",
+            "label": "JOIN NOW",
             "link": "shopify://collections/all",
             "open_in_new_tab": false,
             "style_class": "button",
-            "custom_button_background": "{{ settings.color_palette.foreground }}",
+            "custom_button_background": "rgba(0,0,0,0)",
             "custom_button_text": "{{ settings.color_palette.background }}",
             "custom_button_shadow_enabled": false,
             "custom_button_shadow_horizontal_offset": 0,
@@ -112,7 +762,7 @@
             "custom_button_shadow_blur_radius": 0,
             "custom_button_shadow_spread_radius": 0,
             "custom_button_shadow_color": "",
-            "custom_button_border_enabled": false,
+            "custom_button_border_enabled": true,
             "custom_button_border": "{{ settings.color_palette.background }}",
             "custom_button_border_width": 1,
             "custom_button_padding_enabled": false,
@@ -135,22 +785,42 @@
             "rotation": 0,
             "width": "fit-content",
             "custom_width": 100,
-            "width_mobile": "fit-content",
+            "width_mobile": "custom",
             "custom_width_mobile": 100,
             "hide_on_mobile": false,
             "hide_on_desktop": false
           },
           "blocks": {}
+        },
+        "spacer_8pQqFF": {
+          "type": "spacer",
+          "name": "t:names.spacer",
+          "settings": {
+            "size": "pixel",
+            "percent_size": 100,
+            "pixel_size": 200,
+            "custom_mobile_size": true,
+            "size_mobile": "pixel",
+            "percent_size_mobile": 100,
+            "pixel_size_mobile": 60
+          },
+          "blocks": {}
         }
       },
       "block_order": [
-        "text_xNiTVy",
-        "text_gf9J7L",
-        "button_kmcLgY"
+        "floating_stickers_cCB8dQ",
+        "spacer_rU6gaT",
+        "group_NJJEYF",
+        "group_jCarH8",
+        "text_4GkneE",
+        "button_hQkhKG",
+        "spacer_8pQqFF"
       ],
       "name": "t:names.hero",
       "settings": {
         "media_type_1": "image",
+        "image_1": "shopify://shop_images/hero_background_v2.webp",
+        "image_1_mobile_override": "shopify://shop_images/iPhone_16_Plus_-_1.webp",
         "parallax_effect": false,
         "hide_media_on_mobile": false,
         "media_type_2": "image",
@@ -162,30 +832,156 @@
         "open_in_new_tab": false,
         "content_direction": "column",
         "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
-        "vertical_alignment": "center",
-        "align_baseline": false,
+        "horizontal_alignment": "space-between",
+        "vertical_alignment": "flex-end",
+        "align_baseline": true,
         "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 16,
+        "vertical_alignment_flex_direction_column": "flex-end",
+        "gap": 20,
         "use_mobile_gap": false,
         "mobile_gap": 12,
         "section_width": "page-width",
         "section_width-mobile": "page-width",
-        "section_height": "large",
+        "section_height": "auto",
         "section_height_custom": 50,
         "background_color": "",
-        "toggle_overlay": true,
-        "overlay_color": "#00000026",
-        "overlay_style": "gradient",
-        "gradient_direction": "to top",
+        "toggle_overlay": false,
+        "overlay_color": "#12121266",
+        "overlay_style": "solid",
+        "gradient_direction": "to bottom",
         "blurred_reflection": false,
         "reflection_opacity": 75,
-        "padding-block-start": 40,
-        "padding-block-end": 40,
+        "padding-block-start": 0,
+        "padding-block-end": 0,
         "use_mobile_padding": false,
         "padding-block-start-mobile": 0,
         "padding-block-end-mobile": 0
+      }
+    },
+    "overlap_section_TeMBen": {
+      "type": "overlap-section",
+      "blocks": {
+        "group_UPtrkA": {
+          "type": "group",
+          "name": "t:names.group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "wrap": false,
+            "mobile_wrap": true,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "use_mobile_alignment": false,
+            "mobile_horizontal_alignment": "flex-start",
+            "mobile_vertical_alignment": "center",
+            "mobile_horizontal_alignment_flex_direction_column": "flex-start",
+            "mobile_vertical_alignment_flex_direction_column": "center",
+            "gap": 12,
+            "use_mobile_gap": false,
+            "mobile_gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "background_media": "none",
+            "background_color": "rgba(0,0,0,0)",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "hide_on_mobile": false,
+            "hide_on_desktop": false,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {
+            "countdown_timer_FRhzBG": {
+              "type": "countdown-timer",
+              "name": "Countdown Timer",
+              "settings": {
+                "title": "Drawing Live · July 25, 2026",
+                "subtitle": "Stay subscribed through the draw date to keep your entry active.",
+                "end_date": "2026-07-25",
+                "end_time": "12:00",
+                "days_label": "Days",
+                "hours_label": "Hours",
+                "minutes_label": "Minutes",
+                "seconds_label": "Seconds",
+                "background_color": "#0b1b2b",
+                "title_color": "#ffffff",
+                "text_color": "#ffffff",
+                "box_background_color": "#ffffff",
+                "box_border_color": "#009eed",
+                "number_color": "#009eed",
+                "label_color": "#0b1b2b",
+                "shadow_color": "#0b1b2b",
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "countdown_timer_FRhzBG"
+          ]
+        }
+      },
+      "block_order": [
+        "group_UPtrkA"
+      ],
+      "name": "Overlap section",
+      "settings": {
+        "overlap": 50,
+        "layer": "above",
+        "use_mobile_overlap": true,
+        "overlap_mobile": 25,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "rgba(0,0,0,0)",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 0,
+        "padding-block-end": 0
       }
     },
     "section_JJc79Y": {
@@ -203,13 +999,13 @@
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
-                "text": "The Prize",
+                "text": "THE PRIZE ✦",
                 "shape": "wave",
                 "frequency": 2,
                 "amplitude": 48,
                 "speed": 30,
                 "direction": "left",
-                "gap": 12,
+                "gap": 4,
                 "rotation": -23,
                 "type_preset": "h4",
                 "font": "var(--font-heading--family)",
@@ -223,14 +1019,14 @@
                 "y_position": 50,
                 "width": 100,
                 "height": 100,
-                "use_mobile_settings": false,
-                "x_position_mobile": 50,
+                "use_mobile_settings": true,
+                "x_position_mobile": 10,
                 "y_position_mobile": 50,
                 "width_mobile": 100,
                 "height_mobile": 100,
-                "rotation_mobile": -4,
+                "rotation_mobile": -30,
                 "amplitude_mobile": 24,
-                "frequency_mobile": 3,
+                "frequency_mobile": 1,
                 "hide_on_mobile": false,
                 "hide_on_desktop": false
               },
@@ -276,7 +1072,7 @@
             "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0,
-            "use_mobile_padding": false,
+            "use_mobile_padding": true,
             "padding-block-start-mobile": 0,
             "padding-block-end-mobile": 0,
             "padding-inline-start-mobile": 0,
@@ -344,7 +1140,7 @@
         "vertical_alignment_flex_direction_column": "center",
         "gap": 10,
         "use_mobile_gap": true,
-        "mobile_gap": 0,
+        "mobile_gap": 8,
         "section_width": "page-width",
         "section_height": "",
         "section_height_custom": 50,
@@ -385,7 +1181,7 @@
         "padding-inline-start": 0,
         "padding-inline-end": 0,
         "use_mobile_padding": true,
-        "padding-block-start-mobile": 20,
+        "padding-block-start-mobile": 35,
         "padding-block-end-mobile": 0,
         "padding-inline-start-mobile": 0,
         "padding-inline-end-mobile": 0,
@@ -408,13 +1204,13 @@
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
-                "text": "REAL STORY ✦ NO AGENCY ✦",
+                "text": "THE PRIZE ✦",
                 "shape": "wave",
                 "frequency": 2,
                 "amplitude": 20,
                 "speed": 30,
                 "direction": "left",
-                "gap": 12,
+                "gap": 4,
                 "rotation": -9,
                 "type_preset": "h4",
                 "font": "var(--font-heading--family)",
@@ -429,13 +1225,13 @@
                 "width": 80,
                 "height": 100,
                 "use_mobile_settings": true,
-                "x_position_mobile": 50,
-                "y_position_mobile": 11,
-                "width_mobile": 50,
+                "x_position_mobile": 60,
+                "y_position_mobile": 100,
+                "width_mobile": 100,
                 "height_mobile": 100,
                 "rotation_mobile": -30,
                 "amplitude_mobile": 40,
-                "frequency_mobile": 2,
+                "frequency_mobile": 1,
                 "hide_on_mobile": false,
                 "hide_on_desktop": false
               },
@@ -446,13 +1242,14 @@
               "settings": {
                 "image": "shopify://shop_images/Group_1597884185.svg",
                 "size": 128,
-                "rotation": 0,
+                "mobile_size": 106,
+                "rotation": 5,
                 "shadow": true,
                 "x_position": 12,
                 "y_position": 7,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
+                "custom_mobile_position": true,
+                "x_position_mobile": 90,
+                "y_position_mobile": 5,
                 "motion_offset": 0,
                 "peel_enabled": false,
                 "peel_code": ""
@@ -464,13 +1261,14 @@
               "settings": {
                 "image": "shopify://shop_images/Group_1597884187.svg",
                 "size": 128,
-                "rotation": 0,
+                "mobile_size": 106,
+                "rotation": -5,
                 "shadow": true,
                 "x_position": 41,
                 "y_position": 70,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
+                "custom_mobile_position": true,
+                "x_position_mobile": 13,
+                "y_position_mobile": 32,
                 "motion_offset": 3,
                 "peel_enabled": false,
                 "peel_code": ""
@@ -482,13 +1280,14 @@
               "settings": {
                 "image": "shopify://shop_images/Group_1597884188.svg",
                 "size": 128,
-                "rotation": 0,
+                "mobile_size": 106,
+                "rotation": 5,
                 "shadow": true,
                 "x_position": 86,
                 "y_position": 3,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
+                "custom_mobile_position": true,
+                "x_position_mobile": 88,
+                "y_position_mobile": 65,
                 "motion_offset": 2,
                 "peel_enabled": false,
                 "peel_code": ""
@@ -667,7 +1466,7 @@
                   "settings": {
                     "text": "<p>Millions of followers already ask for it by name. Shoppers walk in looking for the bag they saw online — you just have to have it in stock.</p>",
                     "mobile_text": "",
-                    "width": "fit-content",
+                    "width": "100%",
                     "max_width": "normal",
                     "alignment": "left",
                     "height_mode": "auto",
@@ -682,7 +1481,7 @@
                     "custom_line_height": 1.5,
                     "letter_spacing": "normal",
                     "case": "none",
-                    "wrap": "balance",
+                    "wrap": "pretty",
                     "type_preset_mobile": "custom",
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
@@ -894,8 +1693,8 @@
                   "settings": {
                     "text": "<p>12 months of your favorite flavors on the house. Every drop, every new release, shipped to your door before anyone else.</p>",
                     "mobile_text": "",
-                    "width": "fit-content",
-                    "max_width": "normal",
+                    "width": "100%",
+                    "max_width": "none",
                     "alignment": "left",
                     "height_mode": "auto",
                     "desktop_height": "",
@@ -909,7 +1708,7 @@
                     "custom_line_height": 1.5,
                     "letter_spacing": "normal",
                     "case": "none",
-                    "wrap": "balance",
+                    "wrap": "pretty",
                     "type_preset_mobile": "custom",
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
@@ -930,11 +1729,26 @@
                     "padding-inline-end-mobile": 0
                   },
                   "blocks": {}
+                },
+                "spacer_r7KMeP": {
+                  "type": "spacer",
+                  "name": "t:names.spacer",
+                  "settings": {
+                    "size": "pixel",
+                    "percent_size": 100,
+                    "pixel_size": 120,
+                    "custom_mobile_size": true,
+                    "size_mobile": "pixel",
+                    "percent_size_mobile": 100,
+                    "pixel_size_mobile": 148
+                  },
+                  "blocks": {}
                 }
               },
               "block_order": [
                 "text_kbKnwP",
-                "text_fEBTPC"
+                "text_fEBTPC",
+                "spacer_r7KMeP"
               ]
             }
           },
@@ -1106,8 +1920,8 @@
                   "settings": {
                     "text": "<p>The full limited merch kit plus a signed bundle box you literally cannot buy anywhere. Bragging rights, permanent.</p>",
                     "mobile_text": "",
-                    "width": "fit-content",
-                    "max_width": "normal",
+                    "width": "100%",
+                    "max_width": "none",
                     "alignment": "left",
                     "height_mode": "auto",
                     "desktop_height": "",
@@ -1121,7 +1935,7 @@
                     "custom_line_height": 1.5,
                     "letter_spacing": "normal",
                     "case": "none",
-                    "wrap": "balance",
+                    "wrap": "pretty",
                     "type_preset_mobile": "custom",
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
@@ -1142,11 +1956,26 @@
                     "padding-inline-end-mobile": 0
                   },
                   "blocks": {}
+                },
+                "spacer_zADEVq": {
+                  "type": "spacer",
+                  "name": "t:names.spacer",
+                  "settings": {
+                    "size": "pixel",
+                    "percent_size": 100,
+                    "pixel_size": 120,
+                    "custom_mobile_size": true,
+                    "size_mobile": "pixel",
+                    "percent_size_mobile": 100,
+                    "pixel_size_mobile": 148
+                  },
+                  "blocks": {}
                 }
               },
               "block_order": [
                 "text_Eg6m9G",
-                "text_VBcyMR"
+                "text_VBcyMR",
+                "spacer_zADEVq"
               ]
             }
           },
@@ -1214,7 +2043,7 @@
         "padding-inline-end": 100,
         "use_mobile_padding": true,
         "padding-block-start-mobile": 40,
-        "padding-block-end-mobile": 40,
+        "padding-block-end-mobile": 49,
         "padding-inline-start-mobile": 0,
         "padding-inline-end-mobile": 0,
         "hide_on_mobile": false,
@@ -1427,7 +2256,7 @@
             "padding-block-end": 29,
             "padding-inline-start": 27,
             "padding-inline-end": 27,
-            "use_mobile_padding": true,
+            "use_mobile_padding": false,
             "padding-block-start-mobile": 20,
             "padding-block-end-mobile": 20,
             "padding-inline-start-mobile": 20,
@@ -1619,7 +2448,7 @@
             "padding-block-end": 29,
             "padding-inline-start": 27,
             "padding-inline-end": 27,
-            "use_mobile_padding": true,
+            "use_mobile_padding": false,
             "padding-block-start-mobile": 20,
             "padding-block-end-mobile": 20,
             "padding-inline-start-mobile": 20,
@@ -1811,11 +2640,11 @@
             "padding-block-end": 29,
             "padding-inline-start": 27,
             "padding-inline-end": 27,
-            "use_mobile_padding": true,
-            "padding-block-start-mobile": 20,
-            "padding-block-end-mobile": 20,
-            "padding-inline-start-mobile": 20,
-            "padding-inline-end-mobile": 20
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 29,
+            "padding-block-end-mobile": 27,
+            "padding-inline-start-mobile": 27,
+            "padding-inline-end-mobile": 27
           },
           "blocks": {
             "text_ahwaJ3": {
@@ -2020,300 +2849,10 @@
         "hide_on_desktop": false
       }
     },
-    "section_KDxDXB": {
-      "type": "section",
+    "hero_G4thAL": {
+      "type": "hero",
       "blocks": {
-        "floating_stickers_KqdGG8": {
-          "type": "floating-stickers",
-          "name": "Floating elements",
-          "settings": {
-            "full_width": true,
-            "behind": true
-          },
-          "blocks": {
-            "floating_sticker_T9GzLi": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
-                "size": 120,
-                "rotation": 30,
-                "shadow": true,
-                "x_position": 50,
-                "y_position": 90,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_ba99qY": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
-                "size": 120,
-                "rotation": -30,
-                "shadow": true,
-                "x_position": 15,
-                "y_position": 90,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0.3,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_BB7Pez": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
-                "size": 120,
-                "rotation": -120,
-                "shadow": true,
-                "x_position": 90,
-                "y_position": 90,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0.2,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_8XRrLa": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
-                "size": 120,
-                "rotation": -120,
-                "shadow": true,
-                "x_position": 75,
-                "y_position": 93,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 1,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_dCKY9X": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
-                "size": 120,
-                "rotation": 15,
-                "shadow": true,
-                "x_position": 97,
-                "y_position": 93,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0.5,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_ApaHEU": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
-                "size": 120,
-                "rotation": -15,
-                "shadow": true,
-                "x_position": 27,
-                "y_position": 93,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 2.2,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_nVA9pN": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
-                "size": 120,
-                "rotation": -65,
-                "shadow": true,
-                "x_position": 5,
-                "y_position": 91,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 1.6,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_NFyrP7": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
-                "size": 120,
-                "rotation": -65,
-                "shadow": true,
-                "x_position": 57,
-                "y_position": 92,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0.5,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_mnXTgH": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
-                "size": 120,
-                "rotation": 5,
-                "shadow": true,
-                "x_position": 33,
-                "y_position": 96,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 0.9,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_VLXW3e": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
-                "size": 120,
-                "rotation": 75,
-                "shadow": true,
-                "x_position": 65,
-                "y_position": 90,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 1.7,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_48ecQa": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
-                "size": 120,
-                "rotation": -75,
-                "shadow": true,
-                "x_position": 80,
-                "y_position": 90,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 2.8,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "floating_sticker_EH86nR": {
-              "type": "_floating-sticker",
-              "name": "Floating sticker",
-              "settings": {
-                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
-                "size": 120,
-                "rotation": -10,
-                "shadow": true,
-                "x_position": 43,
-                "y_position": 94,
-                "custom_mobile_position": false,
-                "x_position_mobile": 50,
-                "y_position_mobile": 50,
-                "motion_offset": 3,
-                "peel_enabled": false,
-                "peel_code": ""
-              },
-              "blocks": {}
-            },
-            "wave_marquee_JDmCrH": {
-              "type": "_wave-marquee",
-              "name": "Wave marquee",
-              "settings": {
-                "text": "Thin-cut bites ✦ Never sticks ✦ SOUR ✦ HITS HARDER ✦",
-                "shape": "wave",
-                "frequency": 4,
-                "amplitude": 20,
-                "speed": 30,
-                "direction": "left",
-                "gap": 40,
-                "rotation": 1,
-                "type_preset": "h4",
-                "font": "var(--font-heading--family)",
-                "font_size": "2.5rem",
-                "line_height": "tight",
-                "letter_spacing": "normal",
-                "case": "uppercase",
-                "text_color": "{{ settings.color_palette.background }}",
-                "shadow": false,
-                "x_position": 50,
-                "y_position": 9,
-                "width": 140,
-                "height": 100,
-                "use_mobile_settings": true,
-                "x_position_mobile": 36,
-                "y_position_mobile": 12,
-                "width_mobile": 200,
-                "height_mobile": 100,
-                "rotation_mobile": -1,
-                "amplitude_mobile": 20,
-                "frequency_mobile": 2,
-                "hide_on_mobile": false,
-                "hide_on_desktop": false
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": [
-            "floating_sticker_T9GzLi",
-            "floating_sticker_ba99qY",
-            "floating_sticker_BB7Pez",
-            "floating_sticker_8XRrLa",
-            "floating_sticker_dCKY9X",
-            "floating_sticker_ApaHEU",
-            "floating_sticker_nVA9pN",
-            "floating_sticker_NFyrP7",
-            "floating_sticker_mnXTgH",
-            "floating_sticker_VLXW3e",
-            "floating_sticker_48ecQa",
-            "floating_sticker_EH86nR",
-            "wave_marquee_JDmCrH"
-          ]
-        },
-        "group_6mgban": {
+        "group_zPifBK": {
           "type": "group",
           "name": "t:names.group",
           "settings": {
@@ -2369,7 +2908,7 @@
             "padding-inline-end-mobile": 0
           },
           "blocks": {
-            "text_QATqWq": {
+            "text_EwLwdp": {
               "type": "text",
               "name": "t:names.heading",
               "settings": {
@@ -2412,7 +2951,7 @@
               },
               "blocks": {}
             },
-            "text_BcxqgW": {
+            "text_4CXh96": {
               "type": "text",
               "name": "t:names.heading",
               "settings": {
@@ -2455,7 +2994,7 @@
               },
               "blocks": {}
             },
-            "text_gckn7z": {
+            "text_DrFTfN": {
               "type": "text",
               "name": "t:names.text",
               "settings": {
@@ -2498,7 +3037,7 @@
               },
               "blocks": {}
             },
-            "group_M47Hhf": {
+            "group_MGMHQN": {
               "type": "group",
               "name": "t:names.group",
               "settings": {
@@ -2554,7 +3093,7 @@
                 "padding-inline-end-mobile": 0
               },
               "blocks": {
-                "button_dywYgL": {
+                "button_mcfLHD": {
                   "type": "button",
                   "name": "t:names.button",
                   "settings": {
@@ -2602,82 +3141,746 @@
                 }
               },
               "block_order": [
-                "button_dywYgL"
+                "button_mcfLHD"
               ]
             }
           },
           "block_order": [
-            "text_QATqWq",
-            "text_BcxqgW",
-            "text_gckn7z",
-            "group_M47Hhf"
+            "text_EwLwdp",
+            "text_4CXh96",
+            "text_DrFTfN",
+            "group_MGMHQN"
+          ]
+        },
+        "floating_stickers_aGhTkD": {
+          "type": "floating-stickers",
+          "name": "Floating elements",
+          "settings": {
+            "full_width": true,
+            "behind": true
+          },
+          "blocks": {
+            "floating_sticker_BikBCg": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 30,
+                "shadow": true,
+                "x_position": 50,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_RwatiW": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -30,
+                "shadow": true,
+                "x_position": 15,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fXhTpW": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fmUaN7": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 0,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_7xfNCN": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 20,
+                "shadow": true,
+                "x_position": 68,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_gyeb3L": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 75,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_mgLfMc": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 10,
+                "shadow": true,
+                "x_position": 37,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_q9fhgq": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 9,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_ajdfgU": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 97,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_KwdR7n": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -15,
+                "shadow": true,
+                "x_position": 27,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 2.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_3Tcmg6": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 5,
+                "y_position": 91,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.6,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_aKKfph": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 85,
+                "y_position": 92,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_69hRVi": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 20,
+                "y_position": 96,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_c4c7VG": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_AK9MJR": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 75,
+                "shadow": true,
+                "x_position": 100,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.7,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_zzfrtJ": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -75,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 2.8,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_rnUgKD": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 13,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Y7mMc3": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_KdPtDL": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 60,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_8zmrXk": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 4,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_crWCEk": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 35,
+                "shadow": true,
+                "x_position": 30,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_9agQXq": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 120,
+                "shadow": true,
+                "x_position": 95,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_DWrtJj": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 120,
+                "shadow": true,
+                "x_position": 53,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_qxEYAz": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 85,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_gMaB8L": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 30,
+                "shadow": true,
+                "x_position": 50,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_49PeFJ": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 57,
+                "y_position": 92,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_mz6czy": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 46,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_AwJkkp": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 33,
+                "y_position": 96,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_RcB8nt": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 75,
+                "shadow": true,
+                "x_position": 67,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.7,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_zj3qdR": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 43,
+                "y_position": 94,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "wave_background_ddQxEw": {
+              "type": "_wave-background",
+              "name": "Wave background",
+              "settings": {
+                "fill": "up",
+                "frequency": 4,
+                "amplitude": 20,
+                "phase": 0,
+                "rotation": 1,
+                "fill_color": "",
+                "shadow": false,
+                "text": "Thin-cut bites ✦ Never sticks ✦ SOUR ✦ HITS HARDER ✦",
+                "gap": 4,
+                "type_preset": "h4",
+                "font": "var(--font-heading--family)",
+                "font_size": "2.5rem",
+                "line_height": "tight",
+                "letter_spacing": "normal",
+                "case": "uppercase",
+                "x_position": 50,
+                "y_position": 6,
+                "width": 140,
+                "use_mobile_settings": true,
+                "x_position_mobile": 36,
+                "y_position_mobile": 10,
+                "width_mobile": 200,
+                "rotation_mobile": -1,
+                "amplitude_mobile": 20,
+                "frequency_mobile": 2,
+                "hide_on_mobile": false,
+                "hide_on_desktop": false
+              },
+              "blocks": {}
+            },
+            "wave_marquee_GyXxzz": {
+              "type": "_wave-marquee",
+              "name": "Wave marquee",
+              "settings": {
+                "text": "Thin-cut bites ✦ Never sticks ✦ SOUR ✦ HITS HARDER ✦",
+                "shape": "wave",
+                "frequency": 4,
+                "amplitude": 20,
+                "speed": 30,
+                "direction": "left",
+                "gap": 4,
+                "rotation": 1,
+                "type_preset": "h4",
+                "font": "var(--font-heading--family)",
+                "font_size": "2.5rem",
+                "line_height": "tight",
+                "letter_spacing": "normal",
+                "case": "uppercase",
+                "text_color": "{{ settings.color_palette.background }}",
+                "shadow": false,
+                "x_position": 50,
+                "y_position": 9,
+                "width": 140,
+                "height": 100,
+                "use_mobile_settings": true,
+                "x_position_mobile": 36,
+                "y_position_mobile": 12,
+                "width_mobile": 200,
+                "height_mobile": 100,
+                "rotation_mobile": -1,
+                "amplitude_mobile": 20,
+                "frequency_mobile": 2,
+                "hide_on_mobile": false,
+                "hide_on_desktop": false
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "floating_sticker_BikBCg",
+            "floating_sticker_RwatiW",
+            "floating_sticker_fXhTpW",
+            "floating_sticker_fmUaN7",
+            "floating_sticker_7xfNCN",
+            "floating_sticker_gyeb3L",
+            "floating_sticker_mgLfMc",
+            "floating_sticker_q9fhgq",
+            "floating_sticker_ajdfgU",
+            "floating_sticker_KwdR7n",
+            "floating_sticker_3Tcmg6",
+            "floating_sticker_aKKfph",
+            "floating_sticker_69hRVi",
+            "floating_sticker_c4c7VG",
+            "floating_sticker_AK9MJR",
+            "floating_sticker_zzfrtJ",
+            "floating_sticker_rnUgKD",
+            "floating_sticker_Y7mMc3",
+            "floating_sticker_KdPtDL",
+            "floating_sticker_8zmrXk",
+            "floating_sticker_crWCEk",
+            "floating_sticker_9agQXq",
+            "floating_sticker_DWrtJj",
+            "floating_sticker_qxEYAz",
+            "floating_sticker_gMaB8L",
+            "floating_sticker_49PeFJ",
+            "floating_sticker_mz6czy",
+            "floating_sticker_AwJkkp",
+            "floating_sticker_RcB8nt",
+            "floating_sticker_zj3qdR",
+            "wave_background_ddQxEw",
+            "wave_marquee_GyXxzz"
           ]
         }
       },
       "block_order": [
-        "floating_stickers_KqdGG8",
-        "group_6mgban"
+        "group_zPifBK",
+        "floating_stickers_aGhTkD"
       ],
-      "name": "Still scrolling",
+      "name": "t:names.hero",
       "settings": {
+        "media_type_1": "image",
+        "image_1": "shopify://shop_images/Frame-2.webp",
+        "parallax_effect": false,
+        "hide_media_on_mobile": false,
+        "media_type_2": "image",
+        "stack_media_on_mobile": false,
+        "custom_mobile_media": false,
+        "media_type_1_mobile": "image",
+        "media_type_2_mobile": "image",
+        "link": "",
+        "open_in_new_tab": false,
         "content_direction": "column",
         "vertical_on_mobile": true,
         "horizontal_alignment": "flex-start",
         "vertical_alignment": "center",
         "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "flex-start",
+        "horizontal_alignment_flex_direction_column": "center",
         "vertical_alignment_flex_direction_column": "center",
-        "gap": 12,
+        "gap": 16,
         "use_mobile_gap": false,
         "mobile_gap": 12,
         "section_width": "page-width",
-        "section_height": "small",
+        "section_width-mobile": "page-width",
+        "section_height": "auto",
         "section_height_custom": 50,
-        "background_media": "image",
         "background_color": "",
-        "video_position": "cover",
-        "background_image": "shopify://shop_images/Frame.webp",
-        "background_image_mobile": "shopify://shop_images/Frame_0c694e1e-1a2c-406e-81d6-0cc1d8fd0f71.webp",
-        "background_image_position": "cover",
-        "background_image_position_y": 0,
-        "toggle_overlay": false,
+        "toggle_overlay": true,
         "overlay_color": "#00000026",
-        "overlay_style": "solid",
+        "overlay_style": "gradient",
         "gradient_direction": "to top",
-        "floating_media_type": "image",
-        "floating_media_text": "",
-        "floating_media_text_preset": "paragraph",
-        "floating_media_text_preset_mobile": "",
-        "floating_media_text_alignment": "center",
-        "floating_media_text_padding_y": 8,
-        "floating_media_text_padding_x": 16,
-        "floating_media_width": 120,
-        "floating_media_anchor": "top-right",
-        "floating_media_offset_x": 0,
-        "floating_media_offset_y": 0,
-        "floating_media_rotation": 0,
-        "floating_media_hide_mobile": false,
-        "use_floating_media_mobile_settings": false,
-        "floating_media_width_mobile": 120,
-        "floating_media_anchor_mobile": "",
-        "floating_media_offset_x_mobile": 0,
-        "floating_media_offset_y_mobile": 0,
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_color": "",
-        "border_radius": 0,
+        "blurred_reflection": false,
+        "reflection_opacity": 75,
         "padding-block-start": 100,
         "padding-block-end": 100,
-        "padding-inline-start": 0,
-        "padding-inline-end": 0,
         "use_mobile_padding": false,
         "padding-block-start-mobile": 0,
-        "padding-block-end-mobile": 0,
-        "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0,
-        "hide_on_mobile": false,
-        "hide_on_desktop": false
+        "padding-block-end-mobile": 0
       }
     },
     "main": {
@@ -2748,12 +3951,13 @@
     }
   },
   "order": [
-    "hero_EQnwXk",
+    "hero_rprFhR",
+    "overlap_section_TeMBen",
     "section_JJc79Y",
     "section_akHVDU",
     "section_q7b37c",
     "section_mknwmf",
-    "section_KDxDXB",
+    "hero_G4thAL",
     "main"
   ]
 }

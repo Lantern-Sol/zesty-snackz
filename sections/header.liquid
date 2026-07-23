@@ -25,6 +25,11 @@
   elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
     assign transparent = 'always'
     assign transparent_text_color_setting = section.settings.text_color_transparent_collection
+  elsif template.name == 'page' and template.suffix == 'giveaway'
+    # The giveaway landing page runs the floating header transparent so its hero
+    # extends up under the pill, matching the home page treatment. Scoped to this
+    # one page by suffix (there is no page-level transparent-header setting).
+    assign transparent = 'always'
   endif
 
   if section.settings.enable_sticky_header == 'always'

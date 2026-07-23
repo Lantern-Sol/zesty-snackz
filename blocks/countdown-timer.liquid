@@ -1,14 +1,17 @@
-{% comment %}
-  Countdown Timer
-  ---------------
+{%- doc -%}
+  Countdown Timer block
+  ---------------------
   A dark rounded card with a headline, four unit boxes (days / hours / minutes /
   seconds) counting down to a fixed instant, and a supporting line of copy.
 
   The deadline is built in Liquid from the merchant's date + time settings and
   stamped with the store's UTC offset, so every visitor counts down to the same
-  moment regardless of their own timezone. The countdown-timer.js custom element
-  ticks the cells each second and stops at zero.
-{% endcomment %}
+  moment regardless of their own timezone. countdown-timer.js ticks the cells
+  each second and stops at zero.
+
+  @example
+  {% content_for 'block', type: 'countdown-timer', id: 'countdown-timer' %}
+{%- enddoc -%}
 
 <script
   src="{{ 'countdown-timer.js' | asset_url }}"
@@ -17,10 +20,9 @@
 ></script>
 
 {% liquid
-  assign end_date = section.settings.end_date | default: '2026-07-25'
-  assign end_time = section.settings.end_time | default: '12:00'
+  assign end_date = block.settings.end_date | default: '2026-07-25'
+  assign end_time = block.settings.end_time | default: '12:00'
 
-  # Store UTC offset (e.g. "-0500") so the deadline is the same instant for everyone.
   assign raw_offset = 'now' | date: '%z'
   assign offset_h = raw_offset | slice: 0, 3
   assign offset_m = raw_offset | slice: 3, 2
@@ -35,33 +37,34 @@
 <div
   class="countdown spacing-style"
   style="
-    {%- render 'spacing-style', settings: section.settings %}
-    --countdown-bg: {{ section.settings.background_color }};
-    --countdown-title: {{ section.settings.title_color }};
-    --countdown-text: {{ section.settings.text_color }};
-    --countdown-box-bg: {{ section.settings.box_background_color }};
-    --countdown-box-border: {{ section.settings.box_border_color }};
-    --countdown-number: {{ section.settings.number_color }};
-    --countdown-label: {{ section.settings.label_color }};
-    --countdown-shadow: {{ section.settings.shadow_color }};
+    {%- render 'spacing-style', settings: block.settings %}
+    --countdown-bg: {{ block.settings.background_color }};
+    --countdown-title: {{ block.settings.title_color }};
+    --countdown-text: {{ block.settings.text_color }};
+    --countdown-box-bg: {{ block.settings.box_background_color }};
+    --countdown-box-border: {{ block.settings.box_border_color }};
+    --countdown-number: {{ block.settings.number_color }};
+    --countdown-label: {{ block.settings.label_color }};
+    --countdown-shadow: {{ block.settings.shadow_color }};
   "
+  {{ block.shopify_attributes }}
 >
   <div class="countdown__card">
-    {%- if section.settings.title != blank -%}
-      <p class="countdown__title">{{ section.settings.title }}</p>
+    {%- if block.settings.title != blank -%}
+      <p class="countdown__title">{{ block.settings.title }}</p>
     {%- endif -%}
 
     <countdown-timer
       class="countdown__grid"
       data-deadline="{{ deadline_iso }}"
       role="timer"
-      aria-label="{{ section.settings.title | strip_html | default: 'Countdown' | escape }}"
+      aria-label="{{ block.settings.title | strip_html | default: 'Countdown' | escape }}"
     >
       {%- assign units = 'days,hours,minutes,seconds' | split: ',' -%}
       {%- for unit in units -%}
         {%- liquid
           assign label_key = unit | append: '_label'
-          assign label = section.settings[label_key]
+          assign label = block.settings[label_key]
         -%}
         <div class="countdown__unit">
           <span class="countdown__number" data-unit="{{ unit }}">00</span>
@@ -72,8 +75,8 @@
       {%- endfor -%}
     </countdown-timer>
 
-    {%- if section.settings.subtitle != blank -%}
-      <p class="countdown__subtitle">{{ section.settings.subtitle }}</p>
+    {%- if block.settings.subtitle != blank -%}
+      <p class="countdown__subtitle">{{ block.settings.subtitle }}</p>
     {%- endif -%}
   </div>
 </div>
@@ -82,26 +85,27 @@
   .countdown {
     display: flex;
     justify-content: center;
+    width: 100%;
   }
 
   .countdown__card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 1.25rem;
     width: 100%;
-    max-width: 743px;
-    padding: clamp(28px, 5vw, 49px);
-    border-radius: 32px;
+    max-width: 46.32rem;
+    padding: 3rem;
+    border-radius: 2rem;
     background: var(--countdown-bg);
-    box-shadow: 0 5px 0 0 var(--countdown-shadow);
+    box-shadow: 0 0.3125rem 0 0 var(--countdown-shadow);
   }
 
   .countdown__title {
     margin: 0;
     font-family: var(--font-heading--family);
     font-weight: 400;
-    font-size: clamp(24px, 3.5vw, 32px);
+    font-size: 2rem;
     line-height: 1.1;
     letter-spacing: -0.01em;
     text-align: center;
@@ -113,7 +117,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 1.25rem;
     width: 100%;
   }
 
@@ -122,30 +126,30 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    width: clamp(104px, 13.5vw, 118px);
-    min-height: clamp(104px, 20vw, 130px);
-    padding: 19px 24px;
-    border: 3px solid var(--countdown-box-border);
-    border-radius: 20px;
+    gap: 0;
+    width: calc(25% - 1.25rem * 3 / 4);
+    padding: 1.19rem 1.19rem 0.94rem;
+    border: 0.1875rem solid var(--countdown-box-border);
+    border-radius: 1.25rem;
     background: var(--countdown-box-bg);
-    box-shadow: 0 5px 0 0 var(--countdown-shadow);
+    box-shadow: 0 0.3125rem 0 0 var(--countdown-shadow);
   }
 
   .countdown__number {
     font-family: var(--font-heading--family);
     font-weight: 400;
-    font-size: clamp(52px, 9vw, 80px);
+    font-size: 5rem;
     line-height: 1;
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
     color: var(--countdown-number);
+    margin-bottom: -1rem;
   }
 
   .countdown__label {
     font-family: var(--font-heading--family);
     font-weight: 400;
-    font-size: clamp(16px, 2vw, 20px);
+    font-size: clamp(1rem, 2vw, 1.25rem);
     line-height: 1.5;
     letter-spacing: -0.01em;
     text-transform: uppercase;
@@ -155,16 +159,38 @@
   .countdown__subtitle {
     margin: 0;
     font-family: var(--font-body--family);
-    font-size: clamp(14px, 1.6vw, 16px);
+    font-size: clamp(0.875rem, 1.6vw, 1rem);
     line-height: 1.3;
     letter-spacing: 0.02em;
     text-align: center;
     color: var(--countdown-text);
   }
 
-  @media screen and (max-width: 540px) {
+  @media screen and (max-width: 749px) {
+    .countdown__grid {
+      gap: 0.65rem;
+    }
     .countdown__unit {
-      width: calc(50% - 10px);
+      width: calc(25% - 0.65rem * 3 / 4);
+      padding: 0.61rem 1rem 0.46rem;
+      border-radius: 11px;
+    }
+    .countdown__card {
+      padding: 1.59rem 1.59rem 1.62rem;
+      gap: 0.65rem;
+    }
+    .countdown__number {
+      font-size: 2.58rem;
+      margin-bottom: -0.5rem;
+    }
+    .countdown__label {
+      font-size: 0.647rem;
+    }
+    .countdown__title {
+      font-size: 1.125rem;
+    }
+    .countdown__subtitle {
+      font-size: 0.625rem;
     }
   }
 {% endstylesheet %}
@@ -172,11 +198,7 @@
 {% schema %}
 {
   "name": "Countdown Timer",
-  "tag": "section",
-  "class": "section-countdown-timer",
-  "disabled_on": {
-    "groups": ["header", "footer"]
-  },
+  "tag": null,
   "settings": [
     {
       "type": "header",
@@ -305,7 +327,7 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 40
+      "default": 0
     },
     {
       "type": "range",
@@ -315,13 +337,13 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 40
+      "default": 0
     }
   ],
   "presets": [
     {
       "name": "Countdown Timer",
-      "category": "Promotional"
+      "category": "t:categories.basic"
     }
   ]
 }
