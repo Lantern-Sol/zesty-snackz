@@ -4993,6 +4993,13 @@ slideshow-arrows .slideshow-control.slideshow-control--style-none {
   flex-basis: var(--size-style-height);
 }
 
+/* In a row, "Fill" height should match the tallest sibling (equal-height columns)
+   regardless of the parent's vertical alignment. align-self overrides align-items. */
+.layout-panel-flex--row>.group-block--height-fill {
+  align-self: stretch;
+  height: auto;
+}
+
 accordion-custom {
   details {
 
