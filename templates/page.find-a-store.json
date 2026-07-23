@@ -1,0 +1,196 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "title": {
+          "type": "text",
+          "name": "t:names.title",
+          "settings": {
+            "text": "<h1>{{ closest.page.title }}</h1>",
+            "mobile_text": "",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "left",
+            "height_mode": "auto",
+            "desktop_height": "",
+            "mobile_height": "",
+            "type_preset": "h2",
+            "font": "var(--font-primary--family)",
+            "enable_custom_font_weight": false,
+            "weight": "400",
+            "font_size": "",
+            "line_height": "normal",
+            "custom_line_height": 1.5,
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "type_preset_mobile": "rte",
+            "mobile_font_size": "1rem",
+            "mobile_custom_line_height": 1.5,
+            "text_color": "",
+            "accent_color": "",
+            "enable_text_shadow": false,
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {}
+        },
+        "content": {
+          "type": "text",
+          "name": "t:names.content",
+          "settings": {
+            "text": "{{ closest.page.content }}",
+            "mobile_text": "",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "left",
+            "height_mode": "auto",
+            "desktop_height": "",
+            "mobile_height": "",
+            "type_preset": "rte",
+            "font": "var(--font-primary--family)",
+            "enable_custom_font_weight": false,
+            "weight": "400",
+            "font_size": "",
+            "line_height": "normal",
+            "custom_line_height": 1.5,
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "type_preset_mobile": "rte",
+            "mobile_font_size": "1rem",
+            "mobile_custom_line_height": 1.5,
+            "text_color": "",
+            "accent_color": "",
+            "enable_text_shadow": false,
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "use_mobile_padding": false,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "content"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "gap": 24,
+        "background_color": "",
+        "padding-block-start": 40,
+        "padding-block-end": 0
+      }
+    },
+    "store_locator": {
+      "type": "section",
+      "blocks": {
+        "powr_map_store_locator": {
+          "type": "shopify://apps/powr-map-store-locator/blocks/app-block/9044b7a6-9786-4034-a66f-350b6e75cfd1",
+          "settings": {
+            "app_id": "9RjoGW"
+          }
+        }
+      },
+      "block_order": [
+        "powr_map_store_locator"
+      ],
+      "custom_css": [
+        ".shopify-block.shopify-app-block {margin: 40px 0px;}",
+        "@media screen and (min-width: 1600px) {.shopify-block.shopify-app-block {margin: 40px 40px 106px 40px !important; }}"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 0,
+        "use_mobile_gap": false,
+        "mobile_gap": 12,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "background_image_position_y": 50,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "floating_media_type": "image",
+        "floating_media_text": "",
+        "floating_media_text_preset": "paragraph",
+        "floating_media_text_preset_mobile": "",
+        "floating_media_text_alignment": "center",
+        "floating_media_text_padding_y": 8,
+        "floating_media_text_padding_x": 16,
+        "floating_media_width": 120,
+        "floating_media_anchor": "top-right",
+        "floating_media_offset_x": 0,
+        "floating_media_offset_y": 0,
+        "floating_media_rotation": 0,
+        "floating_media_hide_mobile": false,
+        "use_floating_media_mobile_settings": false,
+        "floating_media_width_mobile": 120,
+        "floating_media_anchor_mobile": "",
+        "floating_media_offset_x_mobile": 0,
+        "floating_media_offset_y_mobile": 0,
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
+        "padding-block-start": 24,
+        "padding-block-end": 40,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0,
+        "use_mobile_padding": false,
+        "padding-block-start-mobile": 0,
+        "padding-block-end-mobile": 0,
+        "padding-inline-start-mobile": 0,
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
+      }
+    }
+  },
+  "order": [
+    "main",
+    "store_locator"
+  ]
+}

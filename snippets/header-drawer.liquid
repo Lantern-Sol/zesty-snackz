@@ -828,8 +828,14 @@
     transition: opacity var(--drawer-animation-speed) ease;
 
     @media screen and (max-width: 749px) {
-      top: var(--account-offset-top);
-      height: calc(100dvh - var(--account-offset-top));
+      /* The scrim is position:fixed but lives inside .header (contain: layout),
+         so an offset-based height can fall short of the viewport and leave the
+         lower page undimmed. Cover the full viewport and sit behind the opaque
+         pill so every page dims uniformly, including when the pill floats over
+         content (transparent header, or the wholesale mobile overlap). */
+      top: 0;
+      height: 100dvh;
+      z-index: -2;
     }
 
     .menu-open & {
@@ -905,17 +911,6 @@
        pair it with a translucent dark overlay. */
     .menu-drawer__backdrop {
       background-color: rgba(11, 27, 43, 0.5);
-    }
-
-    /* Transparent (e.g. homepage) header: the pill floats over page content, so
-       the scrim must sit BEHIND the pill and cover its transparent surround.
-       A negative z-index keeps it under the bright pill (underlay is -1, row
-       content 0) while the header's own stacking context (layer-overlay /
-       sticky) keeps the whole scrim above the page hero. */
-    #header-component[transparent] .menu-drawer__backdrop {
-      top: 0;
-      height: 100dvh;
-      z-index: -2;
     }
 
     /* Uniform 44px header icons: match the cart/search glyphs */

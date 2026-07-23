@@ -85,11 +85,19 @@
             "custom_button_padding_inline_start_mobile": 24,
             "custom_button_padding_inline_end_mobile": 24,
             "link_text_color": "",
+            "custom_text_enabled": false,
+            "custom_text_size": 16,
+            "custom_text_line_height": 1.2,
+            "custom_text_use_mobile": false,
+            "custom_text_size_mobile": 16,
+            "custom_text_line_height_mobile": 1.2,
             "rotation": 0,
             "width": "fit-content",
             "custom_width": 100,
             "width_mobile": "fit-content",
-            "custom_width_mobile": 100
+            "custom_width_mobile": 100,
+            "hide_on_mobile": false,
+            "hide_on_desktop": false
           },
           "blocks": {}
         },
@@ -182,7 +190,7 @@
         "enable_transparent_header_product": false,
         "product_inverse_logo": false,
         "text_color_transparent_product": "",
-        "enable_transparent_header_collection": false,
+        "enable_transparent_header_collection": true,
         "collection_inverse_logo": false,
         "text_color_transparent_collection": ""
       }

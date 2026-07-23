@@ -139,7 +139,7 @@
     background-color: var(--card-media-background, transparent);
   }
 
-  .product-card__content.product-card--accent .buy-buttons-block {
+  .product-card__content .buy-buttons-block {
     width: fit-content;
 
     /* Full-width add-to-cart on mobile */
@@ -148,14 +148,30 @@
     }
   }
 
-  .product-card__content.product-card--accent .add-to-cart-button {
-    background-color: var(--card-accent);
-    border-color: var(--card-accent);
-    color: rgb(255 255 255);
+  /* Base pill styling for the card add-to-cart button. Applies to every card so
+     products without a custom.color metafield still get a finished button
+     (falls back to the theme's primary button colors instead of bare text). */
+  .product-card__content .add-to-cart-button {
+    background-color: var(--color-primary-button-background);
+    border-color: var(--color-primary-button-border);
+    color: var(--color-primary-button-text);
     border-radius: 100px;
     padding: 0.625rem 1.5rem;
     font-size: 0.875rem;
     white-space: nowrap;
+  }
+
+  .product-card__content .add-to-cart-button:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--color-primary-button-background) 85%, black);
+    border-color: color-mix(in srgb, var(--color-primary-button-border) 85%, black);
+  }
+
+  /* Accent override: when the product defines a custom.color metafield, tint the
+     button with that accent instead of the theme default. */
+  .product-card__content.product-card--accent .add-to-cart-button {
+    background-color: var(--card-accent);
+    border-color: var(--card-accent);
+    color: rgb(255 255 255);
   }
 
   .product-card__content.product-card--accent .add-to-cart-button:not(:disabled):hover {
