@@ -1364,6 +1364,18 @@
     }
   }
 
+  /* Pin the card badge (fan-fave / chaos-pick) to the top-right corner. The
+     shared `.product-badges--*` inset relies on theme padding vars that inherit
+     large values inside this card, which pushed the badge toward the centre —
+     mirror the sour meter's simple corner inset instead. (The SOLD OUT stamp is
+     part of the product image and stays centred.) */
+  .section-build-a-box .bab-card__media .product-badges {
+    top: var(--padding-sm);
+    right: var(--padding-sm);
+    bottom: auto;
+    left: auto;
+  }
+
   .section-build-a-box .bab-card__info {
     display: flex;
     flex-direction: column;
@@ -1800,34 +1812,43 @@
       padding: 14px 0 10px;
     }
 
-    /* Floating bar condenses to actions only */
+    /* Full stacked sticky: picks strip → subscribe pill → add-to-cart. */
     .section-build-a-box .bab__float {
       flex-direction: column;
-      gap: 10px;
-      padding: 12px 16px;
+      align-items: stretch;
+      gap: 20px;
+      padding: 13px 20px;
     }
 
     .section-build-a-box .bab__float-picks-col {
-      display: none;
+      display: flex;
+      width: 100%;
+      max-width: none;
+      gap: 10px;
+    }
+
+    /* Picks scroll horizontally so the slots keep their size on narrow screens. */
+    .section-build-a-box .bab__picks--float {
+      overflow-x: auto;
     }
 
     .section-build-a-box .bab__float-actions {
       width: 100%;
-      flex-direction: row;
-      align-items: stretch;
+      flex-direction: column;
+      gap: 13px;
     }
 
     .section-build-a-box .bab__float-subscribe {
-      flex: 1 1 auto;
-      font-size: 14px;
-      padding-block: 6px;
+      width: 100%;
+      height: 54px;
+      font-size: 20px;
+      padding: 8px 12px 8px 17px;
     }
 
     .section-build-a-box .bab__cta--float {
-      flex: 1 1 auto;
-      width: auto;
-      font-size: 16px;
-      padding: 12px 16px 9px;
+      width: 100%;
+      font-size: 20px;
+      padding: 20px 34px 14px;
     }
   }
 {% endstylesheet %}

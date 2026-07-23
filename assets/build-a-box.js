@@ -504,6 +504,17 @@ class BuildABoxSection extends Component {
       el.setAttribute('aria-checked', String(subscribe));
     });
 
+    // Float subscribe pill shows the discount unlocked at the current tier,
+    // e.g. "SUBSCRIBE & SAVE 10%" — the % drops when below the first tier.
+    const floatSubLabel = this.querySelector('[data-bab-float-subscribe-label]');
+    if (floatSubLabel instanceof HTMLElement) {
+      if (!this.dataset.subscribeBaseLabel) {
+        this.dataset.subscribeBaseLabel = (floatSubLabel.textContent || 'SUBSCRIBE & SAVE').trim();
+      }
+      const base = this.dataset.subscribeBaseLabel;
+      floatSubLabel.textContent = active && active.discount > 0 ? `${base} ${active.discount}%` : base;
+    }
+
     // Floating bar count + visibility.
     this.querySelectorAll('[data-bab-float-count]').forEach((el) => {
       el.textContent = String(total);

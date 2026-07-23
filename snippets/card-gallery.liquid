@@ -32,7 +32,15 @@
     capture card_size
       render 'util-product-grid-card-size', section: section
     endcapture
-    assign card_size = card_size | strip | replace: 'px', '' | plus: 0
+    assign card_size = card_size | strip
+    if card_size contains 'rem'
+      # Convert rem to px (root font-size is 16px) so the sizes math below
+      # doesn't treat e.g. "18rem" as 18px, which collapses the computed
+      # column width and makes the browser fetch tiny, blurry candidates.
+      assign card_size = card_size | replace: 'rem', '' | plus: 0 | times: 16
+    else
+      assign card_size = card_size | replace: 'px', '' | plus: 0
+    endif
     capture sizes_attribute
       render 'util-autofill-img-size-attr', card_size: card_size, card_gap: section.settings.columns_gap_horizontal
     endcapture
