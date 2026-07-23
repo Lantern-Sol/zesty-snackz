@@ -1275,6 +1275,16 @@
     margin-top: var(--header-height);
   }
 
+  /* Wholesale page, mobile only: let the floating pill header overlap the page
+     content instead of reserving space above it. Pulling <main> up by the header
+     height slides the hero under the pill; the .header-section z-index above keeps
+     the pill on top. */
+  @media screen and (max-width: 749px) {
+    main[data-template='page.wholesale'] {
+      margin-block-start: calc(-1 * var(--header-height, 0px));
+    }
+  }
+
   /* Optimize layout performance for hidden menus */
   .header-menu .menu-list__submenu {
     content-visibility: auto;

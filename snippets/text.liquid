@@ -47,6 +47,9 @@
     if block_settings.enable_text_shadow
       echo ' text-block--text-shadow '
     endif
+    if block_settings.accent_color != blank
+      echo ' text-block--has-accent '
+    endif
     if is_rte
       echo ' rte '
     endif
@@ -65,6 +68,9 @@
     {% if block_settings.text_color != blank %}
       --color: {{ block_settings.text_color }};
       --color-rgb: {{ block_settings.text_color.rgb }};
+    {% endif %}
+    {% if block_settings.accent_color != blank %}
+      --accent-color: {{ block_settings.accent_color }};
     {% endif %}
 
     --width: {{ text_width }};
@@ -299,6 +305,15 @@
   .custom-color,
   .custom-color > :is(h1, h2, h3, h4, h5, h6, p, *) {
     color: var(--color);
+  }
+
+  /* Accent color: merchants italicize the words they want highlighted, so the
+     accent doubles as a color marker — reset the slant so it reads as a color
+     change, not italic text. Scoped to blocks that actually set an accent so
+     genuine italics elsewhere are untouched. */
+  .text-block--has-accent :is(em, i) {
+    color: var(--accent-color);
+    font-style: normal;
   }
 
   /* Sticker-style heading shadow: hard offset + thin outline + soft ambient

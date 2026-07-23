@@ -1,0 +1,679 @@
+{% comment %}
+  Wholesale Inquiry
+  -----------------
+  Two-panel inquiry card on a full-bleed brand background:
+    - Left (dark) panel: eyebrow, headline with a highlighted word, intro copy
+      and up to three icon + text contact/reassurance rows.
+    - Right (light) panel: a native Shopify `contact` form (Name, Company,
+      Email, Message) styled to match, with a pill submit button and a
+      fine-print disclaimer.
+
+  On mobile the two panels stack as separate rounded cards.
+
+  The form posts through Shopify's built-in contact form, so submissions land
+  in the store's Notifications > "Contact form" email. The "Company" value is
+  sent as a custom `contact[Company]` field.
+{% endcomment %}
+
+{%- liquid
+  assign form_id = 'WholesaleInquiry-' | append: section.id
+  assign heading_highlight = section.settings.heading_highlight | strip
+
+  assign accent = section.settings.background_color
+  assign panel_dark = section.settings.panel_dark_color
+  assign panel_light = section.settings.panel_light_color
+  assign highlight = section.settings.highlight_color
+  assign button_color = section.settings.button_color
+-%}
+
+<div
+  class="wholesale-inquiry"
+  style="
+    --wsi-accent: {{ accent }};
+    --wsi-dark: {{ panel_dark }};
+    --wsi-light: {{ panel_light }};
+    --wsi-highlight: {{ highlight }};
+    --wsi-button: {{ button_color }};
+    --wsi-button-shadow: {{ section.settings.button_shadow_color }};
+    --wsi-dark-text: {{ section.settings.dark_text_color }};
+    --wsi-dark-muted: {{ section.settings.dark_muted_color }};
+    --wsi-input-bg: {{ section.settings.input_background_color }};
+  "
+>
+  <div class="wholesale-inquiry__card">
+    {%- comment -%} -------------------------------------------- Left / dark panel {%- endcomment -%}
+    <div class="wholesale-inquiry__panel wholesale-inquiry__panel--info">
+      <div class="wholesale-inquiry__intro">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="wholesale-inquiry__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="wholesale-inquiry__heading">
+            {{- section.settings.heading -}}
+            {%- if heading_highlight != blank -%}
+              <span class="wholesale-inquiry__heading-accent">{{ heading_highlight }}</span>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <p class="wholesale-inquiry__body">{{ section.settings.body }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- liquid
+        assign has_rows = false
+        for block in section.blocks
+          if block.type == 'info_row'
+            assign has_rows = true
+            break
+          endif
+        endfor
+      -%}
+      {%- if has_rows -%}
+        <ul class="wholesale-inquiry__facts" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'info_row' -%}
+              <li class="wholesale-inquiry__fact" {{ block.shopify_attributes }}>
+                <span class="wholesale-inquiry__fact-icon" aria-hidden="true">
+                  {%- render 'wholesale-inquiry-icon', name: block.settings.icon -%}
+                </span>
+                <span class="wholesale-inquiry__fact-text">{{ block.settings.text }}</span>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} -------------------------------------------- Right / form panel {%- endcomment -%}
+    <div class="wholesale-inquiry__panel wholesale-inquiry__panel--form">
+      {%- form 'contact', id: form_id, class: 'wholesale-inquiry__form' -%}
+        <input type="hidden" name="contact[id]" value="{{ form_id }}">
+
+        {%- liquid
+          assign form_matches = false
+          if form.id == form_id or form.id == blank
+            assign form_matches = true
+          endif
+        -%}
+
+        {%- if form.posted_successfully? and form_matches -%}
+          <div class="wholesale-inquiry__notice wholesale-inquiry__notice--success" tabindex="-1" autofocus>
+            {{ section.settings.success_message | default: 'blocks.contact_form.post_success' | t }}
+          </div>
+        {%- elsif form.errors and form_matches -%}
+          <div class="wholesale-inquiry__notice wholesale-inquiry__notice--error" tabindex="-1" autofocus>
+            {{ form.errors.translated_fields.email | capitalize }}
+            {{ form.errors.messages.email }}
+          </div>
+        {%- endif -%}
+
+        <div class="wholesale-inquiry__row">
+          <div class="wholesale-inquiry__field">
+            <label class="wholesale-inquiry__label" for="{{ form_id }}-name">
+              {{- section.settings.name_label -}}
+            </label>
+            <input
+              class="wholesale-inquiry__input"
+              type="text"
+              id="{{ form_id }}-name"
+              name="contact[name]"
+              autocomplete="name"
+              placeholder="{{ section.settings.name_placeholder }}"
+              value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+            >
+          </div>
+
+          <div class="wholesale-inquiry__field">
+            <label class="wholesale-inquiry__label" for="{{ form_id }}-company">
+              {{- section.settings.company_label -}}
+            </label>
+            <input
+              class="wholesale-inquiry__input"
+              type="text"
+              id="{{ form_id }}-company"
+              name="contact[Company]"
+              autocomplete="organization"
+              placeholder="{{ section.settings.company_placeholder }}"
+            >
+          </div>
+        </div>
+
+        <div class="wholesale-inquiry__field">
+          <label class="wholesale-inquiry__label" for="{{ form_id }}-email">
+            {{- section.settings.email_label -}} <span aria-hidden="true">*</span>
+          </label>
+          <input
+            class="wholesale-inquiry__input"
+            type="email"
+            id="{{ form_id }}-email"
+            name="contact[email]"
+            autocomplete="email"
+            spellcheck="false"
+            autocapitalize="off"
+            aria-required="true"
+            placeholder="{{ section.settings.email_placeholder }}"
+            value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+            {% if form.errors contains 'email' and form_matches %}
+              aria-invalid="true"
+            {% endif %}
+          >
+        </div>
+
+        <div class="wholesale-inquiry__field">
+          <label class="wholesale-inquiry__label" for="{{ form_id }}-body">
+            {{- section.settings.message_label -}}
+          </label>
+          <textarea
+            class="wholesale-inquiry__input wholesale-inquiry__input--textarea"
+            id="{{ form_id }}-body"
+            name="contact[body]"
+            rows="4"
+            placeholder="{{ section.settings.message_placeholder }}"
+          >{{ form.body }}</textarea>
+        </div>
+
+        <button type="submit" class="wholesale-inquiry__submit">
+          {{- section.settings.button_label -}}
+        </button>
+
+        {%- if section.settings.disclaimer != blank -%}
+          <p class="wholesale-inquiry__disclaimer">{{ section.settings.disclaimer }}</p>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .wholesale-inquiry {
+    background-color: var(--wsi-accent);
+    padding: 3.125rem clamp(1rem, 6vw, 6.25rem) 8rem;
+  }
+
+  .wholesale-inquiry__card {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    max-width: 77.5rem;
+    margin-inline: auto;
+    background-color: var(--wsi-dark);
+    border: 0.1875rem solid var(--wsi-dark);
+    border-radius: 2.25rem;
+    padding: 0.1875rem;
+    overflow: hidden;
+    box-shadow: 0 0.625rem 0 0 var(--wsi-dark), 0 1.875rem 3.125rem 0 rgba(11, 27, 43, 0.12);
+  }
+
+  .wholesale-inquiry__panel {
+    padding: clamp(1.75rem, 4vw, 3.75rem);
+  }
+
+  .wholesale-inquiry__panel--info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.875rem;
+    background-color: var(--wsi-dark);
+    border-radius: 2.0625rem 0 0 2.0625rem;
+  }
+
+  .wholesale-inquiry__panel--form {
+    padding-bottom: clamp(1.75rem, 4vw, 2.5rem);
+    background-color: var(--wsi-light);
+  }
+
+  .wholesale-inquiry__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .wholesale-inquiry__eyebrow {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    letter-spacing: 0.02rem;
+    line-height: 1.3;
+    color: var(--wsi-dark-muted);
+  }
+
+  .wholesale-inquiry__heading {
+    margin: 0;
+    max-width: 27.1875rem;
+    font-family: var(--font-heading--family);
+    font-size: clamp(3.5rem, 9vw, 5rem);
+    line-height: 0.95;
+    letter-spacing: -0.05rem;
+    color: var(--wsi-dark-text);
+    text-transform: uppercase;
+  }
+
+  .wholesale-inquiry__heading-accent {
+    color: var(--wsi-highlight);
+    display: inline-block;
+  }
+
+  .wholesale-inquiry__body {
+    margin: 0;
+    max-width: 27.1875rem;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    letter-spacing: 0.02rem;
+    line-height: 1.3;
+    color: var(--wsi-dark-muted);
+  }
+
+  .wholesale-inquiry__facts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .wholesale-inquiry__fact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .wholesale-inquiry__fact-icon {
+    display: flex;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--wsi-dark-text);
+  }
+
+  .wholesale-inquiry__fact-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .wholesale-inquiry__fact-text {
+    font-family: var(--font-body--family);
+    font-size: 0.75rem;
+    color: var(--wsi-dark-text);
+  }
+
+  /* -------------------------------------------------------------- form */
+  .wholesale-inquiry__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .wholesale-inquiry__row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .wholesale-inquiry__row .wholesale-inquiry__field {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .wholesale-inquiry__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .wholesale-inquiry__label {
+    font-family: var(--font-heading--family);
+    font-size: 1.5rem;
+    letter-spacing: -0.015rem;
+    line-height: 1;
+    color: var(--wsi-dark);
+    text-transform: uppercase;
+  }
+
+  .wholesale-inquiry__input {
+    width: 100%;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    letter-spacing: 0.02rem;
+    color: var(--wsi-dark);
+    background-color: var(--wsi-input-bg);
+    border: 0.125rem solid rgba(11, 27, 43, 0.3);
+    border-radius: 0.875rem;
+    padding: 1rem 1.125rem;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .wholesale-inquiry__input::placeholder {
+    color: rgba(11, 27, 43, 0.5);
+  }
+
+  .wholesale-inquiry__input:focus,
+  .wholesale-inquiry__input:focus-visible {
+    outline: none;
+    border-color: var(--wsi-accent);
+  }
+
+  .wholesale-inquiry__input--textarea {
+    min-height: 8.75rem;
+    resize: vertical;
+  }
+
+  .wholesale-inquiry__submit {
+    align-self: flex-start;
+    font-family: var(--font-heading--family);
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--wsi-dark);
+    text-transform: uppercase;
+    background-color: var(--wsi-button);
+    border: none;
+    border-radius: 62.4375rem;
+    padding: 1.25rem 2.125rem 0.875rem;
+    cursor: pointer;
+    box-shadow: 0 0.375rem 0 0 var(--wsi-button-shadow);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .wholesale-inquiry__submit:hover {
+    transform: translateY(0.125rem);
+    box-shadow: 0 0.25rem 0 0 var(--wsi-button-shadow);
+  }
+
+  .wholesale-inquiry__submit:active {
+    transform: translateY(0.375rem);
+    box-shadow: 0 0 0 0 var(--wsi-button-shadow);
+  }
+
+  .wholesale-inquiry__disclaimer {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: rgba(11, 27, 43, 0.45);
+  }
+
+  .wholesale-inquiry__notice {
+    font-family: var(--font-body--family);
+    font-size: 0.875rem;
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.125rem;
+  }
+
+  .wholesale-inquiry__notice--success {
+    color: #0b4d1f;
+    background-color: #e2f6e8;
+    border: 0.125rem solid #9bd8ac;
+  }
+
+  .wholesale-inquiry__notice--error {
+    color: #7a1b1b;
+    background-color: #fdecec;
+    border: 0.125rem solid #f0b4b4;
+  }
+
+  /* -------------------------------------------------------------- mobile */
+  @media screen and (max-width: 749px) {
+    .wholesale-inquiry {
+      padding: 3.125rem 1rem 5.625rem;
+    }
+
+    .wholesale-inquiry__card {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 30rem;
+      background-color: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      overflow: visible;
+      box-shadow: none;
+    }
+
+    .wholesale-inquiry__panel {
+      padding: 1.5rem;
+      border: 0.1875rem solid var(--wsi-dark);
+      border-radius: 1.5rem;
+      box-shadow: 0 0.625rem 0 0 var(--wsi-dark), 0 1.875rem 1.5625rem 0 rgba(11, 27, 43, 0.12);
+    }
+
+    .wholesale-inquiry__panel--info {
+      gap: 1.25rem;
+      border-radius: 1.5rem;
+    }
+
+    .wholesale-inquiry__eyebrow,
+    .wholesale-inquiry__body {
+      max-width: none;
+    }
+
+    .wholesale-inquiry__heading {
+      max-width: none;
+      font-size: clamp(3rem, 15vw, 4.5rem);
+    }
+
+    .wholesale-inquiry__facts {
+      gap: 0.3125rem;
+    }
+
+    .wholesale-inquiry__row {
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .wholesale-inquiry__submit {
+      align-self: stretch;
+      text-align: center;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wholesale Inquiry",
+  "tag": "section",
+  "class": "section-wholesale-inquiry",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Intro"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "LET'S TALK"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Start a wholesale "
+    },
+    {
+      "type": "text",
+      "id": "heading_highlight",
+      "label": "Highlighted word",
+      "info": "Appended to the heading in the highlight color.",
+      "default": "inquiry"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body",
+      "default": "Tell us about your stores and we'll send a line sheet, case-pack details, and lead times. A real human on our team replies within two business days."
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "text",
+      "id": "name_label",
+      "label": "Name label",
+      "default": "Name"
+    },
+    {
+      "type": "text",
+      "id": "name_placeholder",
+      "label": "Name placeholder",
+      "default": "Your full name"
+    },
+    {
+      "type": "text",
+      "id": "company_label",
+      "label": "Company label",
+      "default": "Company"
+    },
+    {
+      "type": "text",
+      "id": "company_placeholder",
+      "label": "Company placeholder",
+      "default": "Store or company name"
+    },
+    {
+      "type": "text",
+      "id": "email_label",
+      "label": "Email label",
+      "default": "Email"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "you@company.com"
+    },
+    {
+      "type": "text",
+      "id": "message_label",
+      "label": "Message label",
+      "default": "Message"
+    },
+    {
+      "type": "text",
+      "id": "message_placeholder",
+      "label": "Message placeholder",
+      "default": "Tell us about your stores — how many locations, region, and what you're interested in stocking."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Send inquiry"
+    },
+    {
+      "type": "textarea",
+      "id": "disclaimer",
+      "label": "Disclaimer",
+      "default": "By submitting you agree to be contacted about wholesale opportunities. No pricing is shown publicly — we'll share it directly with qualified buyers."
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "info": "Shown after a successful submission. Leave blank to use the theme default.",
+      "default": "Thanks! We'll be in touch within two business days."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background",
+      "default": "#009EED"
+    },
+    {
+      "type": "color",
+      "id": "panel_dark_color",
+      "label": "Info panel background",
+      "default": "#0B1B2B"
+    },
+    {
+      "type": "color",
+      "id": "panel_light_color",
+      "label": "Form panel background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight",
+      "default": "#FFD23F"
+    },
+    {
+      "type": "color",
+      "id": "dark_text_color",
+      "label": "Info panel text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "dark_muted_color",
+      "label": "Info panel muted text",
+      "default": "#E4F3FD"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input background",
+      "default": "#F6FAFD"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button",
+      "default": "#FFD23F"
+    },
+    {
+      "type": "color",
+      "id": "button_shadow_color",
+      "label": "Button shadow",
+      "default": "#E0A800"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "info_row",
+      "name": "Info row",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "mail", "label": "Mail" },
+            { "value": "calendar", "label": "Calendar" },
+            { "value": "warehouse", "label": "Warehouse" }
+          ],
+          "default": "mail"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "wholesale@zestysnackz.com"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Wholesale Inquiry",
+      "category": "Contact",
+      "blocks": [
+        { "type": "info_row", "settings": { "icon": "mail", "text": "wholesale@zestysnackz.com" } },
+        { "type": "info_row", "settings": { "icon": "calendar", "text": "Replies within 2 business days" } },
+        { "type": "info_row", "settings": { "icon": "warehouse", "text": "Shipping from our US warehouse" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
