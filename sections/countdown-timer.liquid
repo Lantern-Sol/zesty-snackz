@@ -1,0 +1,328 @@
+{% comment %}
+  Countdown Timer
+  ---------------
+  A dark rounded card with a headline, four unit boxes (days / hours / minutes /
+  seconds) counting down to a fixed instant, and a supporting line of copy.
+
+  The deadline is built in Liquid from the merchant's date + time settings and
+  stamped with the store's UTC offset, so every visitor counts down to the same
+  moment regardless of their own timezone. The countdown-timer.js custom element
+  ticks the cells each second and stops at zero.
+{% endcomment %}
+
+<script
+  src="{{ 'countdown-timer.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  assign end_date = section.settings.end_date | default: '2026-07-25'
+  assign end_time = section.settings.end_time | default: '12:00'
+
+  # Store UTC offset (e.g. "-0500") so the deadline is the same instant for everyone.
+  assign raw_offset = 'now' | date: '%z'
+  assign offset_h = raw_offset | slice: 0, 3
+  assign offset_m = raw_offset | slice: 3, 2
+  if offset_h == blank
+    assign offset_h = '+00'
+    assign offset_m = '00'
+  endif
+
+  assign deadline_iso = end_date | append: 'T' | append: end_time | append: ':00' | append: offset_h | append: ':' | append: offset_m
+%}
+
+<div
+  class="countdown spacing-style"
+  style="
+    {%- render 'spacing-style', settings: section.settings %}
+    --countdown-bg: {{ section.settings.background_color }};
+    --countdown-title: {{ section.settings.title_color }};
+    --countdown-text: {{ section.settings.text_color }};
+    --countdown-box-bg: {{ section.settings.box_background_color }};
+    --countdown-box-border: {{ section.settings.box_border_color }};
+    --countdown-number: {{ section.settings.number_color }};
+    --countdown-label: {{ section.settings.label_color }};
+    --countdown-shadow: {{ section.settings.shadow_color }};
+  "
+>
+  <div class="countdown__card">
+    {%- if section.settings.title != blank -%}
+      <p class="countdown__title">{{ section.settings.title }}</p>
+    {%- endif -%}
+
+    <countdown-timer
+      class="countdown__grid"
+      data-deadline="{{ deadline_iso }}"
+      role="timer"
+      aria-label="{{ section.settings.title | strip_html | default: 'Countdown' | escape }}"
+    >
+      {%- assign units = 'days,hours,minutes,seconds' | split: ',' -%}
+      {%- for unit in units -%}
+        {%- liquid
+          assign label_key = unit | append: '_label'
+          assign label = section.settings[label_key]
+        -%}
+        <div class="countdown__unit">
+          <span class="countdown__number" data-unit="{{ unit }}">00</span>
+          {%- if label != blank -%}
+            <span class="countdown__label">{{ label }}</span>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </countdown-timer>
+
+    {%- if section.settings.subtitle != blank -%}
+      <p class="countdown__subtitle">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .countdown {
+    display: flex;
+    justify-content: center;
+  }
+
+  .countdown__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 743px;
+    padding: clamp(28px, 5vw, 49px);
+    border-radius: 32px;
+    background: var(--countdown-bg);
+    box-shadow: 0 5px 0 0 var(--countdown-shadow);
+  }
+
+  .countdown__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(24px, 3.5vw, 32px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--countdown-title);
+  }
+
+  .countdown__grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .countdown__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: clamp(104px, 13.5vw, 118px);
+    min-height: clamp(104px, 20vw, 130px);
+    padding: 19px 24px;
+    border: 3px solid var(--countdown-box-border);
+    border-radius: 20px;
+    background: var(--countdown-box-bg);
+    box-shadow: 0 5px 0 0 var(--countdown-shadow);
+  }
+
+  .countdown__number {
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(52px, 9vw, 80px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--countdown-number);
+  }
+
+  .countdown__label {
+    font-family: var(--font-heading--family);
+    font-weight: 400;
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--countdown-label);
+  }
+
+  .countdown__subtitle {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: clamp(14px, 1.6vw, 16px);
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--countdown-text);
+  }
+
+  @media screen and (max-width: 540px) {
+    .countdown__unit {
+      width: calc(50% - 10px);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Countdown Timer",
+  "tag": "section",
+  "class": "section-countdown-timer",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Drawing Live · July 25, 2026"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Stay subscribed through the draw date to keep your entry active."
+    },
+    {
+      "type": "header",
+      "content": "Deadline",
+      "info": "The countdown ends at this date and time in your store's timezone."
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date",
+      "default": "2026-07-25",
+      "info": "Format: YYYY-MM-DD"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time",
+      "default": "12:00",
+      "info": "24-hour format: HH:MM"
+    },
+    {
+      "type": "header",
+      "content": "Unit labels"
+    },
+    {
+      "type": "text",
+      "id": "days_label",
+      "label": "Days label",
+      "default": "Days"
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "Hours label",
+      "default": "Hours"
+    },
+    {
+      "type": "text",
+      "id": "minutes_label",
+      "label": "Minutes label",
+      "default": "Minutes"
+    },
+    {
+      "type": "text",
+      "id": "seconds_label",
+      "label": "Seconds label",
+      "default": "Seconds"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Card background",
+      "default": "#0B1B2B"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Subtitle",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "box_background_color",
+      "label": "Unit box background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "box_border_color",
+      "label": "Unit box border",
+      "default": "#009EED"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number",
+      "default": "#009EED"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Unit label",
+      "default": "#0B1B2B"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Shadow",
+      "default": "#0B1B2B"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Timer",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}
