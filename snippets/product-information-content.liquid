@@ -326,9 +326,13 @@
   /* If the header is sticky, make product details content stick underneath the
      header. Reserve the height for any sticky header mode rather than only while
      it is revealed, so a `scroll-up` header toggling on scroll-direction change
-     doesn't flip the sticky offset and jump the column (mirrors the gallery). */
-  body:has(#header-group #header-component[sticky='always']) .product-details.sticky-content--desktop,
-  body:has(#header-group #header-component[sticky='scroll-up']) .product-details.sticky-content--desktop {
-    --sticky-header-offset: var(--header-height);
+     doesn't flip the sticky offset and jump the column (mirrors the gallery).
+     Only at the breakpoint where the column is actually sticky — the offset is a
+     sticky `top` and must not shift the column while it is in normal flow. */
+  @media screen and (min-width: 750px) {
+    body:has(#header-group #header-component[sticky='always']) .product-details.sticky-content--desktop,
+    body:has(#header-group #header-component[sticky='scroll-up']) .product-details.sticky-content--desktop {
+      --sticky-header-offset: var(--header-height);
+    }
   }
 {% endstylesheet %}

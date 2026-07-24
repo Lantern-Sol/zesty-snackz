@@ -625,10 +625,17 @@
      reveal state flips every time the shopper changes scroll direction, so
      gating the offset on `[data-sticky-state='active']` made the sticky top flip
      between the header height and 0, jumping the gallery and letting the
-     revealing header overlap it (most visible at the tablet breakpoint). */
-  body:has(#header-group #header-component[sticky='always']) media-gallery.sticky-content,
-  body:has(#header-group #header-component[sticky='scroll-up']) media-gallery.sticky-content {
-    --sticky-header-offset: var(--header-height);
+     revealing header overlap it (most visible at the tablet breakpoint).
+
+     Only set the offset at the breakpoint where the gallery is actually sticky.
+     Below it the gallery is `position: relative`, and a non-zero `top` would
+     shift it down while leaving its layout space behind — overlapping the
+     content underneath it on mobile. */
+  @media screen and (min-width: 750px) {
+    body:has(#header-group #header-component[sticky='always']) media-gallery.sticky-content,
+    body:has(#header-group #header-component[sticky='scroll-up']) media-gallery.sticky-content {
+      --sticky-header-offset: var(--header-height);
+    }
   }
 
   /* Thumbnail strip spacing: 1.2rem between thumbs and between the main image

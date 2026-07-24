@@ -1495,6 +1495,13 @@ button.shopify-payment-button__button--unbranded {
   }
 }
 
+@media screen and (max-width: 749px) { 
+  button.shopify-payment-button__button--unbranded,
+  .product-form-buttons button.button.add-to-cart-button {
+    --mobile-button-padding-inline: 0;
+  }
+}
+
 .button {
   font-family: var(--button-font-family-primary);
   text-transform: var(--button-text-case-primary);
@@ -3171,7 +3178,7 @@ input[type='radio'] {
   background: var(--color-background);
 }
 
-:where(input[type='radio']):checked::after {
+:not(.visually-hidden):where(input[type='radio']):checked::after {
   content: '';
   position: absolute;
   top: 50%;
