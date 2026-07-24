@@ -264,7 +264,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>Freeze-dried, sour, paper-thin candy with a built-in social <br/>audience of millions a category- disrupting SKU that flies off <br/>the shelf. Let's talk about getting it into your stores.</p>",
+                "text": "<p>Built-in social audience of millions, a category-disrupting SKU that flies off <br/>the shelf. Let's talk about getting it into your stores!</p>",
                 "mobile_text": "",
                 "width": "100%",
                 "max_width": "normal",
@@ -361,7 +361,7 @@
         "image_YqKtVw": {
           "type": "image",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Jul_17_2026_at_05_05_21_PM_1.webp",
+            "image": "shopify://shop_images/J13A0026.jpg",
             "link": "",
             "hide_on_mobile": false,
             "hide_on_desktop": false,
@@ -1105,7 +1105,7 @@
                   "type": "text",
                   "name": "t:names.description",
                   "settings": {
-                    "text": "<p>Average across <br/>30,000+ reviews</p>",
+                    "text": "<p>Average across <br/>30,000+ reviews & comments</p>",
                     "mobile_text": "<p>Average across 30,000+ reviews</p>",
                     "width": "100%",
                     "max_width": "normal",
@@ -1272,7 +1272,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h1>16M+</h1>",
+                    "text": "<h1>11M+</h1>",
                     "mobile_text": "",
                     "width": "100%",
                     "max_width": "normal",
@@ -2125,7 +2125,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>Freeze-dried, sliced paper-thin, genuinely sour. It doesn’t compete with the gummy set — it creates its own impulse moment at the register.</p>",
+                    "text": "<p>Paper-thin, genuinely sour. It doesn’t compete with the gummy set, it creates its own impulse moment at the register.</p>",
                     "mobile_text": "",
                     "width": "fit-content",
                     "max_width": "normal",
@@ -4538,7 +4538,7 @@
           "type": "info_row",
           "settings": {
             "icon": "mail",
-            "text": "wholesale@zestysnackz.com"
+            "text": "distribution@zestybitez.com"
           }
         },
         "info_row_VWWfkX": {
