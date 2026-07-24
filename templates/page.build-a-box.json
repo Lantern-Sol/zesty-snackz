@@ -18,7 +18,7 @@
             "name": "Mini Munch",
             "quantity": 3,
             "discount": 5,
-            "perks": "Giveaway entry + early access",
+            "perks": "Giveaway entry",
             "free_shipping": false
           }
         },
@@ -28,7 +28,7 @@
             "name": "Big Zest",
             "quantity": 6,
             "discount": 10,
-            "perks": "Most popular + save your favorite box",
+            "perks": "Most popular + Giveaway entry",
             "free_shipping": false
           }
         },
@@ -38,7 +38,7 @@
             "name": "Mega Munch",
             "quantity": 9,
             "discount": 15,
-            "perks": "Priority fulfillment + subscriber-only products",
+            "perks": "Free Shipping+ Giveaway Entry",
             "free_shipping": true
           }
         },
@@ -61,8 +61,8 @@
       ],
       "settings": {
         "banner_title": "Subscribe now for your chance to win.",
-        "banner_perk_1": "Take home the boat of your dreams.",
-        "banner_perk_2": "Free Zesty Bitez delivered for an entire year.",
+        "banner_perk_1": "Chance to take home the boat.",
+        "banner_perk_2": "Alternative Cash Prize.",
         "banner_perk_3": "Own the most exclusive Zesty merch ever made.",
         "boat_image": "shopify://shop_images/ChatGPT_Image_Jul_22_2026_at_07_06_04_PM_1.webp",
         "plan_group_name": "Single Bag Plans",
@@ -73,8 +73,8 @@
         "enable_subscribe": true,
         "subscribe_default_on": true,
         "subscribe_title": "SUBSCRIBE & SAVE",
-        "subscribe_badge": "+ 10% off every order",
-        "subscribe_benefits": "100% satisfaction guarantee\nSkip, swap or cancel anytime\nFree shipping on every order",
+        "subscribe_badge": "10% - 20% off every order",
+        "subscribe_benefits": "100% satisfaction guarantee\nSkip, swap or cancel anytime\nFree shipping on 9+ bags",
         "selected_label": "SELECTED:",
         "free_shipping_label": "FREE SHIPPING",
         "max_savings_label": "MAX SAVINGS",
