@@ -36,6 +36,30 @@
     flex-basis: 51%;
   }
 
+  /* Mobile: keep the Add to cart button on the same row as the quantity selector,
+     the way it sits on desktop. The default `min-width: fit-content` on the
+     add-to-cart button forces it to wrap below the stepper on narrow screens, so
+     let it shrink to share the row, and push the accelerated-checkout button
+     ("Buy with Shop") onto its own full-width row below. */
+  @media screen and (max-width: 749px) {
+    .product-form-buttons:not(.product-form-buttons--stacked)
+      > *:not(
+        .quantity-selector-wrapper,
+        .quantity-rules,
+        .quantity-label,
+        .volume-pricing,
+        .product-form-text__error,
+        .accelerated-checkout-block
+      ) {
+      min-width: 0;
+    }
+
+    .product-form-buttons:not(.product-form-buttons--stacked) .accelerated-checkout-block {
+      flex-basis: 100%;
+      min-width: 0;
+    }
+  }
+
   .product-form-buttons button {
     width: 100%;
     padding-block: var(--padding-lg);

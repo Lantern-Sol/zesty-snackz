@@ -76,16 +76,7 @@
   "
 >
   {%- if section.settings.show_wave -%}
-    <div class="kyb__wave">
-      <svg viewBox="0 0 1440 135" preserveAspectRatio="xMidYMid slice" role="presentation" aria-hidden="true">
-        <path
-          id="kyb-wave-path-{{ section.id }}"
-          d="M0 0L120.615 18.279C340.658 51.6262 564.031 57.0547 785.434 34.4356L802.905 32.6507C1015.1 10.9722 1229.2 16.4664 1440 49V135H0V0Z"
-          fill="var(--kyb-bg)"
-        />
-      </svg>
-      {% content_for 'block', type: '_wave-marquee', id: 'kyb-wave-marquee' %}
-    </div>
+    {% content_for 'block', type: 'floating-stickers', id: 'kyb-wave-background' %}
   {%- endif -%}
 
   <div class="kyb__body spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
@@ -366,19 +357,6 @@
     overflow: clip;
   }
 
-  .kyb__wave {
-    position: relative;
-    display: block;
-    line-height: 0;
-    margin-top: 12px;
-  }
-
-  .kyb__wave svg {
-    display: block;
-    width: 100%;
-    height: clamp(90px, 9.375vw, 135px);
-  }
-
   .kyb__body {
     background: var(--kyb-bg);
     color: var(--kyb-text);
@@ -397,7 +375,7 @@
     align-items: center;
     gap: 16px;
     text-align: center;
-    padding-block-start: clamp(24px, 3vw, 44px);
+    padding-block-start: 12rem;
   }
 
   .kyb__eyebrow {
@@ -866,6 +844,9 @@
     .kyb__col--right {
       gap: 32px;
     }
+      .kyb__header {
+        padding-block-start: 8rem;
+      }
   }
 {% endstylesheet %}
 

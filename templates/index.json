@@ -433,6 +433,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -537,6 +538,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "{{ settings.color_palette.background }}",
+                "accent_color": "",
                 "enable_text_shadow": true,
                 "background": false,
                 "background_color": "#00000026",
@@ -579,6 +581,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "{{ settings.color_palette.color3 }}",
+                "accent_color": "",
                 "enable_text_shadow": true,
                 "background": false,
                 "background_color": "#00000026",
@@ -621,6 +624,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "{{ settings.color_palette.color5 }}",
+                "accent_color": "",
                 "enable_text_shadow": true,
                 "background": false,
                 "background_color": "#00000026",
@@ -670,6 +674,7 @@
             "mobile_font_size": "1rem",
             "mobile_custom_line_height": 1.3,
             "text_color": "",
+            "accent_color": "",
             "enable_text_shadow": false,
             "background": false,
             "background_color": "#00000026",
@@ -1080,6 +1085,7 @@
             "mobile_font_size": "1rem",
             "mobile_custom_line_height": 1.5,
             "text_color": "{{ settings.color_palette.color3 }}",
+            "accent_color": "",
             "enable_text_shadow": false,
             "background": false,
             "background_color": "#00000026",
@@ -1496,7 +1502,9 @@
         "padding-block-start-mobile": 18,
         "padding-block-end-mobile": 18,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "section_ebRMEK": {
@@ -1722,6 +1730,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -1806,6 +1815,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -1848,6 +1858,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -1934,7 +1945,9 @@
         "padding-block-start-mobile": 0,
         "padding-block-end-mobile": 0,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "section_b4KPwG": {
@@ -1966,6 +1979,7 @@
             "mobile_font_size": "0.75rem",
             "mobile_custom_line_height": 1.5,
             "text_color": "{{ settings.color_palette.color1 }}",
+            "accent_color": "",
             "enable_text_shadow": false,
             "background": false,
             "background_color": "#00000026",
@@ -2251,7 +2265,9 @@
         "padding-block-start-mobile": 36,
         "padding-block-end-mobile": 50,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "product_list_fa6P9H": {
@@ -2385,6 +2401,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "#5e7b93",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -2496,6 +2513,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -2538,6 +2556,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "#3a5468",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -2744,6 +2763,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "#5e7b93",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -2886,7 +2906,7 @@
                           "type": "add-to-cart",
                           "static": true,
                           "settings": {
-                            "custom_label": "ADD +",
+                            "custom_label": "ADD TO CART +",
                             "show_price": false,
                             "style_class": "button-secondary",
                             "custom_button_background": "{{ settings.color_palette.foreground }}",
@@ -3105,6 +3125,7 @@
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
                     "text_color": "{{ settings.color_palette.color1 }}",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -3147,6 +3168,7 @@
                     "mobile_font_size": "1rem",
                     "mobile_custom_line_height": 1.5,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -3189,6 +3211,7 @@
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -3308,8 +3331,8 @@
                     "border_opacity": 40,
                     "border_color": "#7ed3ff",
                     "border_radius": 100,
-                    "link": "",
-                    "open_in_new_tab": false,
+                    "link": "https://www.youtube.com/finatic",
+                    "open_in_new_tab": true,
                     "placeholder": "",
                     "hide_on_mobile": false,
                     "hide_on_desktop": false,
@@ -3332,8 +3355,8 @@
                         "image_upload": "shopify://shop_images/solar_play-bold.svg",
                         "width": 16,
                         "width-mobile": 16,
-                        "link": "",
-                        "open_in_new_tab": false,
+                        "link": "https://www.youtube.com/finatic",
+                        "open_in_new_tab": true,
                         "icon_color": ""
                       },
                       "blocks": {}
@@ -3342,7 +3365,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>@Finatic</p>",
+                        "text": "<p><a href=\"https://www.youtube.com/finatic\" target=\"_blank\" title=\"@finatic\">@Finatic</a></p>",
                         "mobile_text": "",
                         "width": "fit-content",
                         "max_width": "normal",
@@ -3364,6 +3387,7 @@
                         "mobile_font_size": "0.625rem",
                         "mobile_custom_line_height": 1.5,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -3426,8 +3450,8 @@
                     "border_opacity": 40,
                     "border_color": "#7ed3ff",
                     "border_radius": 100,
-                    "link": "",
-                    "open_in_new_tab": false,
+                    "link": "https://www.youtube.com/@paulcuffaro",
+                    "open_in_new_tab": true,
                     "placeholder": "",
                     "hide_on_mobile": false,
                     "hide_on_desktop": false,
@@ -3450,8 +3474,8 @@
                         "image_upload": "shopify://shop_images/solar_play-bold.svg",
                         "width": 16,
                         "width-mobile": 16,
-                        "link": "",
-                        "open_in_new_tab": false,
+                        "link": "https://www.youtube.com/@paulcuffaro",
+                        "open_in_new_tab": true,
                         "icon_color": ""
                       },
                       "blocks": {}
@@ -3460,7 +3484,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>@paulcuffaro</p>",
+                        "text": "<p><a href=\"https://www.youtube.com/@paulcuffaro\" target=\"_blank\" title=\"@paulcuffaro\">@paulcuffaro</a></p>",
                         "mobile_text": "",
                         "width": "fit-content",
                         "max_width": "normal",
@@ -3482,6 +3506,7 @@
                         "mobile_font_size": "0.625rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -3544,8 +3569,8 @@
                     "border_opacity": 40,
                     "border_color": "#7ed3ff",
                     "border_radius": 100,
-                    "link": "",
-                    "open_in_new_tab": false,
+                    "link": "https://www.tiktok.com/@zesty.snackz",
+                    "open_in_new_tab": true,
                     "placeholder": "",
                     "hide_on_mobile": false,
                     "hide_on_desktop": false,
@@ -3568,8 +3593,8 @@
                         "image_upload": "shopify://shop_images/Link_Text_6c51e3c7-1801-4406-bfec-3ae318de292e.png",
                         "width": 12,
                         "width-mobile": 8,
-                        "link": "",
-                        "open_in_new_tab": false,
+                        "link": "https://www.tiktok.com/@zesty.snackz",
+                        "open_in_new_tab": true,
                         "icon_color": ""
                       },
                       "blocks": {}
@@ -3578,7 +3603,7 @@
                       "type": "text",
                       "name": "t:names.text",
                       "settings": {
-                        "text": "<p>@zesty.snackz</p>",
+                        "text": "<p><a href=\"https://www.tiktok.com/@zesty.snackz\" target=\"_blank\" title=\"@zesty.snackz\">@zesty.snackz</a></p>",
                         "mobile_text": "",
                         "width": "fit-content",
                         "max_width": "normal",
@@ -3600,6 +3625,7 @@
                         "mobile_font_size": "0.625rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -3890,7 +3916,9 @@
         "padding-block-start-mobile": 25,
         "padding-block-end-mobile": 25,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "section_CybUWB": {
@@ -3978,6 +4006,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "{{ settings.color_palette.color1 }}",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -4020,6 +4049,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -4062,6 +4092,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -4191,7 +4222,9 @@
         "padding-block-start-mobile": 30,
         "padding-block-end-mobile": 30,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "marquee_collection_MhaaAE": {
@@ -4387,7 +4420,9 @@
         "padding-block-start-mobile": 0,
         "padding-block-end-mobile": 0,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "gravity_fall_NjwWNP": {
@@ -4483,6 +4518,24 @@
             "size_mobile": 160
           }
         },
+        "sticker_PBpYrE": {
+          "type": "sticker",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_Jul_7_2026_01_21_57_PM_1.png",
+            "size": 220,
+            "style": "bubble",
+            "position": 0,
+            "pinned": false,
+            "rotation": 0,
+            "hide_mobile": true,
+            "hide_desktop": false,
+            "pinned_mobile": false,
+            "position_mobile": 0,
+            "position_y_mobile": 95,
+            "rotation_mobile": 0,
+            "size_mobile": 160
+          }
+        },
         "sticker_YQK84D": {
           "type": "sticker",
           "settings": {
@@ -4501,6 +4554,24 @@
             "size_mobile": 170
           }
         },
+        "sticker_yaqrxc": {
+          "type": "sticker",
+          "settings": {
+            "image": "shopify://shop_images/imgi_81_7_64e2934e-8778-44ef-810a-8f9429e0551e_2.png",
+            "size": 300,
+            "style": "bubble",
+            "position": 90,
+            "pinned": false,
+            "rotation": 0,
+            "hide_mobile": true,
+            "hide_desktop": false,
+            "pinned_mobile": false,
+            "position_mobile": 100,
+            "position_y_mobile": 95,
+            "rotation_mobile": 0,
+            "size_mobile": 170
+          }
+        },
         "sticker_FRRWB3": {
           "type": "sticker",
           "settings": {
@@ -4513,6 +4584,42 @@
             "hide_mobile": false,
             "hide_desktop": false,
             "pinned_mobile": true,
+            "position_mobile": 100,
+            "position_y_mobile": 30,
+            "rotation_mobile": 0,
+            "size_mobile": 90
+          }
+        },
+        "sticker_3rPNMJ": {
+          "type": "sticker",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_Jul_7_2026_01_21_57_PM_1.png",
+            "size": 220,
+            "style": "bubble",
+            "position": 20,
+            "pinned": false,
+            "rotation": 0,
+            "hide_mobile": true,
+            "hide_desktop": false,
+            "pinned_mobile": false,
+            "position_mobile": 100,
+            "position_y_mobile": 30,
+            "rotation_mobile": 0,
+            "size_mobile": 90
+          }
+        },
+        "sticker_4qEqkX": {
+          "type": "sticker",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_Jul_7_2026_01_21_57_PM_1.png",
+            "size": 220,
+            "style": "bubble",
+            "position": 0,
+            "pinned": false,
+            "rotation": 0,
+            "hide_mobile": true,
+            "hide_desktop": false,
+            "pinned_mobile": false,
             "position_mobile": 100,
             "position_y_mobile": 30,
             "rotation_mobile": 0,
@@ -4854,8 +4961,12 @@
         "sticker_EwNRxt",
         "sticker_74kHPN",
         "sticker_HKMe7h",
+        "sticker_PBpYrE",
         "sticker_YQK84D",
+        "sticker_yaqrxc",
         "sticker_FRRWB3",
+        "sticker_3rPNMJ",
+        "sticker_4qEqkX",
         "sticker_Vptj74",
         "sticker_XyFNft",
         "sticker_BAeePW",
@@ -4979,6 +5090,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "{{ settings.color_palette.color1 }}",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -5021,6 +5133,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -5153,6 +5266,7 @@
                     "mobile_font_size": "1rem",
                     "mobile_custom_line_height": 1.5,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -5195,6 +5309,7 @@
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -5297,6 +5412,7 @@
                     "mobile_font_size": "1rem",
                     "mobile_custom_line_height": 1.5,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -5339,6 +5455,7 @@
                     "mobile_font_size": "0.875rem",
                     "mobile_custom_line_height": 1.3,
                     "text_color": "",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -5686,7 +5803,7 @@
                 "text_MHBYTT": {
                   "type": "text",
                   "settings": {
-                    "text": "<h4>Same two guys, same energy, way better packaging.</h4>",
+                    "text": "<h4>Same two guys, same energy, <br/>way better packaging.</h4>",
                     "mobile_text": "",
                     "width": "100%",
                     "max_width": "normal",
@@ -5708,6 +5825,7 @@
                     "mobile_font_size": "1rem",
                     "mobile_custom_line_height": 1.5,
                     "text_color": "{{ settings.color_palette.color3 }}",
+                    "accent_color": "",
                     "enable_text_shadow": false,
                     "background": false,
                     "background_color": "#00000026",
@@ -5862,6 +5980,7 @@
                             "mobile_font_size": "1rem",
                             "mobile_custom_line_height": 1.5,
                             "text_color": "{{ settings.color_palette.color1 }}",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -5904,6 +6023,7 @@
                             "mobile_font_size": "0.875rem",
                             "mobile_custom_line_height": 1.3,
                             "text_color": "",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -6008,6 +6128,7 @@
                             "mobile_font_size": "1rem",
                             "mobile_custom_line_height": 1.5,
                             "text_color": "{{ settings.color_palette.color5 }}",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -6050,6 +6171,7 @@
                             "mobile_font_size": "0.875rem",
                             "mobile_custom_line_height": 1.3,
                             "text_color": "",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -6154,6 +6276,7 @@
                             "mobile_font_size": "1rem",
                             "mobile_custom_line_height": 1.5,
                             "text_color": "{{ settings.color_palette.color9 }}",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -6196,6 +6319,7 @@
                             "mobile_font_size": "0.875rem",
                             "mobile_custom_line_height": 1.3,
                             "text_color": "",
+                            "accent_color": "",
                             "enable_text_shadow": false,
                             "background": false,
                             "background_color": "#00000026",
@@ -6531,7 +6655,9 @@
         "padding-block-start-mobile": 30,
         "padding-block-end-mobile": 30,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "section_YkNEQe": {
@@ -6633,6 +6759,7 @@
                 "mobile_font_size": "0.875rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -6681,6 +6808,7 @@
             "mobile_font_size": "1rem",
             "mobile_custom_line_height": 1.5,
             "text_color": "",
+            "accent_color": "",
             "enable_text_shadow": false,
             "background": false,
             "background_color": "#00000026",
@@ -6892,6 +7020,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -7091,6 +7220,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -7290,6 +7420,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -7489,6 +7620,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -7688,6 +7820,7 @@
                         "mobile_font_size": "0.875rem",
                         "mobile_custom_line_height": 1.3,
                         "text_color": "",
+                        "accent_color": "",
                         "enable_text_shadow": false,
                         "background": false,
                         "background_color": "#00000026",
@@ -7803,13 +7936,15 @@
         "padding-block-start-mobile": 30,
         "padding-block-end-mobile": 30,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     },
     "section_MdE37r": {
       "type": "section",
       "blocks": {
-        "floating_stickers_rVQPJ4": {
+        "floating_stickers_fXYTaM": {
           "type": "floating-stickers",
           "name": "Floating elements",
           "settings": {
@@ -7817,7 +7952,7 @@
             "behind": true
           },
           "blocks": {
-            "floating_sticker_KnTVLx": {
+            "floating_sticker_8kTrxD": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7836,7 +7971,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_d746HY": {
+            "floating_sticker_yXq7XP": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7855,7 +7990,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_heUL44": {
+            "floating_sticker_pfULbW": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7874,7 +8009,45 @@
               },
               "blocks": {}
             },
-            "floating_sticker_R6gbmW": {
+            "floating_sticker_mdAAzp": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 0,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_fVP6T8": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 20,
+                "shadow": true,
+                "x_position": 68,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_FcpzCM": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7893,7 +8066,45 @@
               },
               "blocks": {}
             },
-            "floating_sticker_xP4JBV": {
+            "floating_sticker_ThzrCP": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 10,
+                "shadow": true,
+                "x_position": 37,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_kpfnAq": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 9,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_BdFWCW": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7912,7 +8123,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_QTby4i": {
+            "floating_sticker_BDkJrQ": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7931,7 +8142,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_fyem4z": {
+            "floating_sticker_VjWcX3": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7950,7 +8161,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_idctpN": {
+            "floating_sticker_nbJdh7": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7958,7 +8169,7 @@
                 "size": 120,
                 "rotation": -65,
                 "shadow": true,
-                "x_position": 57,
+                "x_position": 85,
                 "y_position": 92,
                 "custom_mobile_position": false,
                 "x_position_mobile": 50,
@@ -7969,7 +8180,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_q8rM9P": {
+            "floating_sticker_WwbpKG": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7977,7 +8188,7 @@
                 "size": 120,
                 "rotation": 5,
                 "shadow": true,
-                "x_position": 33,
+                "x_position": 20,
                 "y_position": 96,
                 "custom_mobile_position": false,
                 "x_position_mobile": 50,
@@ -7988,7 +8199,26 @@
               },
               "blocks": {}
             },
-            "floating_sticker_KGTMKL": {
+            "floating_sticker_6iaCeN": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 80,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_cmP4wC": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -7996,7 +8226,7 @@
                 "size": 120,
                 "rotation": 75,
                 "shadow": true,
-                "x_position": 65,
+                "x_position": 100,
                 "y_position": 90,
                 "custom_mobile_position": false,
                 "x_position_mobile": 50,
@@ -8007,7 +8237,7 @@
               },
               "blocks": {}
             },
-            "floating_sticker_mbqRFM": {
+            "floating_sticker_DgmaqD": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -8026,7 +8256,254 @@
               },
               "blocks": {}
             },
-            "floating_sticker_aCtaUG": {
+            "floating_sticker_bGgj6G": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 13,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_trtFPd": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 90,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_8X6QBq": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/e591db44-122a-4153-bcf9-56f318647c2d_5e7a3b84-1655-4594-8d86-124bc05e9f2f.webp",
+                "size": 120,
+                "rotation": -10,
+                "shadow": true,
+                "x_position": 60,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 3,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_DnEKa9": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": -120,
+                "shadow": true,
+                "x_position": 4,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_YcacMG": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 35,
+                "shadow": true,
+                "x_position": 30,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_TFqaQz": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 120,
+                "shadow": true,
+                "x_position": 95,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_r3XwiP": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/3173a1fc-4c61-4811-afbd-b200e6628dc2.webp",
+                "size": 120,
+                "rotation": 120,
+                "shadow": true,
+                "x_position": 53,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_hL4C9H": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 15,
+                "shadow": true,
+                "x_position": 85,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.2,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_ifXB6n": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/959a42a7-2aa5-4f50-8522-adb4eae20066.webp",
+                "size": 120,
+                "rotation": 30,
+                "shadow": true,
+                "x_position": 50,
+                "y_position": 90,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_wk3Tt8": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": -65,
+                "shadow": true,
+                "x_position": 57,
+                "y_position": 92,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Fwwqyz": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/ceddfc99-1061-4427-93a6-27b6a372ee2e.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 46,
+                "y_position": 100,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.5,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_Ktcg7q": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 5,
+                "shadow": true,
+                "x_position": 33,
+                "y_position": 96,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 0.9,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_pJgfJp": {
+              "type": "_floating-sticker",
+              "name": "Floating sticker",
+              "settings": {
+                "image": "shopify://shop_images/4ab1f448-107b-4670-bdd6-2ffeba028958.webp",
+                "size": 120,
+                "rotation": 75,
+                "shadow": true,
+                "x_position": 67,
+                "y_position": 93,
+                "custom_mobile_position": false,
+                "x_position_mobile": 50,
+                "y_position_mobile": 50,
+                "motion_offset": 1.7,
+                "peel_enabled": false,
+                "peel_code": ""
+              },
+              "blocks": {}
+            },
+            "floating_sticker_EjGfYU": {
               "type": "_floating-sticker",
               "name": "Floating sticker",
               "settings": {
@@ -8045,7 +8522,41 @@
               },
               "blocks": {}
             },
-            "wave_marquee_hQeY73": {
+            "wave_background_e9p9ht": {
+              "type": "_wave-background",
+              "name": "Wave background",
+              "settings": {
+                "fill": "up",
+                "frequency": 4,
+                "amplitude": 20,
+                "phase": 0,
+                "rotation": 1,
+                "fill_color": "",
+                "shadow": false,
+                "text": "Thin-cut bites ✦ Never sticks ✦ SOUR ✦ HITS HARDER ✦",
+                "gap": 4,
+                "type_preset": "h4",
+                "font": "var(--font-heading--family)",
+                "font_size": "2.5rem",
+                "line_height": "tight",
+                "letter_spacing": "normal",
+                "case": "uppercase",
+                "x_position": 50,
+                "y_position": 6,
+                "width": 140,
+                "use_mobile_settings": true,
+                "x_position_mobile": 36,
+                "y_position_mobile": 10,
+                "width_mobile": 200,
+                "rotation_mobile": -1,
+                "amplitude_mobile": 20,
+                "frequency_mobile": 2,
+                "hide_on_mobile": false,
+                "hide_on_desktop": false
+              },
+              "blocks": {}
+            },
+            "wave_marquee_CJmmG3": {
               "type": "_wave-marquee",
               "name": "Wave marquee",
               "settings": {
@@ -8055,7 +8566,7 @@
                 "amplitude": 20,
                 "speed": 30,
                 "direction": "left",
-                "gap": 40,
+                "gap": 4,
                 "rotation": 1,
                 "type_preset": "h4",
                 "font": "var(--font-heading--family)",
@@ -8084,19 +8595,38 @@
             }
           },
           "block_order": [
-            "floating_sticker_KnTVLx",
-            "floating_sticker_d746HY",
-            "floating_sticker_heUL44",
-            "floating_sticker_R6gbmW",
-            "floating_sticker_xP4JBV",
-            "floating_sticker_QTby4i",
-            "floating_sticker_fyem4z",
-            "floating_sticker_idctpN",
-            "floating_sticker_q8rM9P",
-            "floating_sticker_KGTMKL",
-            "floating_sticker_mbqRFM",
-            "floating_sticker_aCtaUG",
-            "wave_marquee_hQeY73"
+            "floating_sticker_8kTrxD",
+            "floating_sticker_yXq7XP",
+            "floating_sticker_pfULbW",
+            "floating_sticker_mdAAzp",
+            "floating_sticker_fVP6T8",
+            "floating_sticker_FcpzCM",
+            "floating_sticker_ThzrCP",
+            "floating_sticker_kpfnAq",
+            "floating_sticker_BdFWCW",
+            "floating_sticker_BDkJrQ",
+            "floating_sticker_VjWcX3",
+            "floating_sticker_nbJdh7",
+            "floating_sticker_WwbpKG",
+            "floating_sticker_6iaCeN",
+            "floating_sticker_cmP4wC",
+            "floating_sticker_DgmaqD",
+            "floating_sticker_bGgj6G",
+            "floating_sticker_trtFPd",
+            "floating_sticker_8X6QBq",
+            "floating_sticker_DnEKa9",
+            "floating_sticker_YcacMG",
+            "floating_sticker_TFqaQz",
+            "floating_sticker_r3XwiP",
+            "floating_sticker_hL4C9H",
+            "floating_sticker_ifXB6n",
+            "floating_sticker_wk3Tt8",
+            "floating_sticker_Fwwqyz",
+            "floating_sticker_Ktcg7q",
+            "floating_sticker_pJgfJp",
+            "floating_sticker_EjGfYU",
+            "wave_background_e9p9ht",
+            "wave_marquee_CJmmG3"
           ]
         },
         "group_EcGkY9": {
@@ -8382,6 +8912,7 @@
                 "mobile_font_size": "1rem",
                 "mobile_custom_line_height": 1.5,
                 "text_color": "{{ settings.color_palette.background }}",
+                "accent_color": "",
                 "enable_text_shadow": true,
                 "background": false,
                 "background_color": "#00000026",
@@ -8424,6 +8955,7 @@
                 "mobile_font_size": "1.25rem",
                 "mobile_custom_line_height": 1.3,
                 "text_color": "{{ settings.color_palette.background }}",
+                "accent_color": "",
                 "enable_text_shadow": false,
                 "background": false,
                 "background_color": "#00000026",
@@ -8604,7 +9136,7 @@
         }
       },
       "block_order": [
-        "floating_stickers_rVQPJ4",
+        "floating_stickers_fXYTaM",
         "group_EcGkY9"
       ],
       "name": "Still scrolling",
@@ -8625,8 +9157,8 @@
         "background_media": "image",
         "background_color": "",
         "video_position": "cover",
-        "background_image": "shopify://shop_images/Frame.webp",
-        "background_image_mobile": "shopify://shop_images/Frame_0c694e1e-1a2c-406e-81d6-0cc1d8fd0f71.webp",
+        "background_image": "shopify://shop_images/gravity_fall_bg.png",
+        "background_image_mobile": "shopify://shop_images/Frame_69.webp",
         "background_image_position": "cover",
         "background_image_position_y": 0,
         "toggle_overlay": false,
@@ -8664,7 +9196,9 @@
         "padding-block-start-mobile": 0,
         "padding-block-end-mobile": 0,
         "padding-inline-start-mobile": 0,
-        "padding-inline-end-mobile": 0
+        "padding-inline-end-mobile": 0,
+        "hide_on_mobile": false,
+        "hide_on_desktop": false
       }
     }
   },

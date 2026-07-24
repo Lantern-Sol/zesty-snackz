@@ -323,8 +323,12 @@
     }
   }
 
-  /* If the header is sticky, make product details content stick underneath the header */
-  body:has(#header-group #header-component[data-sticky-state='active']) .product-details.sticky-content--desktop {
+  /* If the header is sticky, make product details content stick underneath the
+     header. Reserve the height for any sticky header mode rather than only while
+     it is revealed, so a `scroll-up` header toggling on scroll-direction change
+     doesn't flip the sticky offset and jump the column (mirrors the gallery). */
+  body:has(#header-group #header-component[sticky='always']) .product-details.sticky-content--desktop,
+  body:has(#header-group #header-component[sticky='scroll-up']) .product-details.sticky-content--desktop {
     --sticky-header-offset: var(--header-height);
   }
 {% endstylesheet %}

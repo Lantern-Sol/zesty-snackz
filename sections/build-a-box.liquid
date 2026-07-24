@@ -806,13 +806,15 @@
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
-  .section-build-a-box .bab__tier[data-active] {
+  /* Every reached tier stays fully highlighted (3/6/9 all stay blue at 9 bags). */
+  .section-build-a-box .bab__tier[data-reached] {
     background: var(--bab-accent);
     color: #fff;
   }
 
   /* The stage currently being worked toward: half-strength highlight until
-     the required bag count is reached. */
+     the required bag count is reached. `data-next` wins over `data-reached`
+     when both could apply (they can't: next.quantity is always > total). */
   .section-build-a-box .bab__tier[data-next] {
     background: color-mix(in srgb, var(--bab-accent) 50%, transparent);
     color: #fff;
@@ -1432,10 +1434,10 @@
     color: #fff;
     border: 0;
     border-radius: 999px;
-    padding: 9px 16px 10px;
+    padding: 13px 16px 10px;
     font-family: var(--bab-heading-font);
     font-size: 20px;
-    line-height: 0.9;
+    line-height: 15px;
     cursor: pointer;
     white-space: nowrap;
     transition: filter 0.15s ease, transform 0.15s ease;

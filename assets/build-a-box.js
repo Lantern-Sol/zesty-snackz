@@ -424,11 +424,12 @@ class BuildABoxSection extends Component {
     // Drives CSS that hides the % OFF badges when Subscribe & Save is off.
     this.setAttribute('data-subscribe', String(subscribe));
 
-    // Tier cards: reached stage gets the full highlight, the stage currently
-    // being worked toward gets a half-strength one.
+    // Tier cards: every reached stage stays fully highlighted (so at 9 bags
+    // the 3/6/9 tiers all stay blue), and the stage currently being worked
+    // toward gets a half-strength highlight.
     this.querySelectorAll('[data-bab-tier]').forEach((el) => {
       const qty = Number(/** @type {HTMLElement} */ (el).dataset.quantity);
-      el.toggleAttribute('data-active', !!active && qty === active.quantity);
+      el.toggleAttribute('data-reached', total >= qty);
       el.toggleAttribute('data-next', !!next && qty === next.quantity);
     });
 
@@ -740,12 +741,11 @@ class BuildABoxSection extends Component {
       }).then((r) => r.json());
 
       // Appstle applies the Build-a-Box tiered discount by minting a discount
-      // code for the current cart (same flow its own cart-page script runs):
-      // PUT the cart to its discount endpoint, then hit /discount/{code} so
-      // the code is attached to the checkout session.
+      // code for the current cart and attaching it via /cart/update.js (which
+      // cleanly REPLACES any prior bundle code — see syncBundleDiscount).
       let sections = data.sections;
       if (subscribe && bundleRef) {
-        const applied = await this.#applyAppstleBundleDiscount(bundleRef, cart);
+        const applied = await syncBundleDiscount(cart, bundleRef);
         if (applied) {
           // The sections in the cart/add response were rendered BEFORE the
           // code existed — re-render them (and the cart payload) so the
@@ -793,35 +793,6 @@ class BuildABoxSection extends Component {
         b.disabled = false;
       });
       this.#render();
-    }
-  }
-
-  /**
-   * @param {string} bundleRef
-   * @param {Record<string, any>} cart - /cart.json payload (its lines carry _appstle-bb-id)
-   * @returns {Promise<boolean>} whether a discount code was applied
-   */
-  async #applyAppstleBundleDiscount(bundleRef, cart) {
-    const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
-    try {
-      const res = await fetch(`/${prefix}/bb/api/subscription-bundlings/discount/${encodeURIComponent(bundleRef)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ cart }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data?.discountCode) {
-        const applied = await fetch(
-          `${/** @type {any} */ (window).Shopify?.routes?.root || '/'}discount/${encodeURIComponent(data.discountCode)}`
-        );
-        return applied.ok;
-      }
-      return false;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn('[build-a-box] Could not apply Appstle bundle discount — checkout will show full price.', err);
-      return false;
     }
   }
 
@@ -879,24 +850,13 @@ if (!(/** @type {any} */ (window))[SYNC_FLAG]) {
       )?.properties?.['_appstle-bb-id'];
       if (!bundleRef || run !== syncRun) return;
 
-      const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
       try {
-        const res = await fetch(`/${prefix}/bb/api/subscription-bundlings/discount/${encodeURIComponent(bundleRef)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ cart }),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        // Below the minimum tier Appstle mints nothing (discountNeeded:false);
-        // the previously applied code simply stops validating at checkout.
-        if (!data?.discountCode) return;
-        const applied = await fetch(
-          `${/** @type {any} */ (window).Shopify?.routes?.root || '/'}discount/${encodeURIComponent(data.discountCode)}`
-        );
-        if (!applied.ok || run !== syncRun) return;
+        // Re-mint for the new cart state and REPLACE the applied code (or clear
+        // it below the minimum tier). Repaint afterward regardless, since the
+        // per-line prices change whether the discount was updated or removed.
+        await syncBundleDiscount(cart, bundleRef);
+        if (run !== syncRun) return;
 
-        // Repaint cart sections with the fresh code baked in.
         const ids = [];
         document.querySelectorAll('cart-items-component').forEach((el) => {
           if (el instanceof HTMLElement && el.dataset.sectionId) ids.push(el.dataset.sectionId);
@@ -908,9 +868,17 @@ if (!(/** @type {any} */ (window))[SYNC_FLAG]) {
         ]);
         if (run !== syncRun) return;
 
+        // Repaint the cart sections by resolving a synthetic update event. The
+        // Standard Events schema requires a non-empty `lines`, so mirror the
+        // current cart lines (this event only drives the re-render).
+        const lines = (freshCart.items || []).map((/** @type {any} */ i) => ({
+          merchandiseId: String(i.variant_id),
+          quantity: i.quantity,
+        }));
+        if (!lines.length) return;
         const deferred = CartLinesUpdateEvent.createPromise();
         document.dispatchEvent(
-          new CartLinesUpdateEvent({ action: 'update', context: 'cart', lines: [], promise: deferred.promise })
+          new CartLinesUpdateEvent({ action: 'update', context: 'cart', lines, promise: deferred.promise })
         );
         deferred.resolve({
           cart: CartLinesUpdateEvent.createCartFromAjaxResponse(freshCart),
@@ -933,6 +901,65 @@ if (!(/** @type {any} */ (window))[SYNC_FLAG]) {
 /* ---------------------------------------------------------------------------
  * Utilities
  * --------------------------------------------------------------------------- */
+
+/**
+ * Sync the Appstle Build-a-Box tiered discount to the CURRENT cart:
+ *   1. PUT the cart to Appstle's discount endpoint → returns a fresh code
+ *      sized to the current bundle quantity (or nothing below the min tier).
+ *   2. Apply it via POST /cart/update.js `{discount: code}`, which REPLACES any
+ *      previously applied bundle code (Shopify keeps a single applied code, so
+ *      this avoids the stale-code bug where an earlier, smaller-cart code lingered
+ *      and only discounted the original items). Below the min tier we send
+ *      `{discount: ''}` to clear a stale code — but only when a Build-a-Box code
+ *      is actually applied, so we never wipe a shopper's manually-entered code.
+ *
+ * `/cart/update.js` is used instead of `GET /discount/{code}`: it replaces
+ * cleanly, and it carries the storefront session (so it also works behind the
+ * theme-preview proxy, where `/discount/` returns 401).
+ *
+ * @param {Record<string, any>} cart - /cart.json payload (lines carry _appstle-bb-id)
+ * @param {string} bundleRef
+ * @returns {Promise<boolean>} whether a discount code is now applied
+ */
+async function syncBundleDiscount(cart, bundleRef) {
+  const prefix = /** @type {any} */ (window).RSConfig?.appstle_app_proxy_path_prefix || 'apps/subscriptions';
+  const root = /** @type {any} */ (window).Shopify?.routes?.root || '/';
+  const setDiscount = (/** @type {string} */ code) =>
+    fetch(`${root}cart/update.js`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ discount: code }),
+      credentials: 'same-origin',
+    });
+
+  try {
+    const res = await fetch(`/${prefix}/bb/api/subscription-bundlings/discount/${encodeURIComponent(bundleRef)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ cart }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data?.discountCode) {
+      await setDiscount(data.discountCode);
+      return true;
+    }
+
+    // No discount needed (below the min tier). Clear only a lingering
+    // Build-a-Box code so a stale, now-invalid tier discount can't ride along
+    // to checkout; leave any non-bundle code untouched.
+    const hasBundleCode = (cart?.discount_codes || []).some((/** @type {any} */ d) =>
+      String(d.code || '').includes('BUILD_A_BOX_DISCOUNT')
+    );
+    if (hasBundleCode) await setDiscount('');
+    return false;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[build-a-box] Bundle discount sync failed — checkout may show a stale or full price.', err);
+    return false;
+  }
+}
 
 /** @param {string} s */
 function escapeHtml(s) {

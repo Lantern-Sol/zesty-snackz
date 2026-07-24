@@ -620,8 +620,14 @@
     }
   }
 
-  /* Stick below the header while it's pinned, like the details column does */
-  body:has(#header-group #header-component[data-sticky-state='active']) media-gallery.sticky-content {
+  /* Reserve the header height for the sticky gallery whenever the header is a
+     sticky header — not only while it is revealed. With a `scroll-up` header the
+     reveal state flips every time the shopper changes scroll direction, so
+     gating the offset on `[data-sticky-state='active']` made the sticky top flip
+     between the header height and 0, jumping the gallery and letting the
+     revealing header overlap it (most visible at the tablet breakpoint). */
+  body:has(#header-group #header-component[sticky='always']) media-gallery.sticky-content,
+  body:has(#header-group #header-component[sticky='scroll-up']) media-gallery.sticky-content {
     --sticky-header-offset: var(--header-height);
   }
 
